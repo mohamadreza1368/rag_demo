@@ -1,0 +1,21 @@
+{
+  "name": "rag-interactive-ui-demo",
+  "version": "1.0.0",
+  "description": "استودیو تعاملی و گام‌به‌گام برای یادگیری و آزمایش ساختار RAG (Retrieval-Augmented Generation)",
+  "main": "index.html",
+  "scripts": {
+    "start": "python server.py",
+    "serve": "python -m http.server 8080"
+  },
+  "keywords": [
+    "rag",
+    "retrieval-augmented-generation",
+    "llm",
+    "vector-database",
+    "embeddings",
+    "ai",
+    "interactive-ui"
+  ],
+  "author": "Antigravity",
+  "license": "MIT"
+}
