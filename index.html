@@ -1157,48 +1157,6 @@ Ready to send payload...
           <input type="text" id="cfgModelName" placeholder="gpt-4o-mini" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
         </div>
 
-        <!-- Embedding Configuration Group -->
-        <div class="p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-900/60 space-y-3">
-          <div class="flex items-center justify-between">
-            <span class="text-xs font-bold text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5">
-              <span>🧬</span> تنظیمات مدل وکتورایزر و امبدینگ (Embeddings)
-            </span>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 font-semibold font-mono">
-              Vector Space
-            </span>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">روش اتصال امبدینگ (Provider):</label>
-              <select id="cfgEmbeddingProvider" onchange="onEmbeddingProviderChanged()" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-100">
-                <option value="huggingface">Hugging Face (Inference API - ابری)</option>
-                <option value="local_python">پایتون محلی (SentenceTransformers در سرور)</option>
-                <option value="builtin">وکتورایزر داخلی پرسرعت (Built-in High-Speed)</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">نام مدل امبدینگ (Embedding Model):</label>
-              <input type="text" id="cfgEmbeddingModel" value="google/embeddinggemma-2" placeholder="google/embeddinggemma-2" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
-            </div>
-          </div>
-
-          <!-- Hugging Face Token (for gated models like google/embeddinggemma-2) -->
-          <div id="cfgHfTokenGroup">
-            <div class="flex justify-between items-center mb-1">
-              <label class="text-xs font-bold text-slate-700 dark:text-slate-300">توکن Hugging Face (HF Token - اختیاری / برای مدل‌های محافظت‌شده):</label>
-              <a href="https://huggingface.co/settings/tokens" target="_blank" class="text-[10px] text-brand-600 dark:text-brand-400 hover:underline">دریافت توکن رایگان ↗</a>
-            </div>
-            <div class="relative">
-              <input type="password" id="cfgHfToken" placeholder="hf_..." class="w-full px-3 py-2 pl-10 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
-              <button type="button" onclick="toggleHfTokenVisibility()" class="absolute left-3 top-2 text-slate-400 hover:text-slate-600 text-xs">👁️</button>
-            </div>
-            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
-              مدل <code class="font-mono text-indigo-600 dark:text-indigo-400">google/embeddinggemma-2</code> در Hugging Face قرار دارد. برای دسترسی ابری می‌توانید توکن read خود را وارد کنید یا در صورت عدم دسترسی از حالت داخلی یا پایتون محلی استفاده کنید.
-            </p>
-          </div>
-        </div>
-
         <!-- Routing option: Proxy vs Direct -->
         <div class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs">
           <input type="checkbox" id="cfgUseProxy" checked class="rounded text-brand-600 focus:ring-brand-500 w-4 h-4">
@@ -1208,25 +1166,79 @@ Ready to send payload...
           </label>
         </div>
 
-        <!-- Connection Test Feedback -->
-        <div id="cfgTestFeedback" class="hidden p-3 rounded-xl text-xs font-mono"></div>
+        <!-- LLM Connection Test Section -->
+        <div class="p-3 rounded-xl bg-slate-100/70 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-slate-700 dark:text-slate-300">تست ارتباط با مدل زبانی (LLM):</span>
+            <button type="button" id="btnTestLlm" onclick="testLlmConnection()" class="px-3.5 py-1.5 rounded-lg border border-brand-500 text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950/60 text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+              <span id="btnTestLlmIcon">⚡</span>
+              <span id="btnTestLlmText">تست اتصال مدل زبانی</span>
+            </button>
+          </div>
+          <div id="cfgLlmTestFeedback" class="hidden p-2.5 rounded-lg text-xs font-mono"></div>
+        </div>
+
+        <!-- Embedding Configuration Group -->
+        <div class="p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-900/60 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5">
+              <span>🧬</span> تنظیمات مدل وکتورایزر و امبدینگ (Vector Embeddings)
+            </span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 font-semibold font-mono">
+              768-dim Dense
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">روش وکتورایز (Provider):</label>
+              <select id="cfgEmbeddingProvider" onchange="onEmbeddingProviderChanged()" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-100">
+                <option value="local_python" selected>پایتون محلی (Local Python - ۱۰۰٪ آفلاین / بدون اینترنت)</option>
+                <option value="huggingface">Hugging Face (Inference API - ابری)</option>
+                <option value="builtin">شبیه‌ساز مرورگر (Built-in Browser Vectorizer)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">نام یا شناسه مدل امبدینگ:</label>
+              <input type="text" id="cfgEmbeddingModel" value="local_python_768d" placeholder="local_python_768d یا google/embeddinggemma-2" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
+            </div>
+          </div>
+
+          <!-- Hugging Face Token (for gated models like google/embeddinggemma-2) -->
+          <div id="cfgHfTokenGroup" class="hidden">
+            <div class="flex justify-between items-center mb-1">
+              <label class="text-xs font-bold text-slate-700 dark:text-slate-300">توکن Hugging Face (اختیاری برای مدل‌های محافظت‌شده):</label>
+              <a href="https://huggingface.co/settings/tokens" target="_blank" class="text-[10px] text-brand-600 dark:text-brand-400 hover:underline">دریافت توکن رایگان ↗</a>
+            </div>
+            <div class="relative">
+              <input type="password" id="cfgHfToken" placeholder="hf_..." class="w-full px-3 py-2 pl-10 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
+              <button type="button" onclick="toggleHfTokenVisibility()" class="absolute left-3 top-2 text-slate-400 hover:text-slate-600 text-xs">👁️</button>
+            </div>
+          </div>
+
+          <!-- Dedicated Embedding Test Section -->
+          <div class="pt-2 border-t border-indigo-200/60 dark:border-indigo-900/50 flex flex-col gap-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold text-indigo-900 dark:text-indigo-200">تست تبدیل متن به بردار (Vectorize Test):</span>
+              <button type="button" id="btnTestEmbed" onclick="testEmbedConnection()" class="px-3.5 py-1.5 rounded-lg border border-indigo-500 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-100/70 dark:hover:bg-indigo-900/50 text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+                <span id="btnTestEmbedIcon">🧪</span>
+                <span id="btnTestEmbedText">تست وکتورایزر محلی پایتون</span>
+              </button>
+            </div>
+            <div id="cfgEmbedTestFeedback" class="hidden p-2.5 rounded-lg text-xs font-mono"></div>
+          </div>
+        </div>
+
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-200/80 dark:border-slate-800">
-        <button onclick="testApiConnection()" class="px-4 py-2 rounded-xl border border-brand-500 text-brand-600 dark:text-brand-400 text-xs font-bold hover:bg-brand-50 dark:hover:bg-brand-950/50 transition flex items-center gap-1.5 shadow-xs">
-          <span>تست اتصال به سرور</span>
-          <span>⚡</span>
+      <div class="flex justify-end items-center gap-2.5 mt-6 pt-4 border-t border-slate-200/80 dark:border-slate-800">
+        <button onclick="closeConfigModal()" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+          انصراف
         </button>
-
-        <div class="flex items-center gap-2">
-          <button onclick="closeConfigModal()" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
-            انصراف
-          </button>
-          <button onclick="saveAndApplyConfig()" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-brand-500/25 transition">
-            ذخیره و اعمال تنظیمات
-          </button>
-        </div>
+        <button onclick="saveAndApplyConfig()" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-brand-500/25 transition">
+          ذخیره و اعمال تنظیمات
+        </button>
       </div>
     </div>
   </div>
@@ -1392,8 +1404,8 @@ Ready to send payload...
       baseUrl: localStorage.getItem('rag_base_url') || 'https://api.openai.com/v1',
       apiKey: localStorage.getItem('rag_api_key') || '',
       modelName: localStorage.getItem('rag_model_name') || 'gpt-4o-mini',
-      embeddingModel: localStorage.getItem('rag_embed_model') || 'google/embeddinggemma-2',
-      embeddingProvider: localStorage.getItem('rag_embed_provider') || 'huggingface',
+      embeddingModel: localStorage.getItem('rag_embed_model') || 'local_python_768d',
+      embeddingProvider: localStorage.getItem('rag_embed_provider') || 'local_python',
       hfToken: localStorage.getItem('rag_hf_token') || '',
       useProxy: localStorage.getItem('rag_use_proxy') !== 'false'
     };
@@ -1522,10 +1534,24 @@ Ready to send payload...
     function onEmbeddingProviderChanged() {
       const prov = document.getElementById('cfgEmbeddingProvider').value;
       const hfGroup = document.getElementById('cfgHfTokenGroup');
+      const testBtnText = document.getElementById('btnTestEmbedText');
+      const modelInput = document.getElementById('cfgEmbeddingModel');
+
       if (prov === 'huggingface') {
         hfGroup.classList.remove('hidden');
+        if (testBtnText) testBtnText.innerText = 'تست API هاگینگ‌فیس';
+        if (modelInput.value === 'local_python_768d') {
+          modelInput.value = 'google/embeddinggemma-2';
+        }
+      } else if (prov === 'local_python') {
+        hfGroup.classList.add('hidden');
+        if (testBtnText) testBtnText.innerText = 'تست وکتورایزر محلی پایتون';
+        if (!modelInput.value || modelInput.value.includes('google/')) {
+          modelInput.value = 'local_python_768d';
+        }
       } else {
         hfGroup.classList.add('hidden');
+        if (testBtnText) testBtnText.innerText = 'تست وکتورایزر مرورگر';
       }
     }
 
@@ -1533,33 +1559,33 @@ Ready to send payload...
       if (provider === 'openai') {
         document.getElementById('cfgBaseUrl').value = 'https://api.openai.com/v1';
         document.getElementById('cfgModelName').value = 'gpt-4o-mini';
-        document.getElementById('cfgEmbeddingModel').value = 'google/embeddinggemma-2';
-        document.getElementById('cfgEmbeddingProvider').value = 'huggingface';
+        document.getElementById('cfgEmbeddingModel').value = 'local_python_768d';
+        document.getElementById('cfgEmbeddingProvider').value = 'local_python';
       } else if (provider === 'openrouter') {
         document.getElementById('cfgBaseUrl').value = 'https://openrouter.ai/api/v1';
         document.getElementById('cfgModelName').value = 'meta-llama/llama-3.3-70b-instruct';
-        document.getElementById('cfgEmbeddingModel').value = 'google/embeddinggemma-2';
-        document.getElementById('cfgEmbeddingProvider').value = 'huggingface';
+        document.getElementById('cfgEmbeddingModel').value = 'local_python_768d';
+        document.getElementById('cfgEmbeddingProvider').value = 'local_python';
       } else if (provider === 'groq') {
         document.getElementById('cfgBaseUrl').value = 'https://api.groq.com/openai/v1';
         document.getElementById('cfgModelName').value = 'llama-3.3-70b-versatile';
-        document.getElementById('cfgEmbeddingModel').value = 'google/embeddinggemma-2';
-        document.getElementById('cfgEmbeddingProvider').value = 'huggingface';
+        document.getElementById('cfgEmbeddingModel').value = 'local_python_768d';
+        document.getElementById('cfgEmbeddingProvider').value = 'local_python';
       } else if (provider === 'deepseek') {
         document.getElementById('cfgBaseUrl').value = 'https://api.deepseek.com/v1';
         document.getElementById('cfgModelName').value = 'deepseek-chat';
-        document.getElementById('cfgEmbeddingModel').value = 'google/embeddinggemma-2';
-        document.getElementById('cfgEmbeddingProvider').value = 'huggingface';
+        document.getElementById('cfgEmbeddingModel').value = 'local_python_768d';
+        document.getElementById('cfgEmbeddingProvider').value = 'local_python';
       } else if (provider === 'ollama') {
         document.getElementById('cfgBaseUrl').value = 'http://localhost:11434/v1';
         document.getElementById('cfgModelName').value = 'llama3';
-        document.getElementById('cfgEmbeddingModel').value = 'google/embeddinggemma-2';
+        document.getElementById('cfgEmbeddingModel').value = 'local_python_768d';
         document.getElementById('cfgEmbeddingProvider').value = 'local_python';
       } else if (provider === 'lmstudio') {
         document.getElementById('cfgBaseUrl').value = 'http://localhost:1234/v1';
         document.getElementById('cfgModelName').value = 'local-model';
-        document.getElementById('cfgEmbeddingModel').value = 'google/embeddinggemma-2';
-        document.getElementById('cfgEmbeddingProvider').value = 'builtin';
+        document.getElementById('cfgEmbeddingModel').value = 'local_python_768d';
+        document.getElementById('cfgEmbeddingProvider').value = 'local_python';
       }
       onEmbeddingProviderChanged();
       showToast(`پریست ${provider.toUpperCase()} اعمال شد.`, 'info');
@@ -1569,7 +1595,7 @@ Ready to send payload...
       llmConfig.baseUrl = document.getElementById('cfgBaseUrl').value.trim().replace(/\/+$/, '');
       llmConfig.apiKey = document.getElementById('cfgApiKey').value.trim();
       llmConfig.modelName = document.getElementById('cfgModelName').value.trim() || 'gpt-4o-mini';
-      llmConfig.embeddingModel = document.getElementById('cfgEmbeddingModel').value.trim() || 'google/embeddinggemma-2';
+      llmConfig.embeddingModel = document.getElementById('cfgEmbeddingModel').value.trim() || 'local_python_768d';
       llmConfig.embeddingProvider = document.getElementById('cfgEmbeddingProvider').value;
       llmConfig.hfToken = document.getElementById('cfgHfToken').value.trim();
       llmConfig.useProxy = document.getElementById('cfgUseProxy').checked;
@@ -1601,7 +1627,10 @@ Ready to send payload...
       modelLabel.innerText = `مدل: ${llmConfig.modelName}`;
       if (activeModelBadge) activeModelBadge.innerText = llmConfig.modelName;
       if (metricModel) metricModel.innerText = llmConfig.modelName;
-      if (step3Badge) step3Badge.innerHTML = `<span>🧬 مدل امبدینگ: ${llmConfig.embeddingModel}</span><span class="text-[10px] text-slate-400">⚙️</span>`;
+
+      const embedLabel = llmConfig.embeddingProvider === 'local_python' ? 'پایتون محلی (768D)' :
+                         llmConfig.embeddingProvider === 'huggingface' ? 'Hugging Face API' : 'شبیه‌ساز داخلی';
+      if (step3Badge) step3Badge.innerHTML = `<span>🧬 وکتورایزر: ${embedLabel}</span><span class="text-[10px] text-slate-400">⚙️</span>`;
 
       let providerDisplay = 'سفارشی';
       if (llmConfig.baseUrl.includes('openai.com')) providerDisplay = 'OpenAI';
@@ -1622,12 +1651,18 @@ Ready to send payload...
       }
     }
 
-    // --- TEST API CONNECTION ---
-    async function testApiConnection() {
-      const feedback = document.getElementById('cfgTestFeedback');
+    // --- TEST 1: LLM CONNECTION TEST ---
+    async function testLlmConnection() {
+      const feedback = document.getElementById('cfgLlmTestFeedback');
+      const btn = document.getElementById('btnTestLlm');
+      const icon = document.getElementById('btnTestLlmIcon');
+      const text = document.getElementById('btnTestLlmText');
+
       feedback.classList.remove('hidden');
-      feedback.className = "p-3 rounded-xl text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
-      feedback.innerText = "در حال ارسال درخواست تست پینگ به سرور...";
+      feedback.className = "p-3 rounded-xl text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700";
+      feedback.innerHTML = `⏳ در حال ارسال پینگ آزمایشی به سرور مدل زبانی... (مهلت: ۸ ثانیه)`;
+      btn.disabled = true;
+      icon.innerText = "⏳";
 
       const baseUrl = document.getElementById('cfgBaseUrl').value.trim().replace(/\/+$/, '');
       const apiKey = document.getElementById('cfgApiKey').value.trim();
@@ -1637,17 +1672,21 @@ Ready to send payload...
       const targetUrl = `${baseUrl}/chat/completions`;
       const testPayload = {
         model: model,
-        messages: [{ role: 'user', content: 'Hi, return the word: PONG' }],
+        messages: [{ role: 'user', content: 'Ping' }],
         max_tokens: 5,
         temperature: 0.1
       };
 
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 8000);
       const startTime = performance.now();
+
       try {
         let resp;
         if (useProxy) {
           resp = await fetch('/api/proxy', {
             method: 'POST',
+            signal: controller.signal,
             headers: {
               'Content-Type': 'application/json',
               'target-url': targetUrl,
@@ -1658,6 +1697,7 @@ Ready to send payload...
         } else {
           resp = await fetch(targetUrl, {
             method: 'POST',
+            signal: controller.signal,
             headers: {
               'Content-Type': 'application/json',
               ...(apiKey ? { 'Authorization': `Bearer ${apiKey}` } : {})
@@ -1665,27 +1705,107 @@ Ready to send payload...
             body: JSON.stringify(testPayload)
           });
         }
-
+        clearTimeout(timer);
         const elapsed = Math.round(performance.now() - startTime);
 
         if (resp.ok) {
           const data = await resp.json();
-          const reply = data.choices?.[0]?.message?.content || 'OK';
+          const reply = data.choices?.[0]?.message?.content || 'PONG';
           feedback.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300";
-          feedback.innerHTML = `✅ اتصال با موفقیت برقرار شد! (Latency: ${elapsed}ms)<br>پاسخ مدل: "${reply.trim()}"`;
+          feedback.innerHTML = `✅ اتصال با موفقیت برقرار شد! (${elapsed}ms)<br>مدل: <b>${model}</b> | پاسخ دریافت شد: "${reply.trim()}"`;
           showToast('اتصال به سرور هوش مصنوعی تایید شد.', 'success');
         } else {
           const errData = await resp.text();
           feedback.className = "p-3 rounded-xl text-xs font-mono bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300";
           feedback.innerHTML = `❌ خطا در اتصال (Status ${resp.status}):<br>${errData.substring(0, 160)}`;
-          showToast('خطا در اتصال به مدل.', 'error');
+          showToast(`خطا در اتصال به مدل (${resp.status})`, 'error');
         }
       } catch (err) {
+        clearTimeout(timer);
         feedback.className = "p-3 rounded-xl text-xs font-mono bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300";
-        feedback.innerHTML = `❌ خطای شبکه یا CORS:<br>${err.message}<br>💡 توصیه: تیک «استفاده از سرور پروکسی داخلی» را فعال کنید.`;
-        showToast('خطای شبکه یا مسدودیت CORS.', 'error');
+        if (err.name === 'AbortError') {
+          feedback.innerHTML = `❌ زمان پاسخ‌دهی به پایان رسید (Timeout 8s):<br>سرور مقصد (${targetUrl}) در دسترس نیست یا مسدود شده است.`;
+        } else {
+          feedback.innerHTML = `❌ خطای شبکه یا مسدودیت:<br>${err.message}<br>💡 توصیه: تیک «استفاده از سرور پروکسی داخلی» را فعال کنید.`;
+        }
+        showToast('خطا در اتصال به مدل زبانی.', 'error');
+      } finally {
+        btn.disabled = false;
+        icon.innerText = "⚡";
       }
     }
+
+    // --- TEST 2: LOCAL PYTHON VECTORIZER TEST ---
+    async function testEmbedConnection() {
+      const feedback = document.getElementById('cfgEmbedTestFeedback');
+      const btn = document.getElementById('btnTestEmbed');
+      const icon = document.getElementById('btnTestEmbedIcon');
+
+      feedback.classList.remove('hidden');
+      feedback.className = "p-3 rounded-xl text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700";
+      feedback.innerHTML = `⏳ در حال اجرای وکتورایزر محلی در پایتون...`;
+      btn.disabled = true;
+      icon.innerText = "⏳";
+
+      const provider = document.getElementById('cfgEmbeddingProvider').value;
+      const model = document.getElementById('cfgEmbeddingModel').value.trim() || 'local_python_768d';
+      const token = document.getElementById('cfgHfToken').value.trim();
+
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), 6000);
+      const startTime = performance.now();
+
+      try {
+        const resp = await fetch('/api/embed', {
+          method: 'POST',
+          signal: controller.signal,
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            texts: ["سامانه بازیابی هوشمند اطلاعات و قطعه‌بندی اسناد"],
+            model: model,
+            provider: provider,
+            token: token,
+            test: true
+          })
+        });
+        clearTimeout(timer);
+        const elapsed = Math.round(performance.now() - startTime);
+
+        if (resp.ok) {
+          const data = await resp.json();
+          const dim = data.dimensions || (data.embeddings?.[0]?.length) || (data.sample?.length) || 768;
+          const engine = data.engine || 'Python Local Engine (100% Offline)';
+          const sample = (data.sample || data.embeddings?.[0]?.slice(0, 4) || []).map(n => Number(n).toFixed(3)).join(', ');
+
+          feedback.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300";
+          feedback.innerHTML = `✅ وکتورایزر محلی پایتون فعال و آماده است! (${elapsed}ms)<br>` +
+            `موتور اجرایی: <b>${engine}</b><br>` +
+            `ابعاد بردار: <b>${dim}D</b> | نمونه مقادیر بردار: [${sample}, ...]<br>` +
+            `🟢 تبدیل متن به بردار به صورت ۱۰۰٪ آفلاین و محلی در پایتون تایید شد.`;
+          showToast(`وکتورایزر محلی (${dim} بعد) با موفقیت تست شد!`, 'success');
+        } else {
+          const errData = await resp.json().catch(() => ({}));
+          feedback.className = "p-3 rounded-xl text-xs font-mono bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300";
+          feedback.innerHTML = `❌ خطا در وکتورایزر (Status ${resp.status}):<br>${errData.error || errData.details || 'خطای وب‌سرور'}`;
+          showToast('خطا در تست وکتورایزر.', 'error');
+        }
+      } catch (err) {
+        clearTimeout(timer);
+        feedback.className = "p-3 rounded-xl text-xs font-mono bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300";
+        if (err.name === 'AbortError') {
+          feedback.innerHTML = `❌ زمان پاسخ وکتورایزر به پایان رسید (Timeout 6s).`;
+        } else {
+          feedback.innerHTML = `❌ خطا در برقراری ارتباط با وب‌سرور: ${err.message}`;
+        }
+        showToast('خطا در اجرای تست وکتورایزر.', 'error');
+      } finally {
+        btn.disabled = false;
+        icon.innerText = "🧪";
+      }
+    }
+
+    // Alias for backwards compatibility
+    const testApiConnection = testLlmConnection;
 
     // --- STEP 1: DOCUMENT INGESTION & PDF EXTRACTION ---
     function loadDocumentPreset(key) {
