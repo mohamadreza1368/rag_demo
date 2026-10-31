@@ -33,8 +33,112 @@ class RAGStudioHandler(http.server.SimpleHTTPRequestHandler):
     def do_POST(self):
         if self.path.startswith('/api/proxy'):
             self.handle_proxy()
+        elif self.path.startswith('/api/embed'):
+            self.handle_embed()
         else:
             self.send_error(404, "Endpoint not found")
+
+    def handle_embed(self):
+        content_length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(content_length) if content_length > 0 else b''
+
+        try:
+            req_data = json.loads(body.decode('utf-8')) if body else {}
+        except Exception as e:
+            self.send_response(400)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({'error': f'Invalid JSON: {str(e)}'}).encode('utf-8'))
+            return
+
+        texts = req_data.get('texts', [])
+        if isinstance(texts, str):
+            texts = [texts]
+
+        model_name = req_data.get('model', 'google/embeddinggemma-2')
+        provider = req_data.get('provider', 'huggingface')
+        hf_token = req_data.get('token') or os.environ.get('HF_TOKEN') or os.environ.get('HUGGING_FACE_HUB_TOKEN')
+
+        # 1. Hugging Face Inference API
+        if provider == 'huggingface':
+            hf_url = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{model_name}"
+            headers = {
+                'Content-Type': 'application/json',
+                'User-Agent': 'RAG-Studio-Embed/1.0'
+            }
+            if hf_token:
+                headers['Authorization'] = f"Bearer {hf_token}"
+
+            try:
+                hf_payload = json.dumps({"inputs": texts, "options": {"wait_for_model": True}}).encode('utf-8')
+                req = urllib.request.Request(hf_url, data=hf_payload, headers=headers, method='POST')
+                with urllib.request.urlopen(req, timeout=90) as resp:
+                    data = resp.read()
+                    self.send_response(200)
+                    self.send_header('Content-Type', 'application/json')
+                    self.send_header('Access-Control-Allow-Origin', '*')
+                    self.end_headers()
+                    self.wfile.write(data)
+                    return
+            except urllib.error.HTTPError as e:
+                err_content = e.read().decode('utf-8', errors='ignore')
+                self.send_response(e.code)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'error': f'Hugging Face API returned status {e.code}',
+                    'details': err_content,
+                    'hint': 'If the model is gated (e.g. google/embeddinggemma-2), please provide a Hugging Face API Token (hf_...) and accept model license on HuggingFace.'
+                }).encode('utf-8'))
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': f'Hugging Face connection error: {str(e)}'}).encode('utf-8'))
+                return
+
+        # 2. Local Python (sentence-transformers / transformers)
+        elif provider == 'local_python':
+            try:
+                from sentence_transformers import SentenceTransformer
+                model = SentenceTransformer(model_name)
+                embeddings = model.encode(texts, normalize_embeddings=True)
+                # Convert numpy array to list
+                vectors = embeddings.tolist()
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({'embeddings': vectors, 'model': model_name, 'dimensions': len(vectors[0]) if vectors else 0}).encode('utf-8'))
+                return
+            except ImportError:
+                self.send_response(501)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'error': 'Package sentence-transformers is not installed in Python environment.',
+                    'hint': 'Run: pip install sentence-transformers torch'
+                }).encode('utf-8'))
+                return
+            except Exception as e:
+                self.send_response(500)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({'error': f'Local model inference failed: {str(e)}'}).encode('utf-8'))
+                return
+
+        else:
+            self.send_response(400)
+            self.send_header('Content-Type', 'application/json')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({'error': f'Unsupported provider: {provider}'}).encode('utf-8'))
 
     def handle_proxy(self):
         content_length = int(self.headers.get('Content-Length', 0))

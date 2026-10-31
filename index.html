@@ -514,6 +514,10 @@
           </div>
 
           <div class="flex items-center gap-2">
+            <span id="step3ActiveModelBadge" onclick="openConfigModal()" class="text-xs px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-mono font-bold flex items-center gap-1.5 cursor-pointer hover:border-brand-500 transition shadow-xs" title="کلیک برای تنظیمات مدل و توکن">
+              <span>🧬 مدل امبدینگ: google/embeddinggemma-2</span>
+              <span class="text-[10px] text-slate-400">⚙️</span>
+            </span>
             <button onclick="executeGenerateEmbeddings(true)" id="btnRecomputeEmbeddings" class="px-3.5 py-2 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-300 dark:border-sky-800 text-sky-700 dark:text-sky-300 text-xs font-bold hover:bg-sky-100 transition flex items-center gap-1.5 shadow-xs">
               <span>محاسبه مجدد بردارها</span>
               <span>🔄</span>
@@ -1148,19 +1152,50 @@ Ready to send payload...
         </div>
 
         <!-- Model Name -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">نام مدل پاسخ‌دهنده (LLM Model):</label>
-            <input type="text" id="cfgModelName" placeholder="gpt-4o-mini" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">نام مدل پاسخ‌دهنده متن (LLM Model):</label>
+          <input type="text" id="cfgModelName" placeholder="gpt-4o-mini" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
+        </div>
+
+        <!-- Embedding Configuration Group -->
+        <div class="p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-900/60 space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-bold text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5">
+              <span>🧬</span> تنظیمات مدل وکتورایزر و امبدینگ (Embeddings)
+            </span>
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 font-semibold font-mono">
+              Vector Space
+            </span>
           </div>
-          <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">مدل وکتورایزر (Embeddings):</label>
-            <select id="cfgEmbeddingModel" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100">
-              <option value="builtin">وکتورایزر داخلی پرسرعت (Built-in Dense Normalized)</option>
-              <option value="text-embedding-3-small">text-embedding-3-small (OpenAI)</option>
-              <option value="nomic-embed-text">nomic-embed-text (Ollama)</option>
-              <option value="bge-m3">bge-m3 (HuggingFace / Ollama)</option>
-            </select>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">روش اتصال امبدینگ (Provider):</label>
+              <select id="cfgEmbeddingProvider" onchange="onEmbeddingProviderChanged()" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-100">
+                <option value="huggingface">Hugging Face (Inference API - ابری)</option>
+                <option value="local_python">پایتون محلی (SentenceTransformers در سرور)</option>
+                <option value="builtin">وکتورایزر داخلی پرسرعت (Built-in High-Speed)</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">نام مدل امبدینگ (Embedding Model):</label>
+              <input type="text" id="cfgEmbeddingModel" value="google/embeddinggemma-2" placeholder="google/embeddinggemma-2" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
+            </div>
+          </div>
+
+          <!-- Hugging Face Token (for gated models like google/embeddinggemma-2) -->
+          <div id="cfgHfTokenGroup">
+            <div class="flex justify-between items-center mb-1">
+              <label class="text-xs font-bold text-slate-700 dark:text-slate-300">توکن Hugging Face (HF Token - اختیاری / برای مدل‌های محافظت‌شده):</label>
+              <a href="https://huggingface.co/settings/tokens" target="_blank" class="text-[10px] text-brand-600 dark:text-brand-400 hover:underline">دریافت توکن رایگان ↗</a>
+            </div>
+            <div class="relative">
+              <input type="password" id="cfgHfToken" placeholder="hf_..." class="w-full px-3 py-2 pl-10 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
+              <button type="button" onclick="toggleHfTokenVisibility()" class="absolute left-3 top-2 text-slate-400 hover:text-slate-600 text-xs">👁️</button>
+            </div>
+            <p class="text-[10px] text-slate-500 dark:text-slate-400 mt-1">
+              مدل <code class="font-mono text-indigo-600 dark:text-indigo-400">google/embeddinggemma-2</code> در Hugging Face قرار دارد. برای دسترسی ابری می‌توانید توکن read خود را وارد کنید یا در صورت عدم دسترسی از حالت داخلی یا پایتون محلی استفاده کنید.
+            </p>
           </div>
         </div>
 
@@ -1352,12 +1387,14 @@ Ready to send payload...
     let rawHttpLogs = [];
     let currentPdfMeta = null;
 
-    // --- LLM Connection Config ---
+    // --- LLM & Embedding Connection Config ---
     let llmConfig = {
       baseUrl: localStorage.getItem('rag_base_url') || 'https://api.openai.com/v1',
       apiKey: localStorage.getItem('rag_api_key') || '',
       modelName: localStorage.getItem('rag_model_name') || 'gpt-4o-mini',
-      embeddingModel: localStorage.getItem('rag_embed_model') || 'builtin',
+      embeddingModel: localStorage.getItem('rag_embed_model') || 'google/embeddinggemma-2',
+      embeddingProvider: localStorage.getItem('rag_embed_provider') || 'huggingface',
+      hfToken: localStorage.getItem('rag_hf_token') || '',
       useProxy: localStorage.getItem('rag_use_proxy') !== 'false'
     };
 
@@ -1466,7 +1503,10 @@ Ready to send payload...
       document.getElementById('cfgApiKey').value = llmConfig.apiKey;
       document.getElementById('cfgModelName').value = llmConfig.modelName;
       document.getElementById('cfgEmbeddingModel').value = llmConfig.embeddingModel;
+      document.getElementById('cfgEmbeddingProvider').value = llmConfig.embeddingProvider;
+      document.getElementById('cfgHfToken').value = llmConfig.hfToken;
       document.getElementById('cfgUseProxy').checked = llmConfig.useProxy;
+      onEmbeddingProviderChanged();
     }
 
     function togglePasswordVisibility() {
@@ -1474,32 +1514,54 @@ Ready to send payload...
       input.type = input.type === 'password' ? 'text' : 'password';
     }
 
+    function toggleHfTokenVisibility() {
+      const input = document.getElementById('cfgHfToken');
+      input.type = input.type === 'password' ? 'text' : 'password';
+    }
+
+    function onEmbeddingProviderChanged() {
+      const prov = document.getElementById('cfgEmbeddingProvider').value;
+      const hfGroup = document.getElementById('cfgHfTokenGroup');
+      if (prov === 'huggingface') {
+        hfGroup.classList.remove('hidden');
+      } else {
+        hfGroup.classList.add('hidden');
+      }
+    }
+
     function applyProviderPreset(provider) {
       if (provider === 'openai') {
         document.getElementById('cfgBaseUrl').value = 'https://api.openai.com/v1';
         document.getElementById('cfgModelName').value = 'gpt-4o-mini';
-        document.getElementById('cfgEmbeddingModel').value = 'builtin';
+        document.getElementById('cfgEmbeddingModel').value = 'google/embeddinggemma-2';
+        document.getElementById('cfgEmbeddingProvider').value = 'huggingface';
       } else if (provider === 'openrouter') {
         document.getElementById('cfgBaseUrl').value = 'https://openrouter.ai/api/v1';
         document.getElementById('cfgModelName').value = 'meta-llama/llama-3.3-70b-instruct';
-        document.getElementById('cfgEmbeddingModel').value = 'builtin';
+        document.getElementById('cfgEmbeddingModel').value = 'google/embeddinggemma-2';
+        document.getElementById('cfgEmbeddingProvider').value = 'huggingface';
       } else if (provider === 'groq') {
         document.getElementById('cfgBaseUrl').value = 'https://api.groq.com/openai/v1';
         document.getElementById('cfgModelName').value = 'llama-3.3-70b-versatile';
-        document.getElementById('cfgEmbeddingModel').value = 'builtin';
+        document.getElementById('cfgEmbeddingModel').value = 'google/embeddinggemma-2';
+        document.getElementById('cfgEmbeddingProvider').value = 'huggingface';
       } else if (provider === 'deepseek') {
         document.getElementById('cfgBaseUrl').value = 'https://api.deepseek.com/v1';
         document.getElementById('cfgModelName').value = 'deepseek-chat';
-        document.getElementById('cfgEmbeddingModel').value = 'builtin';
+        document.getElementById('cfgEmbeddingModel').value = 'google/embeddinggemma-2';
+        document.getElementById('cfgEmbeddingProvider').value = 'huggingface';
       } else if (provider === 'ollama') {
         document.getElementById('cfgBaseUrl').value = 'http://localhost:11434/v1';
         document.getElementById('cfgModelName').value = 'llama3';
-        document.getElementById('cfgEmbeddingModel').value = 'builtin';
+        document.getElementById('cfgEmbeddingModel').value = 'google/embeddinggemma-2';
+        document.getElementById('cfgEmbeddingProvider').value = 'local_python';
       } else if (provider === 'lmstudio') {
         document.getElementById('cfgBaseUrl').value = 'http://localhost:1234/v1';
         document.getElementById('cfgModelName').value = 'local-model';
-        document.getElementById('cfgEmbeddingModel').value = 'builtin';
+        document.getElementById('cfgEmbeddingModel').value = 'google/embeddinggemma-2';
+        document.getElementById('cfgEmbeddingProvider').value = 'builtin';
       }
+      onEmbeddingProviderChanged();
       showToast(`پریست ${provider.toUpperCase()} اعمال شد.`, 'info');
     }
 
@@ -1507,18 +1569,23 @@ Ready to send payload...
       llmConfig.baseUrl = document.getElementById('cfgBaseUrl').value.trim().replace(/\/+$/, '');
       llmConfig.apiKey = document.getElementById('cfgApiKey').value.trim();
       llmConfig.modelName = document.getElementById('cfgModelName').value.trim() || 'gpt-4o-mini';
-      llmConfig.embeddingModel = document.getElementById('cfgEmbeddingModel').value;
+      llmConfig.embeddingModel = document.getElementById('cfgEmbeddingModel').value.trim() || 'google/embeddinggemma-2';
+      llmConfig.embeddingProvider = document.getElementById('cfgEmbeddingProvider').value;
+      llmConfig.hfToken = document.getElementById('cfgHfToken').value.trim();
       llmConfig.useProxy = document.getElementById('cfgUseProxy').checked;
 
       localStorage.setItem('rag_base_url', llmConfig.baseUrl);
       localStorage.setItem('rag_api_key', llmConfig.apiKey);
       localStorage.setItem('rag_model_name', llmConfig.modelName);
       localStorage.setItem('rag_embed_model', llmConfig.embeddingModel);
+      localStorage.setItem('rag_embed_provider', llmConfig.embeddingProvider);
+      localStorage.setItem('rag_hf_token', llmConfig.hfToken);
       localStorage.setItem('rag_use_proxy', llmConfig.useProxy);
 
       updateTopBarConnectionBadge();
       closeConfigModal();
       buildAugmentedPrompt();
+      executeGenerateEmbeddings(false);
       showToast('تنظیمات با موفقیت ذخیره و اعمال شدند.', 'success');
     }
 
@@ -1529,10 +1596,12 @@ Ready to send payload...
       const activeModelBadge = document.getElementById('activeModelBadge');
       const metricModel = document.getElementById('metricModelName');
       const llmStatusText = document.getElementById('llmStatusText');
+      const step3Badge = document.getElementById('step3ActiveModelBadge');
 
       modelLabel.innerText = `مدل: ${llmConfig.modelName}`;
       if (activeModelBadge) activeModelBadge.innerText = llmConfig.modelName;
       if (metricModel) metricModel.innerText = llmConfig.modelName;
+      if (step3Badge) step3Badge.innerHTML = `<span>🧬 مدل امبدینگ: ${llmConfig.embeddingModel}</span><span class="text-[10px] text-slate-400">⚙️</span>`;
 
       let providerDisplay = 'سفارشی';
       if (llmConfig.baseUrl.includes('openai.com')) providerDisplay = 'OpenAI';
@@ -1548,6 +1617,10 @@ Ready to send payload...
         dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50 animate-pulse";
         if (llmStatusText) llmStatusText.innerHTML = `🟢 متصل به <strong>${llmConfig.modelName}</strong> (${providerDisplay})`;
       } else {
+        dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
+        if (llmStatusText) llmStatusText.innerHTML = `🟡 حالت شبیه‌ساز (کلید API وارد نشده)`;
+      }
+    }
         dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
         if (llmStatusText) llmStatusText.innerHTML = `🟡 حالت شبیه‌ساز (کلید API وارد نشده)`;
       }
@@ -1942,18 +2015,87 @@ Ready to send payload...
       });
     }
 
-    // --- STEP 3: EMBEDDINGS (Local High-Accuracy Vectorizer or API) ---
-    function executeGenerateEmbeddings(showFeedback) {
-      chunks.forEach((chunk, idx) => {
-        chunk.vector = computeDeterministicDenseVector(chunk.text);
-        chunk.pca2d = projectVectorTo2D(chunk.vector, idx);
-      });
+    // --- STEP 3: EMBEDDINGS (Local High-Accuracy Vectorizer, HuggingFace, or Local Python) ---
+    async function executeGenerateEmbeddings(showFeedback) {
+      const modelName = llmConfig.embeddingModel || 'google/embeddinggemma-2';
+      const provider = llmConfig.embeddingProvider || 'huggingface';
+      const badge = document.getElementById('embeddingDimBadge');
+      const btn = document.getElementById('btnRecomputeEmbeddings');
 
-      drawVectorCanvas();
-      inspectSelectedChunk(selectedChunkIndex);
+      if (provider === 'builtin') {
+        chunks.forEach((chunk, idx) => {
+          chunk.vector = computeDeterministicDenseVector(chunk.text);
+          chunk.pca2d = projectVectorTo2D(chunk.vector, idx);
+        });
+        if (badge) badge.innerText = `Built-in Dense (32-dim) ➔ 2D Plane`;
+        drawVectorCanvas();
+        inspectSelectedChunk(selectedChunkIndex);
+        renderVectorDatabaseTable();
+        if (showFeedback) showToast(`تعداد ${chunks.length} بردار با وکتورایزر داخلی بازتولید شد.`, 'success');
+        return;
+      }
 
-      if (showFeedback) {
-        showToast(`تعداد ${chunks.length} بردار با موفقیت بازتولید شد.`, 'success');
+      // External / Server-side Embedding (e.g. google/embeddinggemma-2)
+      if (badge) badge.innerText = `در حال دریافت بردارها از ${modelName}...`;
+      if (btn) btn.classList.add('opacity-50');
+
+      try {
+        const texts = chunks.map(c => c.text);
+        const resp = await fetch('/api/embed', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            texts: texts,
+            model: modelName,
+            provider: provider,
+            token: llmConfig.hfToken
+          })
+        });
+
+        const data = await resp.json();
+
+        let vectors = null;
+        if (Array.isArray(data)) {
+          vectors = data;
+        } else if (data.embeddings && Array.isArray(data.embeddings)) {
+          vectors = data.embeddings;
+        } else if (data.data && Array.isArray(data.data)) {
+          vectors = data.data.map(item => item.embedding);
+        } else if (data.error) {
+          throw new Error(data.hint || data.error);
+        }
+
+        if (vectors && vectors.length === chunks.length) {
+          const dim = vectors[0].length;
+          chunks.forEach((chunk, idx) => {
+            chunk.vector = vectors[idx];
+            chunk.pca2d = projectVectorTo2D(chunk.vector, idx);
+          });
+          if (badge) badge.innerText = `${modelName} (${dim}-dim) ➔ 2D Plane`;
+          drawVectorCanvas();
+          inspectSelectedChunk(selectedChunkIndex);
+          renderVectorDatabaseTable();
+          if (showFeedback) showToast(`بردارها با مدل ${modelName} (${dim} بعد) با موفقیت دریافت شدند!`, 'success');
+          return;
+        } else {
+          throw new Error(data.details || 'پاسخ دریافتی ساختار معتبر برداری نداشت.');
+        }
+
+      } catch (err) {
+        console.warn('Embedding fallback:', err.message);
+        chunks.forEach((chunk, idx) => {
+          chunk.vector = computeDeterministicDenseVector(chunk.text);
+          chunk.pca2d = projectVectorTo2D(chunk.vector, idx);
+        });
+        if (badge) badge.innerText = `${modelName} (شبیه‌ساز / آفلاین) ➔ 2D Plane`;
+        drawVectorCanvas();
+        inspectSelectedChunk(selectedChunkIndex);
+        renderVectorDatabaseTable();
+        if (showFeedback) {
+          showToast(`توجه: ${err.message}`, 'info');
+        }
+      } finally {
+        if (btn) btn.classList.remove('opacity-50');
       }
     }
 
@@ -1982,10 +2124,13 @@ Ready to send payload...
     }
 
     function projectVectorTo2D(vector, index) {
+      if (!vector || vector.length === 0) return [0, 0];
       let x = 0;
       let y = 0;
-      for (let i = 0; i < 16; i++) x += vector[i] * (i % 2 === 0 ? 1 : -1);
-      for (let i = 16; i < 32; i++) y += vector[i] * (i % 2 === 0 ? 1 : -1);
+      const half = Math.floor(vector.length / 2);
+      const limit = Math.min(32, half);
+      for (let i = 0; i < limit; i++) x += vector[i] * (i % 2 === 0 ? 1 : -1);
+      for (let i = half; i < Math.min(half + limit, vector.length); i++) y += vector[i] * (i % 2 === 0 ? 1 : -1);
 
       x = Math.max(-0.85, Math.min(0.85, x * 0.95 + Math.cos(index * 1.5) * 0.15));
       y = Math.max(-0.85, Math.min(0.85, y * 0.95 + Math.sin(index * 1.5) * 0.15));
@@ -1996,14 +2141,19 @@ Ready to send payload...
       if (!chunks || chunks.length === 0) return;
       selectedChunkIndex = Math.min(index, chunks.length - 1);
       const chunk = chunks[selectedChunkIndex];
+      const dim = chunk.vector ? chunk.vector.length : 32;
 
-      document.getElementById('inspectChunkBadge').innerText = `Chunk #${chunk.id}`;
+      document.getElementById('inspectChunkBadge').innerText = `Chunk #${chunk.id} (${dim}D)`;
       document.getElementById('inspectChunkText').innerText = `"${chunk.text}"`;
 
-      // Heatmap rendering
+      // Heatmap rendering (sample up to 48 cells for visual perfection)
       const heatmap = document.getElementById('vectorHeatmapContainer');
       heatmap.innerHTML = '';
-      chunk.vector.forEach((val, i) => {
+      const sampleCount = Math.min(chunk.vector.length, 48);
+      const step = Math.max(1, Math.floor(chunk.vector.length / sampleCount));
+
+      for (let i = 0; i < chunk.vector.length && heatmap.children.length < sampleCount; i += step) {
+        const val = chunk.vector[i];
         const cell = document.createElement('div');
         const intensity = Math.abs(val);
         const bg = val >= 0
@@ -2013,10 +2163,10 @@ Ready to send payload...
         cell.className = "rounded-xs h-full";
         cell.title = `Dim ${i+1}: ${val}`;
         heatmap.appendChild(cell);
-      });
+      }
 
-      const sampleVals = chunk.vector.slice(0, 10).map(v => v.toFixed(3)).join(', ');
-      document.getElementById('vectorNumbersPreview').innerText = `[ ${sampleVals}, ... ]`;
+      const sampleVals = chunk.vector.slice(0, 10).map(v => typeof v === 'number' ? v.toFixed(3) : v).join(', ');
+      document.getElementById('vectorNumbersPreview').innerText = `[ ${sampleVals}, ... (${dim} dimensions) ]`;
     }
 
     // --- VECTOR CANVAS 2D PCA PLOTTER ---
@@ -2220,9 +2370,37 @@ Ready to send payload...
     }
 
     // --- STEP 5: COSINE RETRIEVAL ---
-    function executeLiveRetrieval() {
+    async function executeLiveRetrieval() {
       currentQuery = document.getElementById('liveUserQueryInput').value || currentQuery;
-      queryVector = computeDeterministicDenseVector(currentQuery);
+
+      const modelName = llmConfig.embeddingModel || 'google/embeddinggemma-2';
+      const provider = llmConfig.embeddingProvider || 'huggingface';
+
+      if (provider !== 'builtin' && chunks[0]?.vector && chunks[0].vector.length > 32) {
+        try {
+          const resp = await fetch('/api/embed', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              texts: [currentQuery],
+              model: modelName,
+              provider: provider,
+              token: llmConfig.hfToken
+            })
+          });
+          const data = await resp.json();
+          let v = Array.isArray(data) ? data[0] : (data.embeddings?.[0] || data.data?.[0]?.embedding);
+          if (v && v.length === chunks[0].vector.length) {
+            queryVector = v;
+          } else {
+            queryVector = computeDeterministicDenseVector(currentQuery);
+          }
+        } catch (e) {
+          queryVector = computeDeterministicDenseVector(currentQuery);
+        }
+      } else {
+        queryVector = computeDeterministicDenseVector(currentQuery);
+      }
 
       const topK = parseInt(document.getElementById('topKSlider').value);
       const threshold = parseInt(document.getElementById('thresholdSlider').value) / 100;
