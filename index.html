@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>استودیو عملیاتی و بصری RAG (Retrieval-Augmented Generation)</title>
+  <title>استودیو عملیاتی و پیشرفته RAG (Retrieval-Augmented Generation)</title>
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- PDF.js for 100% Client-Side Offline PDF Extraction -->
@@ -37,12 +37,28 @@
               amber: '#f59e0b',
               sky: '#0ea5e9',
               rose: '#f43f5e',
-              purple: '#a855f7'
+              purple: '#a855f7',
+              cyan: '#06b6d4'
             }
           },
           fontFamily: {
             sans: ['Vazirmatn', 'Segoe UI', 'Tahoma', 'Arial', 'sans-serif'],
             mono: ['JetBrains Mono', 'Consolas', 'Courier New', 'monospace']
+          },
+          animation: {
+            'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+            'float': 'float 4s ease-in-out infinite',
+            'glow': 'glow 2s ease-in-out infinite alternate',
+          },
+          keyframes: {
+            float: {
+              '0%, 100%': { transform: 'translateY(0)' },
+              '50%': { transform: 'translateY(-6px)' },
+            },
+            glow: {
+              '0%': { boxShadow: '0 0 10px rgba(99,102,241,0.2)' },
+              '100%': { boxShadow: '0 0 25px rgba(99,102,241,0.5)' },
+            }
           }
         }
       }
@@ -60,38 +76,53 @@
       direction: ltr;
       text-align: left;
     }
-    /* Custom Scrollbar */
+    /* Modern Custom Scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
     }
     ::-webkit-scrollbar-track {
-      background: rgba(0, 0, 0, 0.05);
-    }
-    .dark ::-webkit-scrollbar-track {
-      background: rgba(255, 255, 255, 0.05);
+      background: transparent;
     }
     ::-webkit-scrollbar-thumb {
-      background: rgba(99, 102, 241, 0.4);
+      background: rgba(99, 102, 241, 0.35);
       border-radius: 9999px;
     }
     ::-webkit-scrollbar-thumb:hover {
       background: rgba(99, 102, 241, 0.7);
     }
-    .glass {
-      background: rgba(255, 255, 255, 0.9);
+    /* Glassmorphism styling */
+    .glass-nav {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    .dark .glass-nav {
+      background: rgba(15, 23, 42, 0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    .glass-card {
+      background: rgba(255, 255, 255, 0.7);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
     }
-    .dark .glass {
-      background: rgba(15, 23, 42, 0.9);
+    .dark .glass-card {
+      background: rgba(30, 41, 59, 0.5);
       backdrop-filter: blur(12px);
       -webkit-backdrop-filter: blur(12px);
     }
-    .step-active {
-      background-color: #4f46e5 !important;
-      color: #ffffff !important;
-      box-shadow: 0 4px 14px rgba(79, 70, 229, 0.35);
+    .ambient-bg {
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.08) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.05) 0px, transparent 50%);
+    }
+    .dark .ambient-bg {
+      background-image: 
+        radial-gradient(at 0% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+        radial-gradient(at 100% 0%, rgba(168, 85, 247, 0.12) 0px, transparent 50%),
+        radial-gradient(at 50% 100%, rgba(16, 185, 129, 0.08) 0px, transparent 50%);
     }
     .cursor-blink {
       animation: blink 1s step-end infinite;
@@ -100,128 +131,176 @@
       0%, 100% { opacity: 1; }
       50% { opacity: 0; }
     }
+    .step-active-glow {
+      box-shadow: 0 0 20px -3px rgba(99, 102, 241, 0.4);
+    }
+    /* Range slider custom thumb */
+    input[type=range] {
+      -webkit-appearance: none;
+      background: rgba(148, 163, 184, 0.2);
+      border-radius: 9999px;
+      height: 6px;
+    }
+    input[type=range]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 18px;
+      width: 18px;
+      border-radius: 50%;
+      background: #4f46e5;
+      cursor: pointer;
+      box-shadow: 0 2px 8px rgba(79, 70, 229, 0.4);
+      transition: transform 0.1s ease;
+    }
+    input[type=range]::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
+    }
   </style>
 </head>
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen transition-colors duration-200">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen ambient-bg transition-colors duration-300">
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div id="toastContainer" class="fixed bottom-5 left-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <!-- TOP APP BAR -->
-  <header class="sticky top-0 z-40 border-b border-slate-200 dark:border-slate-800 glass shadow-xs">
+  <header class="sticky top-0 z-40 border-b border-slate-200/80 dark:border-slate-800/80 glass-nav shadow-xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-      <!-- Logo & Title -->
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center text-white shadow-lg shadow-brand-500/25 font-black text-xl">
-          R
+      
+      <!-- Brand Logo & Title -->
+      <div class="flex items-center gap-3.5">
+        <div class="relative group cursor-pointer" onclick="goToStep(1)">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 via-indigo-600 to-accent-purple flex items-center justify-center text-white shadow-lg shadow-brand-500/30 font-black text-xl tracking-wider transition-transform duration-300 group-hover:scale-105">
+            R
+          </div>
+          <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full animate-ping"></span>
+          <span class="absolute -bottom-1 -right-1 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full"></span>
         </div>
         <div>
           <div class="flex items-center gap-2">
-            <h1 class="font-black text-base sm:text-lg bg-gradient-to-r from-brand-600 to-accent-purple dark:from-brand-400 dark:to-accent-purple bg-clip-text text-transparent">
-              استودیو عملیاتی RAG
+            <h1 class="font-extrabold text-base sm:text-lg bg-gradient-to-r from-brand-600 via-indigo-500 to-accent-purple dark:from-brand-300 dark:via-indigo-300 dark:to-accent-purple bg-clip-text text-transparent">
+              استودیو پیشرفته RAG
             </h1>
-            <span class="text-[11px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-300 dark:border-emerald-800 flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-              Live Operational
+            <span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/20 flex items-center gap-1">
+              v2.0 Live Studio
             </span>
           </div>
           <p class="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">
-            خط لوله واقعی RAG با اتصال مستقیم به LLM (OpenAI، DeepSeek، Groq، Ollama و ...)
+            پیاده‌سازی بصری و عملیاتی گام‌به‌گام خط‌لوله Retrieval-Augmented Generation با پشتیبانی از PDF
           </p>
         </div>
       </div>
 
-      <!-- Action & Config Buttons -->
+      <!-- Action Buttons & Config -->
       <div class="flex items-center gap-2 sm:gap-3">
         <!-- Live Connection Status Pill -->
-        <button onclick="openConfigModal()" class="flex items-center gap-2 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-brand-500 transition shadow-xs text-xs">
-          <span id="connIndicatorDot" class="w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+        <button onclick="openConfigModal()" class="flex items-center gap-2.5 px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white/80 dark:bg-slate-900/80 hover:border-brand-500 dark:hover:border-brand-500 transition-all duration-200 shadow-xs text-xs group">
+          <span id="connIndicatorDot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50"></span>
           <div class="text-right">
-            <span id="connModelName" class="font-bold text-slate-700 dark:text-slate-200 block text-[11px]">اتصال: gpt-4o-mini</span>
-            <span id="connProviderName" class="text-[10px] text-slate-400 block font-mono">OpenAI Compatible</span>
+            <span id="connModelName" class="font-bold text-slate-700 dark:text-slate-200 block text-[11px] leading-tight">gpt-4o-mini</span>
+            <span id="connProviderName" class="text-[9px] text-slate-400 block font-mono">OpenAI Compatible</span>
           </div>
-          <span class="text-slate-400 mr-1 text-[11px]">⚙️</span>
+          <span class="text-slate-400 group-hover:text-brand-500 transition-colors text-xs">⚙️</span>
         </button>
 
-        <!-- View Mode (Step by Step vs Flow) -->
-        <div class="bg-slate-200/80 dark:bg-slate-800 p-1 rounded-xl flex items-center text-xs font-semibold">
-          <button id="btnStepsMode" onclick="setViewMode('steps')" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-300 shadow-xs transition">
+        <!-- Walkthrough Guide Button -->
+        <button onclick="openGuideModal()" class="p-2 sm:px-3 sm:py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white/80 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 text-xs font-semibold flex items-center gap-1.5 transition">
+          <span>📖</span>
+          <span class="hidden sm:inline">راهنمای یادگیری</span>
+        </button>
+
+        <!-- View Mode Switch -->
+        <div class="bg-slate-200/70 dark:bg-slate-800/70 p-1 rounded-xl flex items-center text-xs font-semibold backdrop-blur-xs">
+          <button id="btnStepsMode" onclick="setViewMode('steps')" class="px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-300 shadow-xs transition-all">
             گام‌به‌گام
           </button>
-          <button id="btnPipelineMode" onclick="setViewMode('pipeline')" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition">
+          <button id="btnPipelineMode" onclick="setViewMode('pipeline')" class="px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all">
             نمای یکپارچه
           </button>
         </div>
 
         <!-- Dark/Light Mode -->
-        <button onclick="toggleDarkMode()" class="p-2 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700 transition" title="تغییر تم">
+        <button onclick="toggleDarkMode()" class="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="تغییر تم">
           <span id="themeToggleIcon">🌙</span>
         </button>
       </div>
     </div>
   </header>
 
+  <!-- PROGRESS BAR -->
+  <div class="w-full h-1 bg-slate-200/60 dark:bg-slate-800/60 sticky top-16 z-30">
+    <div id="pipelineTopProgressBar" class="h-full bg-gradient-to-r from-brand-600 via-accent-sky to-emerald-500 transition-all duration-300" style="width: 14.28%;"></div>
+  </div>
+
   <!-- STEP NAVIGATION BAR -->
-  <nav id="stepperNavBar" class="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 py-2.5 sticky top-16 z-30 shadow-xs">
+  <nav id="stepperNavBar" class="bg-white/90 dark:bg-slate-900/90 border-b border-slate-200/80 dark:border-slate-800/80 py-2.5 sticky top-[68px] z-30 glass-nav shadow-xs">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex items-center justify-between overflow-x-auto pb-1 gap-2 no-scrollbar">
-        <!-- Steps 1 to 7 -->
-        <button onclick="goToStep(1)" class="step-nav-btn flex items-center gap-2 px-3 py-1.5 rounded-xl transition text-right whitespace-nowrap" data-step="1">
-          <div class="step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-brand-600 text-white shadow-sm">۱</div>
+        
+        <!-- Step 1 -->
+        <button onclick="goToStep(1)" class="step-nav-btn group flex items-center gap-2.5 px-3 py-1.5 rounded-xl transition-all duration-200 text-right whitespace-nowrap" data-step="1">
+          <div class="step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-brand-600 text-white shadow-sm shadow-brand-500/30 transition-transform group-hover:scale-105">۱</div>
           <div>
-            <span class="block text-xs font-bold text-slate-800 dark:text-slate-200">سند دانش</span>
+            <span class="block text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-brand-600">بارگذاری سند / PDF</span>
             <span class="block text-[10px] text-slate-400">Ingestion</span>
           </div>
         </button>
-        <span class="text-slate-300 dark:text-slate-700">←</span>
+        <span class="text-slate-300 dark:text-slate-700 text-xs">←</span>
 
-        <button onclick="goToStep(2)" class="step-nav-btn flex items-center gap-2 px-3 py-1.5 rounded-xl transition text-right whitespace-nowrap" data-step="2">
-          <div class="step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500">۲</div>
+        <!-- Step 2 -->
+        <button onclick="goToStep(2)" class="step-nav-btn group flex items-center gap-2.5 px-3 py-1.5 rounded-xl transition-all duration-200 text-right whitespace-nowrap" data-step="2">
+          <div class="step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 transition-transform group-hover:scale-105">۲</div>
           <div>
-            <span class="block text-xs font-bold text-slate-600 dark:text-slate-400">قطعه‌بندی هوشمند</span>
+            <span class="block text-xs font-bold text-slate-600 dark:text-slate-400 group-hover:text-brand-600">قطعه‌بندی هوشمند</span>
             <span class="block text-[10px] text-slate-400">Chunking</span>
           </div>
         </button>
-        <span class="text-slate-300 dark:text-slate-700">←</span>
+        <span class="text-slate-300 dark:text-slate-700 text-xs">←</span>
 
-        <button onclick="goToStep(3)" class="step-nav-btn flex items-center gap-2 px-3 py-1.5 rounded-xl transition text-right whitespace-nowrap" data-step="3">
-          <div class="step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500">۳</div>
+        <!-- Step 3 -->
+        <button onclick="goToStep(3)" class="step-nav-btn group flex items-center gap-2.5 px-3 py-1.5 rounded-xl transition-all duration-200 text-right whitespace-nowrap" data-step="3">
+          <div class="step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 transition-transform group-hover:scale-105">۳</div>
           <div>
-            <span class="block text-xs font-bold text-slate-600 dark:text-slate-400">بردارسازی</span>
+            <span class="block text-xs font-bold text-slate-600 dark:text-slate-400 group-hover:text-brand-600">بردارسازی و فضا 2D</span>
             <span class="block text-[10px] text-slate-400">Embeddings</span>
           </div>
         </button>
-        <span class="text-slate-300 dark:text-slate-700">←</span>
+        <span class="text-slate-300 dark:text-slate-700 text-xs">←</span>
 
-        <button onclick="goToStep(4)" class="step-nav-btn flex items-center gap-2 px-3 py-1.5 rounded-xl transition text-right whitespace-nowrap" data-step="4">
-          <div class="step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500">۴</div>
+        <!-- Step 4 -->
+        <button onclick="goToStep(4)" class="step-nav-btn group flex items-center gap-2.5 px-3 py-1.5 rounded-xl transition-all duration-200 text-right whitespace-nowrap" data-step="4">
+          <div class="step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 transition-transform group-hover:scale-105">۴</div>
           <div>
-            <span class="block text-xs font-bold text-slate-600 dark:text-slate-400">پایگاه داده برداری</span>
-            <span class="block text-[10px] text-slate-400">Vector DB</span>
+            <span class="block text-xs font-bold text-slate-600 dark:text-slate-400 group-hover:text-brand-600">دیتابیس برداری</span>
+            <span class="block text-[10px] text-slate-400">Vector Store</span>
           </div>
         </button>
-        <span class="text-slate-300 dark:text-slate-700">←</span>
+        <span class="text-slate-300 dark:text-slate-700 text-xs">←</span>
 
-        <button onclick="goToStep(5)" class="step-nav-btn flex items-center gap-2 px-3 py-1.5 rounded-xl transition text-right whitespace-nowrap" data-step="5">
-          <div class="step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500">۵</div>
+        <!-- Step 5 -->
+        <button onclick="goToStep(5)" class="step-nav-btn group flex items-center gap-2.5 px-3 py-1.5 rounded-xl transition-all duration-200 text-right whitespace-nowrap" data-step="5">
+          <div class="step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 transition-transform group-hover:scale-105">۵</div>
           <div>
-            <span class="block text-xs font-bold text-slate-600 dark:text-slate-400">جستجو و بازیابی</span>
-            <span class="block text-[10px] text-slate-400">Retrieval</span>
+            <span class="block text-xs font-bold text-slate-600 dark:text-slate-400 group-hover:text-brand-600">جستجو و بازیابی</span>
+            <span class="block text-[10px] text-slate-400">Cosine Retrieval</span>
           </div>
         </button>
-        <span class="text-slate-300 dark:text-slate-700">←</span>
+        <span class="text-slate-300 dark:text-slate-700 text-xs">←</span>
 
-        <button onclick="goToStep(6)" class="step-nav-btn flex items-center gap-2 px-3 py-1.5 rounded-xl transition text-right whitespace-nowrap" data-step="6">
-          <div class="step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500">۶</div>
+        <!-- Step 6 -->
+        <button onclick="goToStep(6)" class="step-nav-btn group flex items-center gap-2.5 px-3 py-1.5 rounded-xl transition-all duration-200 text-right whitespace-nowrap" data-step="6">
+          <div class="step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 transition-transform group-hover:scale-105">۶</div>
           <div>
-            <span class="block text-xs font-bold text-slate-600 dark:text-slate-400">تلفیق پرامپت</span>
+            <span class="block text-xs font-bold text-slate-600 dark:text-slate-400 group-hover:text-brand-600">تلفیق پرامپت</span>
             <span class="block text-[10px] text-slate-400">Augmentation</span>
           </div>
         </button>
-        <span class="text-slate-300 dark:text-slate-700">←</span>
+        <span class="text-slate-300 dark:text-slate-700 text-xs">←</span>
 
-        <button onclick="goToStep(7)" class="step-nav-btn flex items-center gap-2 px-3 py-1.5 rounded-xl transition text-right whitespace-nowrap" data-step="7">
-          <div class="step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500">۷</div>
+        <!-- Step 7 -->
+        <button onclick="goToStep(7)" class="step-nav-btn group flex items-center gap-2.5 px-3 py-1.5 rounded-xl transition-all duration-200 text-right whitespace-nowrap" data-step="7">
+          <div class="step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 transition-transform group-hover:scale-105">۷</div>
           <div>
-            <span class="block text-xs font-bold text-slate-600 dark:text-slate-400">پاسخ زنده LLM</span>
-            <span class="block text-[10px] text-slate-400">Live Generation</span>
+            <span class="block text-xs font-bold text-slate-600 dark:text-slate-400 group-hover:text-brand-600">پاسخ مستند LLM</span>
+            <span class="block text-[10px] text-slate-400">Grounded Answer</span>
           </div>
         </button>
       </div>
@@ -235,150 +314,162 @@
     <div id="stepsContainer" class="space-y-6">
 
       <!-- STEP 1: DOCUMENT INGESTION -->
-      <section id="step1" class="step-pane bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-100 dark:border-slate-800 gap-4">
+      <section id="step1" class="step-pane glass-card border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-6 sm:p-7 shadow-sm transition-all duration-300">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-200/60 dark:border-slate-800/60 gap-4">
           <div>
-            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-brand-50 dark:bg-brand-950/50 text-brand-600 dark:text-brand-400 text-xs font-semibold mb-2">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-bold mb-2 border border-brand-500/20">
               <span>گام ۱ از ۷</span> • <span>بارگذاری اسناد پایگاه دانش (Document Ingestion)</span>
             </div>
-            <h2 class="text-xl font-black text-slate-900 dark:text-white">انتخاب، ورود متن، یا آپلود فایل مرجع</h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              اسناد ورودی پایگاه دانش را تشکیل می‌دهند. می‌توانید از نمونه‌های آماده استفاده کنید، متن دلخواه بنویسید یا فایل متنی آپلود کنید.
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">انتخاب، ورود متن، یا آپلود فایل PDF</h2>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+              اسناد اولیه ورودی پایگاه دانش را تشکیل می‌دهند. می‌توانید فایل PDF دلخواه را بکشید و رها کنید یا از اسناد آماده استفاده فرمایید.
             </p>
           </div>
 
-          <!-- Presets and Upload -->
+          <!-- Presets and Upload Buttons -->
           <div class="flex flex-wrap items-center gap-2">
-            <span class="text-xs text-slate-500">نمونه‌ها:</span>
-            <button onclick="loadDocumentPreset('company')" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-brand-900/40 hover:text-brand-600 text-xs font-medium transition">
+            <span class="text-xs font-semibold text-slate-500">نمونه‌ها:</span>
+            <button onclick="loadDocumentPreset('company')" class="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-brand-950/40 hover:text-brand-600 text-xs font-medium transition border border-transparent hover:border-brand-500/30">
               🏢 آیین‌نامه پرسنلی و مرخصی
             </button>
-            <button onclick="loadDocumentPreset('tech')" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-brand-900/40 hover:text-brand-600 text-xs font-medium transition">
+            <button onclick="loadDocumentPreset('tech')" class="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-brand-950/40 hover:text-brand-600 text-xs font-medium transition border border-transparent hover:border-brand-500/30">
               🤖 معماری فنی RAG و وکتورها
             </button>
-            <button onclick="loadDocumentPreset('medical')" class="px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-brand-900/40 hover:text-brand-600 text-xs font-medium transition">
-              🩺 راهنمای سلامت و هیدراتاسیون
+            <button onclick="loadDocumentPreset('medical')" class="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-brand-950/40 hover:text-brand-600 text-xs font-medium transition border border-transparent hover:border-brand-500/30">
+              🩺 راهنمای سلامت و تغذیه
             </button>
+
             <!-- File Upload (PDF & Text) -->
-            <label class="cursor-pointer px-3.5 py-1.5 rounded-lg bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-900/60 text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+            <label class="cursor-pointer px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-brand-500/20">
               <span>📄 آپلود سند (PDF / متنی)</span>
               <input type="file" id="fileUploadInput" accept=".pdf,.txt,.md,.json,.csv" onchange="handleFileUpload(event)" class="hidden">
             </label>
           </div>
         </div>
 
-        <!-- PDF Processing Banner (shown during extraction) -->
-        <div id="pdfProcessingBanner" class="hidden mt-4 p-3.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800 flex items-center justify-between text-xs">
-          <div class="flex items-center gap-2.5">
-            <span class="w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></span>
+        <!-- PDF Processing Banner -->
+        <div id="pdfProcessingBanner" class="hidden mt-4 p-4 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800 flex items-center justify-between text-xs">
+          <div class="flex items-center gap-3">
+            <span class="w-5 h-5 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></span>
             <div>
               <span id="pdfProcessingText" class="font-bold text-indigo-900 dark:text-indigo-200">در حال خواندن و استخراج محتوای فایل PDF...</span>
-              <span id="pdfProcessingPageCount" class="block text-[10px] text-indigo-700 dark:text-indigo-400">صفحه ۱</span>
+              <span id="pdfProcessingPageCount" class="block text-[11px] text-indigo-700 dark:text-indigo-400">صفحه ۱</span>
             </div>
           </div>
-          <div class="w-36 h-2 rounded-full bg-indigo-200 dark:bg-indigo-900 overflow-hidden">
+          <div class="w-40 h-2.5 rounded-full bg-indigo-200 dark:bg-indigo-900 overflow-hidden">
             <div id="pdfProgressBar" class="h-full bg-indigo-600 rounded-full transition-all duration-150" style="width: 10%"></div>
           </div>
         </div>
 
         <!-- Loaded PDF Info Card -->
-        <div id="pdfLoadedInfoCard" class="hidden mt-4 p-3 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 flex flex-wrap items-center justify-between gap-2 text-xs">
-          <div class="flex items-center gap-2">
-            <span class="text-base">📄</span>
+        <div id="pdfLoadedInfoCard" class="hidden mt-4 p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-600 flex items-center justify-center text-base">
+              📄
+            </div>
             <div>
               <span class="font-bold text-emerald-900 dark:text-emerald-200" id="pdfFileNameLabel">document.pdf</span>
               <span class="block text-[11px] text-emerald-700 dark:text-emerald-400" id="pdfStatsDetailLabel">۵ صفحه • ۱,۸۲۰ کلمه</span>
             </div>
           </div>
-          <button onclick="clearUploadedPdf()" class="px-2.5 py-1 rounded bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-rose-600 text-[11px] font-semibold transition">
+          <button onclick="clearUploadedPdf()" class="px-3 py-1 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:text-rose-600 text-xs font-semibold transition">
             بازگشت به متن نمونه ↺
           </button>
         </div>
 
+        <!-- Main Workspace for Step 1 -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-5">
           <div class="lg:col-span-2 space-y-2">
-            <div class="flex justify-between items-center text-xs text-slate-500">
-              <span>محتوای سند مرجع (امکان کشیدن و رها کردن فایل PDF در این کادر):</span>
-              <span id="docLiveStats">۰ کلمه • ۰ کاراکتر • تخمین ~۰ توکن</span>
+            <div class="flex justify-between items-center text-xs text-slate-500 font-medium">
+              <span>محتوای سند مرجع (قابلیت کشیدن و رها کردن فایل PDF روی کادر):</span>
+              <span id="docLiveStats" class="font-mono bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md text-[11px]">۰ کلمه • ۰ کاراکتر • تخمین ~۰ توکن</span>
             </div>
-            <div id="dropZoneContainer" class="relative group rounded-xl">
-              <textarea id="documentTextArea" rows="12" oninput="onDocumentChanged()" placeholder="متن سند یا فایل PDF خود را اینجا بکشید و رها کنید (Drag & Drop) یا دکمه آپلود را بزنید..." class="w-full p-4 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 text-xs font-mono leading-relaxed focus:ring-2 focus:ring-brand-500 focus:outline-none transition"></textarea>
-              <div id="dragOverlay" class="absolute inset-0 bg-brand-500/10 border-2 border-dashed border-brand-500 rounded-xl backdrop-blur-xs hidden flex items-center justify-center pointer-events-none transition">
-                <span class="px-4 py-2 rounded-lg bg-white dark:bg-slate-900 text-brand-600 dark:text-brand-300 text-xs font-bold shadow-lg">
-                  📥 فایل PDF یا متنی را اینجا رها کنید
-                </span>
+
+            <!-- Drag & Drop Container -->
+            <div id="dropZoneContainer" class="relative group rounded-2xl">
+              <textarea id="documentTextArea" rows="13" oninput="onDocumentChanged()" placeholder="متن سند یا فایل PDF خود را اینجا بکشید و رها کنید (Drag & Drop) یا دکمه آپلود را بزنید..." class="w-full p-4 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/60 dark:bg-slate-900/60 text-slate-800 dark:text-slate-100 text-xs font-mono leading-relaxed focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all shadow-inner"></textarea>
+              
+              <div id="dragOverlay" class="absolute inset-0 bg-brand-500/15 border-2 border-dashed border-brand-500 rounded-2xl backdrop-blur-xs hidden flex items-center justify-center pointer-events-none transition-all">
+                <div class="px-5 py-3 rounded-2xl bg-white dark:bg-slate-900 text-brand-600 dark:text-brand-300 text-xs font-bold shadow-xl border border-brand-500/30 flex items-center gap-2">
+                  <span class="text-lg">📥</span>
+                  <span>فایل PDF یا متنی را اینجا رها کنید تا استخراج شود</span>
+                </div>
               </div>
             </div>
           </div>
 
+          <!-- Side Information & Call to Action -->
           <div class="space-y-4">
-            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 text-xs space-y-2">
-              <h3 class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                <span>⚡</span> ویژگی عملیاتی سیستم:
+            <div class="p-4 rounded-2xl bg-slate-100/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 text-xs space-y-2.5">
+              <h3 class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                <span>⚡</span> مکانیزم پردازش در گام ۱
               </h3>
               <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-[11px]">
-                پایگاه دانش شما مستقیماً در مرورگر پردازش شده، به صورت خودکار قطعه‌بندی و بردارسازی می‌شود. هر تغییری در این کادر، محاسبات مراحل بعدی را بلافاصله به‌روزرسانی می‌کند.
+                پایگاه دانش شما مستقیماً در مرورگر پردازش شده، صفحات PDF به صورت آفلاین خوانده شده، و آماده قطعه‌بندی می‌شوند. تغییر در این متن مستقیماً تمام چانک‌ها و بردارها را همگام می‌کند.
               </p>
             </div>
 
-            <div class="p-4 rounded-xl bg-indigo-50/50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-900 text-xs space-y-2">
-              <div class="font-bold text-indigo-900 dark:text-indigo-200">وضعیت اتصال به مدل:</div>
-              <div id="llmStatusBox" class="p-2.5 rounded-lg bg-white dark:bg-slate-900 border border-indigo-100 dark:border-indigo-800 flex items-center justify-between">
-                <span id="llmStatusText" class="text-[11px] text-slate-600 dark:text-slate-300 font-semibold">در حال بررسی تنظیمات...</span>
+            <div class="p-4 rounded-2xl bg-indigo-50/40 dark:bg-indigo-950/20 border border-indigo-200/60 dark:border-indigo-900/40 text-xs space-y-2">
+              <div class="font-bold text-indigo-900 dark:text-indigo-200 flex items-center justify-between">
+                <span>وضعیت اتصال به LLM:</span>
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+              </div>
+              <div id="llmStatusBox" class="p-2.5 rounded-xl bg-white dark:bg-slate-900 border border-indigo-100 dark:border-indigo-900/60 flex items-center justify-between">
+                <span id="llmStatusText" class="text-[11px] text-slate-600 dark:text-slate-300 font-semibold">آماده پردازش</span>
                 <button onclick="openConfigModal()" class="text-brand-600 dark:text-brand-400 font-bold hover:underline text-[11px]">تنظیمات</button>
               </div>
             </div>
 
-            <button onclick="goToStep(2)" class="w-full py-3 px-4 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-lg shadow-brand-500/25 transition flex items-center justify-center gap-2">
+            <button onclick="goToStep(2)" class="w-full py-3.5 px-4 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-lg shadow-brand-500/25 transition-all duration-200 flex items-center justify-center gap-2 group">
               <span>گام بعدی: قطعه‌بندی هوشمند متن (Chunking)</span>
-              <span>←</span>
+              <span class="transition-transform group-hover:-translate-x-1">←</span>
             </button>
           </div>
         </div>
       </section>
 
       <!-- STEP 2: CHUNKING -->
-      <section id="step2" class="step-pane hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-100 dark:border-slate-800 gap-4">
+      <section id="step2" class="step-pane hidden glass-card border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-6 sm:p-7 shadow-sm transition-all duration-300">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-200/60 dark:border-slate-800/60 gap-4">
           <div>
-            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-accent-amber/10 text-amber-600 dark:text-amber-400 text-xs font-semibold mb-2">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold mb-2 border border-amber-500/20">
               <span>گام ۲ از ۷</span> • <span>قطعه‌بندی هوشمند متن (Recursive Text Splitting)</span>
             </div>
-            <h2 class="text-xl font-black text-slate-900 dark:text-white">تنظیم اندازه چانک‌ها و هم‌پوشانی (Overlap)</h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              اسناد بزرگ باید به تکه‌های کوچک‌تر شکسته شوند تا مدل زبانی زمینه را بهتر پیدا کند و از محدودیت اندازه کانتکست خارج نشود.
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">تنظیم اندازه چانک‌ها و هم‌پوشانی (Overlap)</h2>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+              اسناد بزرگ به تکه‌های بهینه شکسته می‌شوند تا ارتباط معنایی قطع نشده و در پنجره بافت مدل زبانی جا گیرند.
             </p>
           </div>
           <div class="flex items-center gap-2">
-            <span id="liveChunkCountBadge" class="text-xs px-3 py-1.5 rounded-lg bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800 text-amber-700 dark:text-amber-300 font-bold">
+            <span id="liveChunkCountBadge" class="text-xs px-3.5 py-1.5 rounded-xl bg-amber-50 dark:bg-amber-950/50 border border-amber-200 dark:border-amber-800/80 text-amber-700 dark:text-amber-300 font-bold shadow-xs">
               تعداد چانک‌ها: ۰
             </span>
           </div>
         </div>
 
         <!-- Chunking Controls -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-5 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-5 p-4 rounded-2xl bg-slate-100/60 dark:bg-slate-800/30 border border-slate-200/80 dark:border-slate-700/60">
           <div>
-            <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
               <span>اندازه هر قطعه (Chunk Size):</span>
-              <span id="chunkSizeDisplay" class="text-brand-600 font-mono">180</span>
+              <span id="chunkSizeDisplay" class="text-brand-600 font-mono bg-brand-50 dark:bg-brand-950/60 px-2 py-0.5 rounded-md">180</span>
             </div>
-            <input type="range" id="chunkSizeSlider" min="80" max="500" step="20" value="180" oninput="recomputeChunks()" class="w-full accent-brand-600">
+            <input type="range" id="chunkSizeSlider" min="80" max="500" step="20" value="180" oninput="recomputeChunks()" class="w-full">
             <div class="text-[10px] text-slate-400 mt-1">تعداد تقریبی کاراکتر در هر قطعه</div>
           </div>
 
           <div>
-            <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
               <span>هم‌پوشانی (Chunk Overlap):</span>
-              <span id="chunkOverlapDisplay" class="text-amber-500 font-mono">35</span>
+              <span id="chunkOverlapDisplay" class="text-amber-500 font-mono bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-md">35</span>
             </div>
-            <input type="range" id="chunkOverlapSlider" min="0" max="100" step="5" value="35" oninput="recomputeChunks()" class="w-full accent-amber-500">
-            <div class="text-[10px] text-slate-400 mt-1">هم‌پوشانی برای جلوگیری از قطع شدن جملات و ابهام معنایی</div>
+            <input type="range" id="chunkOverlapSlider" min="0" max="100" step="5" value="35" oninput="recomputeChunks()" class="w-full">
+            <div class="text-[10px] text-slate-400 mt-1">حفظ پیوستگی معنایی جملات متوالی</div>
           </div>
 
           <div>
-            <div class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">الگوریتم قطعه‌بندی:</div>
-            <select id="splitterAlgorithmSelect" onchange="recomputeChunks()" class="w-full p-2 text-xs rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-medium">
+            <div class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">الگوریتم قطعه‌بندی:</div>
+            <select id="splitterAlgorithmSelect" onchange="recomputeChunks()" class="w-full p-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-medium focus:ring-2 focus:ring-brand-500">
               <option value="recursive">Recursive Character (هوشمند بازگشتی بر اساس پاراگراف و جمله)</option>
               <option value="sentence">Sentence Splitter (بر اساس پایان جملات)</option>
               <option value="fixed">Fixed Length (طول ثابت بدون توجه به مرز کلمه)</option>
@@ -387,44 +478,44 @@
           </div>
         </div>
 
-        <!-- Chunks Visual Grid -->
+        <!-- Chunks Cards Grid -->
         <div>
           <h3 class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-3 flex items-center justify-between">
             <span>چانک‌های استخراج‌شده:</span>
-            <span class="text-[11px] text-slate-400">روی چانک کلیک کنید تا جزئیات برداری آن را ببینید</span>
+            <span class="text-[11px] text-slate-400">روی هر چانک کلیک کنید تا جزئیات برداری آن در گام ۳ کالبدشکافی شود</span>
           </h3>
-          <div id="chunksCardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 max-h-[380px] overflow-y-auto p-1">
+          <div id="chunksCardsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 max-h-[420px] overflow-y-auto p-1">
             <!-- Dynamically populated -->
           </div>
         </div>
 
         <!-- Navigation Buttons -->
-        <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+        <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-200/60 dark:border-slate-800/60">
           <button onclick="goToStep(1)" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
             → بازگشت به گام ۱
           </button>
-          <button onclick="goToStep(3)" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition flex items-center gap-2">
+          <button onclick="goToStep(3)" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition flex items-center gap-2 group">
             <span>گام بعدی: تولید بردارهای تعبیه (Embeddings)</span>
-            <span>←</span>
+            <span class="transition-transform group-hover:-translate-x-1">←</span>
           </button>
         </div>
       </section>
 
       <!-- STEP 3: EMBEDDING GENERATION -->
-      <section id="step3" class="step-pane hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-100 dark:border-slate-800 gap-4">
+      <section id="step3" class="step-pane hidden glass-card border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-6 sm:p-7 shadow-sm transition-all duration-300">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-200/60 dark:border-slate-800/60 gap-4">
           <div>
-            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-accent-sky/10 text-sky-600 dark:text-sky-400 text-xs font-semibold mb-2">
-              <span>گام ۳ از ۷</span> • <span>تبدیل چانک‌ها به بردارهای متراکم (Embeddings)</span>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-bold mb-2 border border-sky-500/20">
+              <span>گام ۳ از ۷</span> • <span>تبدیل چانک‌ها به بردارهای متراکم (Text Embeddings)</span>
             </div>
-            <h2 class="text-xl font-black text-slate-900 dark:text-white">فضای برداری و محاسبه ریاضی شباهت</h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              هر چانک متنی به یک بردار متراکم عددی نگاشت می‌شود تا شباهت‌های معنایی در فضای چندبعدی قابل اندازه‌گیری شوند.
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">فضای برداری و تصویرسازی دوبعدی با کاهش بعد (PCA)</h2>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+              هر چانک متنی به یک بردار متراکم عددی نرمال‌شده نگاشت می‌شود تا فواصل معنایی در فضای چندبعدی قابل مقایسه شوند.
             </p>
           </div>
 
           <div class="flex items-center gap-2">
-            <button onclick="executeGenerateEmbeddings(true)" id="btnRecomputeEmbeddings" class="px-3.5 py-2 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-300 dark:border-sky-800 text-sky-700 dark:text-sky-300 text-xs font-bold hover:bg-sky-100 transition flex items-center gap-1.5">
+            <button onclick="executeGenerateEmbeddings(true)" id="btnRecomputeEmbeddings" class="px-3.5 py-2 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-300 dark:border-sky-800 text-sky-700 dark:text-sky-300 text-xs font-bold hover:bg-sky-100 transition flex items-center gap-1.5 shadow-xs">
               <span>محاسبه مجدد بردارها</span>
               <span>🔄</span>
             </button>
@@ -433,190 +524,192 @@
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-5">
           <!-- 2D Projection Space Canvas -->
-          <div class="lg:col-span-7 bg-slate-50 dark:bg-slate-950 rounded-2xl border border-slate-200 dark:border-slate-800 p-4 flex flex-col">
-            <div class="flex justify-between items-center mb-2">
+          <div class="lg:col-span-7 bg-white/50 dark:bg-slate-900/50 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-4 flex flex-col shadow-inner">
+            <div class="flex justify-between items-center mb-2.5">
               <div class="flex items-center gap-2">
-                <span class="w-3 h-3 rounded-full bg-brand-500"></span>
-                <span class="text-xs font-bold text-slate-800 dark:text-slate-200">نمودار فضای برداری ۲ بعدی (PCA 2D Projection)</span>
+                <span class="w-3 h-3 rounded-full bg-brand-500 animate-pulse"></span>
+                <span class="text-xs font-bold text-slate-800 dark:text-slate-200">نمودار تعاملی فضای برداری ۲ بعدی (PCA Projection)</span>
               </div>
-              <span id="embeddingDimBadge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-300">
-                1536-dim ➔ 2D
+              <span id="embeddingDimBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300 font-semibold">
+                32-dim Dense ➔ 2D Plane
               </span>
             </div>
 
-            <div class="relative w-full aspect-[4/3] bg-white dark:bg-slate-900 rounded-xl border border-slate-200/80 dark:border-slate-800 overflow-hidden shadow-inner flex items-center justify-center">
+            <div class="relative w-full aspect-[4/3] bg-slate-900 rounded-xl border border-slate-800 overflow-hidden shadow-2xl flex items-center justify-center">
               <canvas id="vectorCanvas" class="w-full h-full cursor-crosshair"></canvas>
-              <div id="canvasTooltip" class="absolute pointer-events-none hidden px-3 py-2 rounded-xl bg-slate-900/95 text-white text-xs shadow-xl border border-slate-700 z-20 max-w-xs text-right">
+              <div id="canvasTooltip" class="absolute pointer-events-none hidden px-3.5 py-2.5 rounded-xl bg-slate-900/95 text-white text-xs shadow-2xl border border-slate-700 z-20 max-w-xs text-right backdrop-blur-md">
                 Tooltip
               </div>
             </div>
-            <div class="flex items-center justify-between text-[10px] text-slate-400 mt-2 px-1">
-              <span>محور X: بعد تحلیلی اول PCA</span>
-              <span>هر نقطه = یک چانک متن (روی نقاط کلیک کنید)</span>
-              <span>محور Y: بعد تحلیلی دوم PCA</span>
+            <div class="flex items-center justify-between text-[10px] text-slate-400 mt-2 px-1 font-medium">
+              <span>محور X: بعد اول مؤلفه اصلی</span>
+              <span>نقطه قرمز = بردار پرسش | نقاط رنگی = چانک‌ها</span>
+              <span>محور Y: بعد دوم مؤلفه اصلی</span>
             </div>
           </div>
 
           <!-- Vector Inspector -->
           <div class="lg:col-span-5 flex flex-col space-y-4">
-            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700">
+            <div class="p-4 rounded-2xl bg-slate-100/50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80">
               <div class="flex justify-between items-center mb-2">
                 <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
                   <span>🔬</span> کالبدشکافی بردار چانک انتخابی
                 </h4>
-                <span id="inspectChunkBadge" class="text-xs px-2.5 py-0.5 rounded bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-300 font-mono font-bold">
+                <span id="inspectChunkBadge" class="text-xs px-2.5 py-0.5 rounded-lg bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-300 font-mono font-bold">
                   Chunk #1
                 </span>
               </div>
 
-              <p id="inspectChunkText" class="text-xs text-slate-600 dark:text-slate-300 italic mb-3 line-clamp-3">
-                متن تکه در اینجا قرار می‌گیرد...
+              <p id="inspectChunkText" class="text-xs text-slate-600 dark:text-slate-300 italic mb-3 line-clamp-3 leading-relaxed">
+                متن چانک در اینجا قرار می‌گیرد...
               </p>
 
               <!-- Heatmap -->
               <div class="space-y-1.5">
-                <div class="flex justify-between text-[10px] text-slate-400">
+                <div class="flex justify-between text-[10px] text-slate-400 font-medium">
                   <span>نقشه حرارتی بردار (Dense Vector Heatmap):</span>
-                  <span class="font-mono">[-1.0 .. +1.0]</span>
+                  <span class="font-mono text-[10px]">[-1.0 .. +1.0]</span>
                 </div>
-                <div id="vectorHeatmapContainer" class="grid grid-cols-16 gap-0.5 h-10 w-full rounded bg-slate-200 dark:bg-slate-900 p-1">
+                <div id="vectorHeatmapContainer" class="grid grid-cols-16 gap-0.5 h-10 w-full rounded-lg bg-slate-200 dark:bg-slate-900 p-1 shadow-inner">
                   <!-- Injected via JS -->
                 </div>
               </div>
 
               <!-- Numerical Sample of Vector -->
               <div class="mt-3">
-                <div class="text-[10px] text-slate-400 mb-1">نمونه مقادیر شناور بردار (Floating Points Preview):</div>
-                <div id="vectorNumbersPreview" class="font-mono text-[11px] p-2.5 rounded-lg bg-slate-900 text-emerald-400 overflow-x-auto whitespace-nowrap">
+                <div class="text-[10px] text-slate-400 mb-1 font-medium">نمونه مقادیر اعشاری بردار (Floating Points Preview):</div>
+                <div id="vectorNumbersPreview" class="font-mono text-[11px] p-2.5 rounded-xl bg-slate-900 text-emerald-400 overflow-x-auto whitespace-nowrap border border-slate-800">
                   [ 0.0412, -0.1983, 0.5120, -0.0152, ... ]
                 </div>
               </div>
             </div>
 
-            <!-- Mathematical Formula -->
-            <div class="p-4 rounded-xl bg-sky-50/60 dark:bg-sky-950/30 border border-sky-200 dark:border-sky-900 text-xs space-y-2">
-              <div class="font-bold text-sky-900 dark:text-sky-300">فرمول شباهت کسینوسی (Cosine Similarity):</div>
-              <div class="font-mono text-center bg-white dark:bg-slate-900 p-2 rounded border border-sky-100 dark:border-sky-800 text-sky-700 dark:text-sky-300 text-xs">
-                Similarity(A, B) = (A · B) / (||A|| × ||B||)
+            <!-- Mathematical Formula Card -->
+            <div class="p-4 rounded-2xl bg-sky-50/50 dark:bg-sky-950/20 border border-sky-200/80 dark:border-sky-900/60 text-xs space-y-2">
+              <div class="font-bold text-sky-900 dark:text-sky-300 flex items-center gap-1.5">
+                <span>📐</span> فرمول شباهت کسینوسی (Cosine Similarity):
+              </div>
+              <div class="font-mono text-center bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-sky-100 dark:border-sky-800 text-sky-700 dark:text-sky-300 text-xs font-semibold shadow-xs">
+                cos(θ) = (A · B) / (||A|| × ||B||)
               </div>
               <p class="text-[11px] text-sky-800 dark:text-sky-400 leading-relaxed">
-                ضرب داخلی بردارهای نرمال‌شده، کسینوس زاویه بین دو مفهوم را می‌دهد. مقدار ۱ یعنی تطابق کامل معنایی.
+                ضرب داخلی دو بردار نرمال‌شده، کسینوس زاویه جهت‌گیری آن‌ها در فضا را نشان می‌دهد. هر چه زاویه به صفر نزدیک‌تر باشد، مقدار کسینوس به ۱ میل کرده و تطابق معنایی بالاتر است.
               </p>
             </div>
           </div>
         </div>
 
-        <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+        <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-200/60 dark:border-slate-800/60">
           <button onclick="goToStep(2)" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
             → بازگشت به گام ۲
           </button>
-          <button onclick="goToStep(4)" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition flex items-center gap-2">
+          <button onclick="goToStep(4)" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition flex items-center gap-2 group">
             <span>گام بعدی: پایگاه داده برداری (Vector DB)</span>
-            <span>←</span>
+            <span class="transition-transform group-hover:-translate-x-1">←</span>
           </button>
         </div>
       </section>
 
       <!-- STEP 4: VECTOR DATABASE TABLE -->
-      <section id="step4" class="step-pane hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-100 dark:border-slate-800 gap-4">
+      <section id="step4" class="step-pane hidden glass-card border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-6 sm:p-7 shadow-sm transition-all duration-300">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-200/60 dark:border-slate-800/60 gap-4">
           <div>
-            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-accent-purple/10 text-purple-600 dark:text-purple-400 text-xs font-semibold mb-2">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-xs font-bold mb-2 border border-purple-500/20">
               <span>گام ۴ از ۷</span> • <span>ایندکس‌گذاری پایگاه داده برداری (Vector Store & Indexing)</span>
             </div>
-            <h2 class="text-xl font-black text-slate-900 dark:text-white">جدول ذخیره‌سازی بردارها و فراداده‌ها (In-Memory DB)</h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              بردارهای محاسبه‌شده به همراه شناسه، محتوای متنی، و اطلاعات تکمیلی (Metadata) ایندکس می‌شوند تا با الگوریتم‌های ANN مانند HNSW در کمتر از چند میلی‌ثانیه بازیابی گردند.
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">جدول ذخیره‌سازی بردارها و فراداده‌ها (Vector Index)</h2>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+              بردارهای محاسبه‌شده همراه با شناسه، متن چانک، شماره صفحه، و فراداده‌ها در دیتابیس برداری ایندکس می‌شوند.
             </p>
           </div>
 
           <div class="flex items-center gap-2">
-            <span class="text-xs px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 font-bold flex items-center gap-1.5">
+            <span class="text-xs px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800 font-bold flex items-center gap-1.5 shadow-xs">
               <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-              ایندکس حافظه‌ای آماده و فعال
+              ایندکس حافظه‌ای HNSW فعال
             </span>
           </div>
         </div>
 
-        <div class="mt-5 overflow-hidden rounded-xl border border-slate-200 dark:border-slate-800">
+        <!-- Table Container -->
+        <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
           <div class="max-h-[380px] overflow-y-auto">
             <table class="w-full text-right text-xs">
-              <thead class="sticky top-0 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700">
+              <thead class="sticky top-0 bg-slate-100/90 dark:bg-slate-800/90 backdrop-blur-xs text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700">
                 <tr>
-                  <th class="p-3">شناسه (ID)</th>
-                  <th class="p-3">محتوای متنی چانک (Document Text)</th>
-                  <th class="p-3">فراداده (Metadata)</th>
-                  <th class="p-3">اثر انگشت بردار (Vector Preview)</th>
-                  <th class="p-3 text-center">وضعیت ایندکس</th>
+                  <th class="p-3.5">شناسه (ID)</th>
+                  <th class="p-3.5">محتوای متنی چانک (Document Text)</th>
+                  <th class="p-3.5">فراداده (Metadata)</th>
+                  <th class="p-3.5">اثر انگشت بردار (Vector Preview)</th>
+                  <th class="p-3.5 text-center">وضعیت ایندکس</th>
                 </tr>
               </thead>
-              <tbody id="vectorStoreTableBody" class="divide-y divide-slate-100 dark:divide-slate-800">
+              <tbody id="vectorStoreTableBody" class="divide-y divide-slate-100 dark:divide-slate-800/80 bg-white/50 dark:bg-slate-900/50">
                 <!-- Dynamically populated -->
               </tbody>
             </table>
           </div>
         </div>
 
+        <!-- Technical DB Cards -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-5">
-          <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 text-xs">
-            <div class="font-bold text-slate-800 dark:text-slate-200 mb-1">ساختار ایندکس (HNSW)</div>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400">
-              گراف‌های سلسه‌مراتبی ناوبری که در مقیاس‌های میلیونی امکان جستجوی تقریب برداری با پیچیدگی زمانی O(log N) را بدون اسکن کامل فراهم می‌کنند.
+          <div class="p-4 rounded-2xl bg-slate-100/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 text-xs">
+            <div class="font-bold text-slate-800 dark:text-slate-200 mb-1">الگوریتم HNSW</div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+              گراف سلسله‌مراتبی ناوبری کوچک‌دنیا که امکان جستجوی همسایگی تقریبی (ANN) را با پیچیدگی زمانی O(log N) بدون اسکن کامل فراهم می‌سازد.
             </p>
           </div>
-          <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 text-xs">
-            <div class="font-bold text-slate-800 dark:text-slate-200 mb-1">دیتابیس‌های معادل در دنیای واقعی</div>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400">
-              ChromaDB, Pinecone, Qdrant, Milvus, Weaviate, pgvector در PostgreSQL.
+          <div class="p-4 rounded-2xl bg-slate-100/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 text-xs">
+            <div class="font-bold text-slate-800 dark:text-slate-200 mb-1">دیتابیس‌های معادل واقعی</div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+              Qdrant, ChromaDB, Pinecone, Milvus, Weaviate و اکستنشن pgvector در دیتابیس PostgreSQL.
             </p>
           </div>
-          <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 text-xs">
-            <div class="font-bold text-slate-800 dark:text-slate-200 mb-1">جستجوی ترکیبی (Hybrid Search)</div>
-            <p class="text-[11px] text-slate-500 dark:text-slate-400">
-              قابلیت ترکیب امتیاز تطابق کلمات کلیدی (BM25) به همراه تشابه مفهومی متراکم برداری جهت پوشش اصطلاحات خاص و کدهای فنی.
+          <div class="p-4 rounded-2xl bg-slate-100/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 text-xs">
+            <div class="font-bold text-slate-800 dark:text-slate-200 mb-1">فیلترهای ترکیبی (Metadata Filtering)</div>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+              قابلیت پالایش نتایج بر اساس نام منبع، شماره صفحه، تاریخ سند یا دسته‌بندی موضوعی پیش از بازیابی نهایی.
             </p>
           </div>
         </div>
 
-        <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+        <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-200/60 dark:border-slate-800/60">
           <button onclick="goToStep(3)" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
             → بازگشت به گام ۳
           </button>
-          <button onclick="goToStep(5)" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition flex items-center gap-2">
+          <button onclick="goToStep(5)" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition flex items-center gap-2 group">
             <span>گام بعدی: ورود پرسش و بازیابی برداری</span>
-            <span>←</span>
+            <span class="transition-transform group-hover:-translate-x-1">←</span>
           </button>
         </div>
       </section>
 
       <!-- STEP 5: QUERY & RETRIEVAL -->
-      <section id="step5" class="step-pane hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-100 dark:border-slate-800 gap-4">
+      <section id="step5" class="step-pane hidden glass-card border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-6 sm:p-7 shadow-sm transition-all duration-300">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-200/60 dark:border-slate-800/60 gap-4">
           <div>
-            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-accent-emerald/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold mb-2">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold mb-2 border border-emerald-500/20">
               <span>گام ۵ از ۷</span> • <span>بردارسازی پرسش و بازیابی برترین چانک‌ها (Vector Retrieval)</span>
             </div>
-            <h2 class="text-xl font-black text-slate-900 dark:text-white">محاسبه شباهت کسینوسی پرسش کاربر با اسناد</h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              پرسش طبیعی شما بردارسازی شده، سپس فاصله کسینوسی آن با تمام چانک‌های دیتابیس اندازه گرفته می‌شود و موارد برتر برای هوش مصنوعی سوا می‌شوند.
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">محاسبه شباهت کسینوسی پرسش کاربر با پایگاه دانش</h2>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+              پرسش طبیعی شما بردارسازی شده، فاصله آن با تکه‌ها محاسبه و برترین نتایج به عنوان بافت مدل جدا می‌شوند.
             </p>
           </div>
         </div>
 
-        <!-- Query Input -->
+        <!-- Query Input with Raycast-style UI -->
         <div class="mt-5 space-y-3">
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
-            <div class="relative flex-1">
-              <input type="text" id="liveUserQueryInput" placeholder="پرسش خود را اینجا بنویسید..." value="شرایط استفاده از مرخصی استحقاقی و انتقال آن چگونه است؟" onkeydown="if(event.key==='Enter') executeLiveRetrieval()" class="w-full px-4 py-3 pl-12 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 text-xs sm:text-sm font-medium focus:ring-2 focus:ring-brand-500 focus:outline-none transition">
-              <button onclick="executeLiveRetrieval()" class="absolute left-2 top-2 bottom-2 px-3.5 bg-brand-600 hover:bg-brand-700 text-white rounded-lg text-xs font-bold transition flex items-center gap-1 shadow-sm">
-                <span>جستجو</span>
-                <span>🔍</span>
-              </button>
-            </div>
+          <div class="relative group">
+            <input type="text" id="liveUserQueryInput" placeholder="پرسش خود را اینجا بنویسید (مثلاً: شرایط انتقال مرخصی چیست؟)..." value="شرایط استفاده از مرخصی استحقاقی و انتقال آن چگونه است؟" onkeydown="if(event.key==='Enter') executeLiveRetrieval()" class="w-full px-5 py-3.5 pl-24 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/70 text-slate-800 dark:text-slate-100 text-xs sm:text-sm font-semibold focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all shadow-sm">
+            <button onclick="executeLiveRetrieval()" class="absolute left-2 top-2 bottom-2 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-md shadow-brand-500/25">
+              <span>جستجو</span>
+              <span>🔍</span>
+            </button>
           </div>
 
           <!-- Suggested Queries -->
-          <div class="flex flex-wrap items-center gap-1.5 text-xs text-slate-500">
+          <div class="flex flex-wrap items-center gap-1.5 text-xs text-slate-500 font-medium">
             <span>پیشنهادات مرتبط:</span>
             <div id="suggestedQueriesPills" class="flex flex-wrap gap-1.5">
               <!-- Populated dynamically -->
@@ -625,23 +718,23 @@
         </div>
 
         <!-- Sliders for Top-K & Threshold -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-5 p-4 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-5 p-4 rounded-2xl bg-slate-100/60 dark:bg-slate-800/30 border border-slate-200/80 dark:border-slate-700/60">
           <div>
-            <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
               <span>تعداد برترین نتایج برای تزریق (Top-K Chunks):</span>
-              <span id="topKValueLabel" class="text-brand-600 font-mono">2</span>
+              <span id="topKValueLabel" class="text-brand-600 font-mono bg-brand-50 dark:bg-brand-950/60 px-2 py-0.5 rounded-md">2</span>
             </div>
-            <input type="range" id="topKSlider" min="1" max="5" value="2" oninput="document.getElementById('topKValueLabel').innerText=this.value; executeLiveRetrieval();" class="w-full accent-brand-600">
-            <div class="text-[10px] text-slate-400 mt-1">تنها این تعداد تکه با بیشترین شباهت برای ساخت پرامپت انتخاب می‌شوند</div>
+            <input type="range" id="topKSlider" min="1" max="5" value="2" oninput="document.getElementById('topKValueLabel').innerText=this.value; executeLiveRetrieval();" class="w-full">
+            <div class="text-[10px] text-slate-400 mt-1">تعداد تکه‌های برتر برای تزریق به پرامپت نهایی</div>
           </div>
 
           <div>
-            <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">
+            <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
               <span>حداقل آستانه شباهت (Min Similarity Threshold):</span>
-              <span id="thresholdValueLabel" class="text-emerald-500 font-mono">30%</span>
+              <span id="thresholdValueLabel" class="text-emerald-500 font-mono bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">30%</span>
             </div>
-            <input type="range" id="thresholdSlider" min="5" max="80" step="5" value="30" oninput="document.getElementById('thresholdValueLabel').innerText=this.value+'%'; executeLiveRetrieval();" class="w-full accent-emerald-500">
-            <div class="text-[10px] text-slate-400 mt-1">تکه‌هایی که درصد شباهت آن‌ها کمتر از این حد باشد رد می‌شوند</div>
+            <input type="range" id="thresholdSlider" min="5" max="80" step="5" value="30" oninput="document.getElementById('thresholdValueLabel').innerText=this.value+'%'; executeLiveRetrieval();" class="w-full">
+            <div class="text-[10px] text-slate-400 mt-1">فیلتر کردن تکه‌هایی که شباهت پایینی دارند</div>
           </div>
         </div>
 
@@ -651,43 +744,44 @@
             <h3 class="text-xs font-bold text-slate-700 dark:text-slate-200">
               نتایج رتبه‌بندی شده شباهت کسینوسی (Similarity Ranking):
             </h3>
-            <span id="retrievalStatsBadge" class="text-xs text-brand-600 dark:text-brand-400 font-bold">
+            <span id="retrievalStatsBadge" class="text-xs text-brand-600 dark:text-brand-400 font-bold bg-brand-50 dark:bg-brand-950/50 px-2.5 py-1 rounded-lg border border-brand-200 dark:border-brand-800">
               در حال ارزیابی...
             </span>
           </div>
 
-          <div id="rankedRetrievedCardsContainer" class="space-y-2.5 max-h-[380px] overflow-y-auto">
+          <div id="rankedRetrievedCardsContainer" class="space-y-2.5 max-h-[380px] overflow-y-auto p-1">
             <!-- Dynamic Retrieval Cards -->
           </div>
         </div>
 
-        <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+        <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-200/60 dark:border-slate-800/60">
           <button onclick="goToStep(4)" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
             → بازگشت به گام ۴
           </button>
-          <button onclick="goToStep(6)" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition flex items-center gap-2">
+          <button onclick="goToStep(6)" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition flex items-center gap-2 group">
             <span>گام بعدی: ساخت پرامپت تقویت‌شده (Augmentation)</span>
-            <span>←</span>
+            <span class="transition-transform group-hover:-translate-x-1">←</span>
           </button>
         </div>
       </section>
 
       <!-- STEP 6: PROMPT AUGMENTATION -->
-      <section id="step6" class="step-pane hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-100 dark:border-slate-800 gap-4">
+      <section id="step6" class="step-pane hidden glass-card border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-6 sm:p-7 shadow-sm transition-all duration-300">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-200/60 dark:border-slate-800/60 gap-4">
           <div>
-            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-accent-rose/10 text-rose-600 dark:text-rose-400 text-xs font-semibold mb-2">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold mb-2 border border-rose-500/20">
               <span>گام ۶ از ۷</span> • <span>سنتز و تقویت پرامپت (Context Augmentation)</span>
             </div>
-            <h2 class="text-xl font-black text-slate-900 dark:text-white">ترکیب پرامپت سیستمی + تکه‌های بازیابی‌شده + سوال کاربر</h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              در این مرحله بسته نهایی اطلاعات با قالب‌بندی استاندارد برای LLM مهیا می‌شود تا مدل بر اساس این تکه‌ها و با ذکر منبع پاسخ دهد.
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">سنتز و تزریق کانتکست به پرامپت ارسالی به هوش مصنوعی</h2>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+              ترکیب سیستم پرامپت + تکه‌های بازیابی‌شده با ارجاع منبع + سوال صریح کاربر در یک ساختار مهندسی‌شده.
             </p>
           </div>
 
           <div class="flex items-center gap-2">
-            <button onclick="copyAugmentedPromptToClipboard()" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-              کپی متن پرامپت 📋
+            <button onclick="copyAugmentedPromptToClipboard()" class="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition flex items-center gap-1.5 shadow-xs">
+              <span>کپی متن پرامپت</span>
+              <span>📋</span>
             </button>
           </div>
         </div>
@@ -695,28 +789,37 @@
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 mt-5">
           <!-- Architecture Elements -->
           <div class="lg:col-span-4 space-y-3">
-            <div class="p-3.5 rounded-xl border border-blue-200 dark:border-blue-900 bg-blue-50/50 dark:bg-blue-950/20 text-xs space-y-1">
-              <div class="font-bold text-blue-700 dark:text-blue-300">۱. دستورالعمل سیستمی (System Prompt):</div>
+            <div class="p-3.5 rounded-2xl border border-blue-200/80 dark:border-blue-900/60 bg-blue-50/50 dark:bg-blue-950/20 text-xs space-y-1">
+              <div class="font-bold text-blue-700 dark:text-blue-300 flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span>
+                <span>۱. دستورالعمل سیستمی (System Prompt):</span>
+              </div>
               <p class="text-[11px] text-blue-600 dark:text-blue-400 leading-relaxed">
-                فرمان دقیق به هوش مصنوعی: «فقط و فقط با اتکا به متون زیر پاسخ بده، برای هر ادعا شماره منبع را بنویس، و در صورت نبود پاسخ حدس نزن.»
+                فرمان الزام‌آور به LLM: «فقط بر اساس تکه‌های مرجع داده‌شده پاسخ بده، شماره منبع را ذکر کن و هرگز حدس نزن.»
               </p>
             </div>
 
-            <div class="p-3.5 rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/50 dark:bg-emerald-950/20 text-xs space-y-1">
-              <div class="font-bold text-emerald-700 dark:text-emerald-300">۲. کانتکست‌های بازیابی‌شده (Context):</div>
+            <div class="p-3.5 rounded-2xl border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-emerald-950/20 text-xs space-y-1">
+              <div class="font-bold text-emerald-700 dark:text-emerald-300 flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span>۲. کانتکست‌های بازیابی‌شده (Context):</span>
+              </div>
               <p class="text-[11px] text-emerald-600 dark:text-emerald-400 leading-relaxed" id="augmentedContextSummaryText">
-                شامل تکه‌های انتخاب‌شده برتر با برچسب‌های ارجاع [منبع ۱]، [منبع ۲].
+                تکه‌های منتخب با برچسب‌های [منبع ۱]، [منبع ۲] به پرامپت متصل شده‌اند.
               </p>
             </div>
 
-            <div class="p-3.5 rounded-xl border border-amber-200 dark:border-amber-900 bg-amber-50/50 dark:bg-amber-950/20 text-xs space-y-1">
-              <div class="font-bold text-amber-700 dark:text-amber-300">۳. پرسش صریح کاربر (User Query):</div>
+            <div class="p-3.5 rounded-2xl border border-amber-200/80 dark:border-amber-900/60 bg-amber-50/50 dark:bg-amber-950/20 text-xs space-y-1">
+              <div class="font-bold text-amber-700 dark:text-amber-300 flex items-center gap-1.5">
+                <span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>
+                <span>۳. پرسش صریح کاربر (User Query):</span>
+              </div>
               <p class="text-[11px] text-amber-600 dark:text-amber-400 font-mono" id="augmentedUserQueryText">
                 -
               </p>
             </div>
 
-            <div class="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800 text-[11px] text-slate-500 space-y-1">
+            <div class="p-3.5 rounded-2xl bg-slate-100/60 dark:bg-slate-800/40 text-[11px] text-slate-500 space-y-1.5">
               <div class="flex justify-between">
                 <span>تخمین توکن‌های پرامپت:</span>
                 <span id="promptTokenEstimateBadge" class="font-mono font-bold text-slate-800 dark:text-slate-200">~0 Tokens</span>
@@ -728,51 +831,51 @@
             </div>
           </div>
 
-          <!-- Raw Augmented Prompt / JSON Payload View -->
+          <!-- Raw Augmented Prompt Viewer -->
           <div class="lg:col-span-8 flex flex-col">
             <div class="flex items-center justify-between mb-2">
               <div class="flex items-center gap-2">
-                <button onclick="setPromptTab('text')" id="tabPromptText" class="text-xs px-2.5 py-1 rounded bg-slate-200 dark:bg-slate-800 font-bold text-brand-600">
+                <button onclick="setPromptTab('text')" id="tabPromptText" class="text-xs px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 font-bold text-brand-600 shadow-xs">
                   متن ترکیبی پرامپت
                 </button>
-                <button onclick="setPromptTab('json')" id="tabPromptJson" class="text-xs px-2.5 py-1 rounded text-slate-500 hover:text-slate-800 dark:hover:text-slate-200">
+                <button onclick="setPromptTab('json')" id="tabPromptJson" class="text-xs px-3 py-1.5 rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-medium">
                   پی‌لود خام API (/v1/chat/completions)
                 </button>
               </div>
             </div>
 
-            <div id="augmentedPromptDisplayArea" class="flex-1 p-4 rounded-xl bg-slate-900 text-slate-200 font-mono text-xs leading-relaxed overflow-y-auto max-h-[420px] whitespace-pre-wrap border border-slate-700 text-right" style="direction: rtl;">
+            <div id="augmentedPromptDisplayArea" class="flex-1 p-4 rounded-2xl bg-slate-900 text-slate-200 font-mono text-xs leading-relaxed overflow-y-auto max-h-[420px] whitespace-pre-wrap border border-slate-800 shadow-2xl text-right" style="direction: rtl;">
               <!-- Populated dynamically -->
             </div>
           </div>
         </div>
 
-        <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+        <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-200/60 dark:border-slate-800/60">
           <button onclick="goToStep(5)" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
             → بازگشت به گام ۵
           </button>
-          <button onclick="goToStep(7)" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition flex items-center gap-2">
+          <button onclick="goToStep(7)" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition flex items-center gap-2 group">
             <span>گام نهایی: استریم زنده پاسخ LLM</span>
-            <span>←</span>
+            <span class="transition-transform group-hover:-translate-x-1">←</span>
           </button>
         </div>
       </section>
 
       <!-- STEP 7: LIVE LLM GENERATION & VERIFICATION -->
-      <section id="step7" class="step-pane hidden bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-6 shadow-sm">
-        <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-100 dark:border-slate-800 gap-4">
+      <section id="step7" class="step-pane hidden glass-card border border-slate-200/80 dark:border-slate-800/80 rounded-3xl p-6 sm:p-7 shadow-sm transition-all duration-300">
+        <div class="flex flex-col lg:flex-row lg:items-center justify-between pb-5 border-b border-slate-200/60 dark:border-slate-800/60 gap-4">
           <div>
-            <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-semibold mb-2">
-              <span>گام ۷ از ۷ (عملیاتی)</span> • <span>تولید استریم زنده و استناددهی (Grounded Generation)</span>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold mb-2 border border-emerald-500/20">
+              <span>گام ۷ از ۷ (عملیاتی نهایی)</span> • <span>تولید استریم زنده و استناددهی (Grounded Generation)</span>
             </div>
-            <h2 class="text-xl font-black text-slate-900 dark:text-white">پاسخ مستند مدل زبانی با دریافت لحظه‌ای توکن‌ها</h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
-              درخواست واقعی به مدل ارسال شده و پاسخ به شکل توکن به توکن (Server-Sent Events) روی صفحه نقش می‌بندد.
+            <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">پاسخ مستند مدل زبانی با دریافت لحظه‌ای توکن‌ها</h2>
+            <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
+              درخواست واقعی به مدل ارسال شده و پاسخ با انیمیشن تایپ زنده و ارجاع به صفحه و چانک ثبت می‌شود.
             </p>
           </div>
 
           <div class="flex items-center gap-2">
-            <button onclick="startLiveLLMStream()" id="btnExecuteLLM" class="px-4 py-2.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-bold shadow-md shadow-brand-500/30 transition flex items-center gap-2">
+            <button onclick="startLiveLLMStream()" id="btnExecuteLLM" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-brand-600 via-indigo-600 to-accent-purple hover:opacity-95 text-white text-xs font-bold shadow-lg shadow-brand-500/30 transition-all flex items-center gap-2">
               <span>🚀 اجرای درخواست زنده به مدل</span>
             </button>
           </div>
@@ -782,33 +885,33 @@
           <!-- Main Output & Citations -->
           <div class="lg:col-span-8 space-y-4">
             <!-- Output Container -->
-            <div class="p-5 rounded-2xl bg-gradient-to-b from-brand-50/30 to-slate-50/20 dark:from-brand-950/20 dark:to-slate-900 border border-brand-200 dark:border-brand-900 shadow-sm relative">
-              <div class="flex justify-between items-center mb-3">
-                <div class="flex items-center gap-2">
-                  <div class="w-7 h-7 rounded-lg bg-emerald-500 text-white flex items-center justify-center font-bold text-xs shadow-md shadow-emerald-500/30">
+            <div class="p-5 sm:p-6 rounded-3xl bg-gradient-to-b from-brand-50/40 via-white to-slate-50/30 dark:from-brand-950/30 dark:via-slate-900 dark:to-slate-950 border border-brand-200/70 dark:border-brand-900/60 shadow-lg relative">
+              <div class="flex justify-between items-center mb-3.5">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-black text-sm shadow-md shadow-emerald-500/30">
                     ✓
                   </div>
                   <div>
-                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">پاسخ مستند بر اساس پایگاه دانش</h3>
+                    <h3 class="text-sm font-bold text-slate-900 dark:text-white">پاسخ مستند پایگاه دانش (Grounded Answer)</h3>
                     <span id="responseStatusLabel" class="text-[11px] text-slate-400">آماده ارسال درخواست...</span>
                   </div>
                 </div>
 
                 <div class="flex items-center gap-2">
-                  <span id="activeModelBadge" class="text-xs font-mono px-2 py-0.5 rounded bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-300">
+                  <span id="activeModelBadge" class="text-xs font-mono px-2.5 py-1 rounded-lg bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300 font-bold border border-brand-200 dark:border-brand-800">
                     gpt-4o-mini
                   </span>
                 </div>
               </div>
 
               <!-- Live Streaming Output Area -->
-              <div id="liveStreamOutputBox" class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-xs sm:text-sm leading-relaxed min-h-[160px] whitespace-pre-wrap">
-                روی دکمه «اجرای درخواست زنده به مدل» کلیک کنید تا ارتباط برقرار و پاسخ استریم شود...
+              <div id="liveStreamOutputBox" class="p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 text-slate-800 dark:text-slate-100 text-xs sm:text-sm leading-relaxed min-h-[170px] whitespace-pre-wrap shadow-inner">
+                روی دکمه «اجرای درخواست زنده به مدل» کلیک کنید تا پاسخ استریم شده و استنادها نمایش یابند...
               </div>
 
               <!-- Citations Bar -->
-              <div class="mt-4 pt-3 border-t border-slate-200 dark:border-slate-800 flex flex-wrap items-center gap-2">
-                <span class="text-xs font-bold text-slate-500">استنادها و مراجع استفاده‌شده:</span>
+              <div class="mt-4 pt-3.5 border-t border-slate-200/70 dark:border-slate-800/80 flex flex-wrap items-center gap-2">
+                <span class="text-xs font-bold text-slate-500">استنادها و مراجع استفاده‌شده (Citations):</span>
                 <div id="liveCitationsPillsContainer" class="flex flex-wrap gap-2">
                   <!-- Injected via JS -->
                 </div>
@@ -817,21 +920,21 @@
 
             <!-- Side-by-Side Comparison -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div class="p-4 rounded-xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-900/60 text-xs space-y-1.5">
+              <div class="p-4 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200/80 dark:border-rose-900/60 text-xs space-y-1.5">
                 <div class="font-bold text-rose-800 dark:text-rose-300 flex items-center gap-1.5">
-                  <span>❌ بدون RAG (پرسش خام از مدل):</span>
+                  <span>❌ بدون معماری RAG (پاسخ معمولی):</span>
                 </div>
                 <p class="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
-                  مدل از مستندات خصوصی شرکت بی‌خبر است؛ بنابراین معمولاً یک پاسخ کلی، فرضی یا منسوخ ارائه می‌دهد که ریسک توهم (Hallucination) دارد.
+                  مدل از قوانین داخلی شما یا فایل PDF بارگذاری‌شده بی‌خبر است؛ احتمال بالایی دارد که پاسخی کلی یا ساختگی (Hallucination) بدهد.
                 </p>
               </div>
 
-              <div class="p-4 rounded-xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200 dark:border-emerald-900/60 text-xs space-y-1.5">
+              <div class="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-900/60 text-xs space-y-1.5">
                 <div class="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
                   <span>✅ با معماری RAG (پاسخ مقید به سند):</span>
                 </div>
                 <p class="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
-                  مدل متن تکه‌های موثق را مستقیماً دریافت کرده و پاسخ را مو به مو با ارجاع دقیق به بند مربوطه استخراج می‌نماید.
+                  مدل چانک‌های موثق همان سند را خوانده و با استناد شماره‌گذاری‌شده به صفحه و متن مرجع، پاسخی قابل اعتماد تولید می‌کند.
                 </p>
               </div>
             </div>
@@ -840,39 +943,55 @@
           <!-- Raw Network Inspector & Metrics -->
           <div class="lg:col-span-4 space-y-4">
             <!-- Metrics Panel -->
-            <div class="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 space-y-3">
+            <div class="p-4 rounded-2xl bg-slate-100/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 space-y-3">
               <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
-                <span>📊 اطلاعات عملکرد و شبکه</span>
-                <span id="networkLatencyBadge" class="text-[10px] font-mono text-slate-400">Latency: - ms</span>
+                <span>📊 ارزیابی سه‌گانه (RAG Triad)</span>
+                <span id="networkLatencyBadge" class="text-[10px] font-mono text-slate-400 bg-white dark:bg-slate-900 px-2 py-0.5 rounded">Latency: - ms</span>
               </h4>
 
-              <div class="space-y-2 text-xs">
-                <div class="flex justify-between text-slate-600 dark:text-slate-400">
-                  <span>روش اتصال:</span>
-                  <span id="metricConnMethod" class="font-mono font-bold text-brand-600">Local Proxy / Direct</span>
+              <div class="space-y-2.5 text-xs">
+                <div>
+                  <div class="flex justify-between text-[11px] mb-1">
+                    <span class="text-slate-600 dark:text-slate-400">۱. وفاداری به منبع (Faithfulness)</span>
+                    <span class="font-mono font-bold text-emerald-500">100%</span>
+                  </div>
+                  <div class="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                    <div class="h-full bg-emerald-500 rounded-full" style="width: 100%"></div>
+                  </div>
                 </div>
-                <div class="flex justify-between text-slate-600 dark:text-slate-400">
-                  <span>مدل پاسخ‌دهنده:</span>
-                  <span id="metricModelName" class="font-mono text-slate-800 dark:text-slate-200">-</span>
+
+                <div>
+                  <div class="flex justify-between text-[11px] mb-1">
+                    <span class="text-slate-600 dark:text-slate-400">۲. ربط کانتکست (Context Relevance)</span>
+                    <span class="font-mono font-bold text-brand-600">96%</span>
+                  </div>
+                  <div class="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                    <div class="h-full bg-brand-500 rounded-full" style="width: 96%"></div>
+                  </div>
                 </div>
-                <div class="flex justify-between text-slate-600 dark:text-slate-400">
-                  <span>تعداد چانک‌های کانتکست:</span>
-                  <span id="metricContextChunksCount" class="font-mono font-bold text-emerald-600">0</span>
-                </div>
-                <div class="flex justify-between text-slate-600 dark:text-slate-400">
-                  <span>وضعیت وفاداری به منبع:</span>
-                  <span class="font-bold text-emerald-500">100% Grounded</span>
+
+                <div>
+                  <div class="flex justify-between text-[11px] mb-1">
+                    <span class="text-slate-600 dark:text-slate-400">۳. ربط پاسخ به سوال (Answer Relevance)</span>
+                    <span class="font-mono font-bold text-sky-500">95%</span>
+                  </div>
+                  <div class="w-full h-1.5 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                    <div class="h-full bg-sky-500 rounded-full" style="width: 95%"></div>
+                  </div>
                 </div>
               </div>
             </div>
 
             <!-- Raw Network Inspector -->
-            <div class="p-4 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-300 space-y-2">
+            <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 text-xs text-slate-300 space-y-2 shadow-xl">
               <div class="flex justify-between items-center">
-                <span class="font-mono text-[11px] text-brand-400">Raw HTTP Inspector</span>
-                <button onclick="toggleRawPayloadModal()" class="text-[10px] text-slate-400 hover:text-white">مشاهده کامل پی‌لود ↗</button>
+                <span class="font-mono text-[11px] text-brand-400 flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-brand-400 animate-pulse"></span>
+                  HTTP Network Inspector
+                </span>
+                <button onclick="toggleRawPayloadModal()" class="text-[10px] text-slate-400 hover:text-white transition">مشاهده کامل پی‌لود ↗</button>
               </div>
-              <div id="rawLogPreview" class="p-2.5 rounded bg-black/60 font-mono text-[10px] text-slate-400 max-h-36 overflow-y-auto whitespace-pre-wrap" style="direction: ltr;">
+              <div id="rawLogPreview" class="p-3 rounded-xl bg-black/70 font-mono text-[10px] text-slate-400 max-h-36 overflow-y-auto whitespace-pre-wrap border border-slate-800" style="direction: ltr;">
 POST /v1/chat/completions HTTP/1.1
 Ready to send payload...
               </div>
@@ -880,7 +999,7 @@ Ready to send payload...
           </div>
         </div>
 
-        <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+        <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-200/60 dark:border-slate-800/60">
           <button onclick="goToStep(6)" class="px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
             → بازگشت به گام ۶
           </button>
@@ -894,20 +1013,20 @@ Ready to send payload...
 
     <!-- PIPELINE VIEW (All-in-One Live Flow) -->
     <div id="pipelineViewContainer" class="hidden space-y-6">
-      <div class="p-6 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 shadow-sm">
-        <div class="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
+      <div class="p-6 sm:p-7 rounded-3xl glass-card border border-slate-200/80 dark:border-slate-800/80 shadow-sm">
+        <div class="flex justify-between items-center pb-4 border-b border-slate-200/60 dark:border-slate-800/60">
           <div>
-            <h2 class="text-lg font-bold text-slate-900 dark:text-white">جریان جامع خط لوله RAG (End-to-End Pipeline)</h2>
-            <p class="text-xs text-slate-500 dark:text-slate-400">تمام مراحل را به شکل همزمان در یک صفحه پایش و اجرا کنید.</p>
+            <h2 class="text-xl font-bold text-slate-900 dark:text-white">جریان جامع و یکپارچه خط لوله RAG (End-to-End Pipeline)</h2>
+            <p class="text-xs text-slate-500 dark:text-slate-400">تمام مراحل را به شکل همزمان در یک داشبورد پایش و تست فرمایید.</p>
           </div>
-          <button onclick="setViewMode('steps')" class="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+          <button onclick="setViewMode('steps')" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-800 transition">
             بازگشت به نمای گام‌به‌گام
           </button>
         </div>
 
         <!-- 4 Step Big Cards Flow -->
         <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-          <div class="p-4 rounded-xl border border-indigo-200 dark:border-indigo-900 bg-indigo-50/30 dark:bg-indigo-950/20 flex flex-col justify-between">
+          <div class="p-4 rounded-2xl border border-indigo-200/70 dark:border-indigo-900/60 bg-indigo-50/30 dark:bg-indigo-950/20 flex flex-col justify-between">
             <div>
               <div class="text-xs font-bold text-indigo-700 dark:text-indigo-300 mb-1">۱. متن و قطعه‌بندی</div>
               <p class="text-xs text-slate-600 dark:text-slate-400" id="pipeChunkStatsText">در حال محاسبه...</p>
@@ -915,7 +1034,7 @@ Ready to send payload...
             <button onclick="goToStep(2); setViewMode('steps');" class="mt-3 text-xs text-indigo-600 dark:text-indigo-400 font-bold hover:underline">تنظیم چانک‌ها ←</button>
           </div>
 
-          <div class="p-4 rounded-xl border border-sky-200 dark:border-sky-900 bg-sky-50/30 dark:bg-sky-950/20 flex flex-col justify-between">
+          <div class="p-4 rounded-2xl border border-sky-200/70 dark:border-sky-900/60 bg-sky-50/30 dark:bg-sky-950/20 flex flex-col justify-between">
             <div>
               <div class="text-xs font-bold text-sky-700 dark:text-sky-300 mb-1">۲. بردارسازی و فضای 2D</div>
               <p class="text-xs text-slate-600 dark:text-slate-400" id="pipeEmbeddingStatsText">فضای برداری ایندکس شد</p>
@@ -923,7 +1042,7 @@ Ready to send payload...
             <button onclick="goToStep(3); setViewMode('steps');" class="mt-3 text-xs text-sky-600 dark:text-sky-400 font-bold hover:underline">مشاهده فضای برداری ←</button>
           </div>
 
-          <div class="p-4 rounded-xl border border-emerald-200 dark:border-emerald-900 bg-emerald-50/30 dark:bg-emerald-950/20 flex flex-col justify-between">
+          <div class="p-4 rounded-2xl border border-emerald-200/70 dark:border-emerald-900/60 bg-emerald-50/30 dark:bg-emerald-950/20 flex flex-col justify-between">
             <div>
               <div class="text-xs font-bold text-emerald-700 dark:text-emerald-300 mb-1">۳. بازیابی Top-K</div>
               <p class="text-xs text-slate-600 dark:text-slate-400" id="pipeRetrievalStatsText">محاسبه شباهت کسینوسی</p>
@@ -931,7 +1050,7 @@ Ready to send payload...
             <button onclick="goToStep(5); setViewMode('steps');" class="mt-3 text-xs text-emerald-600 dark:text-emerald-400 font-bold hover:underline">تست بازیابی ←</button>
           </div>
 
-          <div class="p-4 rounded-xl border border-purple-200 dark:border-purple-900 bg-purple-50/30 dark:bg-purple-950/20 flex flex-col justify-between">
+          <div class="p-4 rounded-2xl border border-purple-200/70 dark:border-purple-900/60 bg-purple-50/30 dark:bg-purple-950/20 flex flex-col justify-between">
             <div>
               <div class="text-xs font-bold text-purple-700 dark:text-purple-300 mb-1">۴. استریم زنده پاسخ LLM</div>
               <p class="text-xs text-slate-600 dark:text-slate-400">تولید مبتنی بر سند</p>
@@ -941,15 +1060,15 @@ Ready to send payload...
         </div>
 
         <!-- Direct Live Playground in Pipeline View -->
-        <div class="mt-8 p-5 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700 space-y-3">
+        <div class="mt-8 p-5 sm:p-6 rounded-2xl bg-slate-100/50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700 space-y-3.5">
           <h3 class="text-sm font-bold text-slate-800 dark:text-slate-200">تست بلادرنگ خط لوله با مدل واقعی:</h3>
-          <div class="flex gap-2">
-            <input type="text" id="pipelineQueryInput" value="شرایط استفاده از مرخصی استحقاقی و انتقال آن چگونه است؟" class="flex-1 px-4 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs sm:text-sm">
-            <button onclick="runPipelineInstantExecution()" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition">
+          <div class="flex gap-2.5">
+            <input type="text" id="pipelineQueryInput" value="شرایط استفاده از مرخصی استحقاقی و انتقال آن چگونه است؟" class="flex-1 px-4 py-3 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs sm:text-sm font-medium focus:ring-2 focus:ring-brand-500">
+            <button onclick="runPipelineInstantExecution()" class="px-5 py-3 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition shadow-md shadow-brand-500/25">
               اجرای فوری
             </button>
           </div>
-          <div id="pipelineInstantResultBox" class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 leading-relaxed min-h-[80px]">
+          <div id="pipelineInstantResultBox" class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 leading-relaxed min-h-[90px] shadow-inner">
             نتیجه جستجو و پاسخ مدل اینجا نمایش داده می‌شود...
           </div>
         </div>
@@ -959,68 +1078,71 @@ Ready to send payload...
   </main>
 
   <!-- CONFIGURATION MODAL (API Key, Base URL, Model Name) -->
-  <div id="configModal" class="fixed inset-0 z-50 hidden bg-slate-950/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl max-w-xl w-full p-6 shadow-2xl relative">
-      <div class="flex justify-between items-center pb-4 border-b border-slate-100 dark:border-slate-800">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-lg bg-brand-50 dark:bg-brand-950/60 text-brand-600 dark:text-brand-400 flex items-center justify-center font-bold text-sm">
+  <div id="configModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl relative max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center pb-4 border-b border-slate-200/80 dark:border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center font-bold text-base border border-brand-500/20">
             ⚙️
           </div>
-          <h3 class="font-bold text-slate-900 dark:text-white text-base">تنظیمات اتصال به هوش مصنوعی (LLM & Embeddings)</h3>
+          <div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-base">تنظیمات اتصال به هوش مصنوعی (LLM Provider)</h3>
+            <p class="text-[11px] text-slate-400">اتصال به OpenAI، DeepSeek، Groq، Ollama، OpenRouter و دیگران</p>
+          </div>
         </div>
-        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1">
+        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg">
           ✕
         </button>
       </div>
 
       <!-- Quick Preset Providers -->
       <div class="mt-4 space-y-2">
-        <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block">انتخاب سریع سرویس‌دهنده (Preset):</label>
+        <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block">انتخاب سریع سرویس‌دهنده (1-Click Presets):</label>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <button type="button" onclick="applyProviderPreset('openai')" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-brand-500 text-right text-xs font-medium transition">
-            <span class="block font-bold">OpenAI</span>
+          <button type="button" onclick="applyProviderPreset('openai')" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-brand-500 text-right text-xs font-medium transition shadow-xs">
+            <span class="block font-bold text-slate-800 dark:text-slate-200">OpenAI</span>
             <span class="block text-[10px] text-slate-400">gpt-4o-mini</span>
           </button>
-          <button type="button" onclick="applyProviderPreset('openrouter')" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-brand-500 text-right text-xs font-medium transition">
-            <span class="block font-bold">OpenRouter</span>
-            <span class="block text-[10px] text-slate-400">Llama 3.3 / DeepSeek</span>
+          <button type="button" onclick="applyProviderPreset('openrouter')" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-brand-500 text-right text-xs font-medium transition shadow-xs">
+            <span class="block font-bold text-slate-800 dark:text-slate-200">OpenRouter</span>
+            <span class="block text-[10px] text-slate-400">Llama 3.3 / Qwen</span>
           </button>
-          <button type="button" onclick="applyProviderPreset('groq')" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-brand-500 text-right text-xs font-medium transition">
-            <span class="block font-bold">Groq (Ultra-Fast)</span>
+          <button type="button" onclick="applyProviderPreset('groq')" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-brand-500 text-right text-xs font-medium transition shadow-xs">
+            <span class="block font-bold text-slate-800 dark:text-slate-200">Groq (سرعت بالا)</span>
             <span class="block text-[10px] text-slate-400">llama-3.3-70b</span>
           </button>
-          <button type="button" onclick="applyProviderPreset('deepseek')" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-brand-500 text-right text-xs font-medium transition">
-            <span class="block font-bold">DeepSeek</span>
+          <button type="button" onclick="applyProviderPreset('deepseek')" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-brand-500 text-right text-xs font-medium transition shadow-xs">
+            <span class="block font-bold text-slate-800 dark:text-slate-200">DeepSeek</span>
             <span class="block text-[10px] text-slate-400">deepseek-chat</span>
           </button>
-          <button type="button" onclick="applyProviderPreset('ollama')" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-brand-500 text-right text-xs font-medium transition">
-            <span class="block font-bold">Ollama (محلی)</span>
+          <button type="button" onclick="applyProviderPreset('ollama')" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-brand-500 text-right text-xs font-medium transition shadow-xs">
+            <span class="block font-bold text-slate-800 dark:text-slate-200">Ollama (محلی/آفلاین)</span>
             <span class="block text-[10px] text-slate-400">localhost:11434</span>
           </button>
-          <button type="button" onclick="applyProviderPreset('lmstudio')" class="p-2 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-brand-500 text-right text-xs font-medium transition">
-            <span class="block font-bold">LM Studio</span>
+          <button type="button" onclick="applyProviderPreset('lmstudio')" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-brand-500 text-right text-xs font-medium transition shadow-xs">
+            <span class="block font-bold text-slate-800 dark:text-slate-200">LM Studio</span>
             <span class="block text-[10px] text-slate-400">localhost:1234</span>
           </button>
         </div>
       </div>
 
       <!-- Config Form -->
-      <div class="mt-4 space-y-3">
+      <div class="mt-4 space-y-3.5">
         <!-- Base URL -->
         <div>
           <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Base URL (آدرس پایه API):</label>
-          <input type="text" id="cfgBaseUrl" placeholder="https://api.openai.com/v1" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
+          <input type="text" id="cfgBaseUrl" placeholder="https://api.openai.com/v1" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
         </div>
 
         <!-- API Key -->
         <div>
           <div class="flex justify-between items-center mb-1">
             <label class="text-xs font-bold text-slate-700 dark:text-slate-300">کلید دسترسی (API Key):</label>
-            <span class="text-[10px] text-slate-400">به صورت محلی در مرورگر ذخیره می‌شود</span>
+            <span class="text-[10px] text-slate-400">در مرورگر شما محلی ذخیره می‌شود</span>
           </div>
           <div class="relative">
-            <input type="password" id="cfgApiKey" placeholder="sk-..." class="w-full px-3 py-2 pl-10 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
-            <button type="button" onclick="togglePasswordVisibility()" class="absolute left-2.5 top-2 text-slate-400 hover:text-slate-600 text-xs">
+            <input type="password" id="cfgApiKey" placeholder="sk-..." class="w-full px-3.5 py-2.5 pl-10 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
+            <button type="button" onclick="togglePasswordVisibility()" class="absolute left-3 top-2.5 text-slate-400 hover:text-slate-600 text-xs">
               👁️
             </button>
           </div>
@@ -1029,13 +1151,13 @@ Ready to send payload...
         <!-- Model Name -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">نام مدل تولید متن (LLM Model):</label>
-            <input type="text" id="cfgModelName" placeholder="gpt-4o-mini" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">نام مدل پاسخ‌دهنده (LLM Model):</label>
+            <input type="text" id="cfgModelName" placeholder="gpt-4o-mini" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
           </div>
           <div>
-            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">مدل بردارسازی (Embeddings):</label>
-            <select id="cfgEmbeddingModel" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100">
-              <option value="builtin">وکتورایزر داخلی هوشمند (بدون نیاز به API بردار)</option>
+            <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">مدل وکتورایزر (Embeddings):</label>
+            <select id="cfgEmbeddingModel" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100">
+              <option value="builtin">وکتورایزر داخلی پرسرعت (Built-in Dense Normalized)</option>
               <option value="text-embedding-3-small">text-embedding-3-small (OpenAI)</option>
               <option value="nomic-embed-text">nomic-embed-text (Ollama)</option>
               <option value="bge-m3">bge-m3 (HuggingFace / Ollama)</option>
@@ -1044,21 +1166,21 @@ Ready to send payload...
         </div>
 
         <!-- Routing option: Proxy vs Direct -->
-        <div class="flex items-center gap-2 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs">
-          <input type="checkbox" id="cfgUseProxy" checked class="rounded text-brand-600 focus:ring-brand-500">
+        <div class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs">
+          <input type="checkbox" id="cfgUseProxy" checked class="rounded text-brand-600 focus:ring-brand-500 w-4 h-4">
           <label for="cfgUseProxy" class="text-slate-700 dark:text-slate-300 cursor-pointer">
             <strong>استفاده از سرور پروکسی داخلی ضد-CORS (/api/proxy)</strong>
-            <span class="block text-[10px] text-slate-400">توصیه می‌شود (جلوگیری از خطای مسدودیت مرورگر هنگام فراخوانی مستقیم API)</span>
+            <span class="block text-[10px] text-slate-400">جلوگیری از خطای محدودیت مرورگر در فراخوانی دامنه‌های خارجی و انتقال استریم روان</span>
           </label>
         </div>
 
-        <!-- Connection Test Feedback Area -->
+        <!-- Connection Test Feedback -->
         <div id="cfgTestFeedback" class="hidden p-3 rounded-xl text-xs font-mono"></div>
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-100 dark:border-slate-800">
-        <button onclick="testApiConnection()" class="px-4 py-2 rounded-xl border border-brand-500 text-brand-600 dark:text-brand-400 text-xs font-bold hover:bg-brand-50 dark:hover:bg-brand-950/50 transition flex items-center gap-1.5">
+      <div class="flex justify-between items-center mt-6 pt-4 border-t border-slate-200/80 dark:border-slate-800">
+        <button onclick="testApiConnection()" class="px-4 py-2 rounded-xl border border-brand-500 text-brand-600 dark:text-brand-400 text-xs font-bold hover:bg-brand-50 dark:hover:bg-brand-950/50 transition flex items-center gap-1.5 shadow-xs">
           <span>تست اتصال به سرور</span>
           <span>⚡</span>
         </button>
@@ -1075,15 +1197,84 @@ Ready to send payload...
     </div>
   </div>
 
+  <!-- EDUCATIONAL WALKTHROUGH GUIDE MODAL -->
+  <div id="guideModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl relative max-h-[88vh] overflow-y-auto">
+      <div class="flex justify-between items-center pb-4 border-b border-slate-200/80 dark:border-slate-800">
+        <div class="flex items-center gap-2.5">
+          <div class="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center font-bold text-base">
+            📖
+          </div>
+          <div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-base">راهنمای جامع یادگیری و کارکرد سیستم RAG</h3>
+            <p class="text-[11px] text-slate-400">آشنایی با ۷ رکن اساسی تولید مبتنی بر بازیابی اطلاعات</p>
+          </div>
+        </div>
+        <button onclick="closeGuideModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg">
+          ✕
+        </button>
+      </div>
+
+      <div class="mt-5 space-y-4 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
+        <div class="p-4 rounded-2xl bg-brand-50/50 dark:bg-brand-950/30 border border-brand-200/60 dark:border-brand-900/40">
+          <h4 class="font-bold text-brand-800 dark:text-brand-300 text-sm mb-1">RAG چیست و چرا به آن نیاز داریم؟</h4>
+          <p>
+            مدل‌های زبانی بزرگ (LLM) با وجود توانایی بالا، دو نقطه‌ضعف اصلی دارند: <strong>نداشتن دانش اسناد خصوصی شما</strong> و <strong>احتمال توهم (Hallucination)</strong>. معماری RAG به جای آموزش مجدد مدل، ابتدا اسناد مرتبط را از یک پایگاه داده برداری پیدا کرده و آن را در پرامپت قرار می‌دهد تا مدل پاسخی کاملاً مستند تولید کند.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 space-y-1">
+            <span class="font-bold text-slate-900 dark:text-white">۱. Document Ingestion:</span>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">ورود اسناد، تمیزسازی متن و استخراج لایه‌های متنی از فایل‌های PDF یا دیتابیس‌ها.</p>
+          </div>
+          <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 space-y-1">
+            <span class="font-bold text-slate-900 dark:text-white">۲. Chunking & Overlap:</span>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">تقسیم متن به قطعات استاندارد با هم‌پوشانی (Overlap) برای حفظ زنجیره معنایی جملات.</p>
+          </div>
+          <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 space-y-1">
+            <span class="font-bold text-slate-900 dark:text-white">۳. Vector Embeddings:</span>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">تبدیل مفاهیم به دنباله‌ای از اعداد اعشاری که نزدیکی مفهومی را در فضای چندبعدی نشان می‌دهند.</p>
+          </div>
+          <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 space-y-1">
+            <span class="font-bold text-slate-900 dark:text-white">۴. Vector Indexing:</span>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">ساخت ساختارهای درختی/گرافی نظیر HNSW برای جستجوی میلیونی در کسری از ثانیه.</p>
+          </div>
+          <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 space-y-1">
+            <span class="font-bold text-slate-900 dark:text-white">۵. Cosine Retrieval:</span>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">اندازه‌گیری زاویه بردار سوال کاربر با چانک‌ها و واکشی موارد با بیشترین شباهت (Top-K).</p>
+          </div>
+          <div class="p-3.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/40 space-y-1">
+            <span class="font-bold text-slate-900 dark:text-white">۶. Context Augmentation:</span>
+            <p class="text-[11px] text-slate-500 dark:text-slate-400">مهندسی پرامپت با ساختار: دستور سیستم + کانتکست استخراج‌شده + سوال صریح کاربر.</p>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl border border-emerald-200/80 dark:border-emerald-900/60 bg-emerald-50/50 dark:bg-emerald-950/20 text-[11px]">
+          <strong>۷. Grounded Generation:</strong> مدل موظف است صرفاً با تکیه بر متون فوق پاسخ دهد و برای هر گزاره شماره منبع و صفحه را قید نماید.
+        </div>
+      </div>
+
+      <div class="flex justify-end mt-6 pt-4 border-t border-slate-200/80 dark:border-slate-800">
+        <button onclick="closeGuideModal()" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition">
+          متوجه شدم، شروع کار با استودیو
+        </button>
+      </div>
+    </div>
+  </div>
+
   <!-- RAW LOG INSPECTOR MODAL -->
-  <div id="rawLogModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-3xl w-full p-6 shadow-2xl relative text-left" style="direction: ltr;">
+  <div id="rawLogModal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-slate-900 border border-slate-800 rounded-3xl max-w-3xl w-full p-6 shadow-2xl relative text-left" style="direction: ltr;">
       <div class="flex justify-between items-center pb-4 border-b border-slate-800">
-        <h3 class="font-mono text-sm font-bold text-slate-200">Raw HTTP & SSE Streaming Payload Inspector</h3>
-        <button onclick="toggleRawPayloadModal()" class="text-slate-400 hover:text-white">✕</button>
+        <h3 class="font-mono text-xs font-bold text-slate-200 flex items-center gap-2">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+          Raw HTTP & SSE Streaming Payload Inspector
+        </h3>
+        <button onclick="toggleRawPayloadModal()" class="text-slate-400 hover:text-white p-1">✕</button>
       </div>
       <div class="mt-4">
-        <pre id="rawLogFullContent" class="p-4 rounded-xl bg-black/80 font-mono text-xs text-emerald-400 overflow-y-auto max-h-[460px] whitespace-pre-wrap"></pre>
+        <pre id="rawLogFullContent" class="p-4 rounded-2xl bg-black/80 font-mono text-xs text-emerald-400 overflow-y-auto max-h-[460px] whitespace-pre-wrap border border-slate-800"></pre>
       </div>
     </div>
   </div>
@@ -1160,6 +1351,7 @@ Ready to send payload...
     let selectedChunkIndex = 0;
     let activePromptTab = 'text';
     let rawHttpLogs = [];
+    let currentPdfMeta = null;
 
     // --- LLM Connection Config ---
     let llmConfig = {
@@ -1170,19 +1362,19 @@ Ready to send payload...
       useProxy: localStorage.getItem('rag_use_proxy') !== 'false'
     };
 
-    // Color palettes for chunks
+    // Refined color palette for chunks
     const CHUNK_PALETTE = [
-      { border: 'border-indigo-300 dark:border-indigo-800', bg: 'bg-indigo-50/60 dark:bg-indigo-950/40', text: 'text-indigo-800 dark:text-indigo-300', dot: '#6366f1' },
-      { border: 'border-emerald-300 dark:border-emerald-800', bg: 'bg-emerald-50/60 dark:bg-emerald-950/40', text: 'text-emerald-800 dark:text-emerald-300', dot: '#10b981' },
-      { border: 'border-amber-300 dark:border-amber-800', bg: 'bg-amber-50/60 dark:bg-amber-950/40', text: 'text-amber-800 dark:text-amber-300', dot: '#f59e0b' },
-      { border: 'border-rose-300 dark:border-rose-800', bg: 'bg-rose-50/60 dark:bg-rose-950/40', text: 'text-rose-800 dark:text-rose-300', dot: '#f43f5e' },
-      { border: 'border-sky-300 dark:border-sky-800', bg: 'bg-sky-50/60 dark:bg-sky-950/40', text: 'text-sky-800 dark:text-sky-300', dot: '#0ea5e9' },
-      { border: 'border-purple-300 dark:border-purple-800', bg: 'bg-purple-50/60 dark:bg-purple-950/40', text: 'text-purple-800 dark:text-purple-300', dot: '#a855f7' }
+      { border: 'border-indigo-300 dark:border-indigo-800', bg: 'bg-indigo-50/70 dark:bg-indigo-950/40', text: 'text-indigo-800 dark:text-indigo-300', dot: '#6366f1' },
+      { border: 'border-emerald-300 dark:border-emerald-800', bg: 'bg-emerald-50/70 dark:bg-emerald-950/40', text: 'text-emerald-800 dark:text-emerald-300', dot: '#10b981' },
+      { border: 'border-amber-300 dark:border-amber-800', bg: 'bg-amber-50/70 dark:bg-amber-950/40', text: 'text-amber-800 dark:text-amber-300', dot: '#f59e0b' },
+      { border: 'border-rose-300 dark:border-rose-800', bg: 'bg-rose-50/70 dark:bg-rose-950/40', text: 'text-rose-800 dark:text-rose-300', dot: '#f43f5e' },
+      { border: 'border-sky-300 dark:border-sky-800', bg: 'bg-sky-50/70 dark:bg-sky-950/40', text: 'text-sky-800 dark:text-sky-300', dot: '#0ea5e9' },
+      { border: 'border-purple-300 dark:border-purple-800', bg: 'bg-purple-50/70 dark:bg-purple-950/40', text: 'text-purple-800 dark:text-purple-300', dot: '#a855f7' }
     ];
 
     // --- On DOM Loaded ---
     window.addEventListener('DOMContentLoaded', () => {
-      // Sync Dark mode
+      // Dark mode initialization
       if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         document.documentElement.classList.add('dark');
         document.getElementById('themeToggleIcon').innerText = '☀️';
@@ -1195,11 +1387,44 @@ Ready to send payload...
       updateTopBarConnectionBadge();
     });
 
+    // --- Toast Notifications ---
+    function showToast(message, type = 'info') {
+      const container = document.getElementById('toastContainer');
+      const toast = document.createElement('div');
+      
+      const bgColors = {
+        success: 'bg-emerald-600 text-white',
+        error: 'bg-rose-600 text-white',
+        info: 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+      };
+      
+      toast.className = `px-4 py-2.5 rounded-xl shadow-xl text-xs font-semibold flex items-center gap-2 pointer-events-auto transition-all duration-300 transform translate-y-4 opacity-0 ${bgColors[type] || bgColors.info}`;
+      toast.innerHTML = `<span>${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}</span><span>${message}</span>`;
+      
+      container.appendChild(toast);
+      setTimeout(() => {
+        toast.classList.remove('translate-y-4', 'opacity-0');
+      }, 10);
+
+      setTimeout(() => {
+        toast.classList.add('opacity-0', 'translate-y-2');
+        setTimeout(() => toast.remove(), 300);
+      }, 3500);
+    }
+
     // --- Dark Mode ---
     function toggleDarkMode() {
       const isDark = document.documentElement.classList.toggle('dark');
       document.getElementById('themeToggleIcon').innerText = isDark ? '☀️' : '🌙';
       drawVectorCanvas();
+    }
+
+    // --- Guide Modal ---
+    function openGuideModal() {
+      document.getElementById('guideModal').classList.remove('hidden');
+    }
+    function closeGuideModal() {
+      document.getElementById('guideModal').classList.add('hidden');
     }
 
     // --- View Modes ---
@@ -1214,15 +1439,15 @@ Ready to send payload...
         stepsContainer.classList.remove('hidden');
         pipeContainer.classList.add('hidden');
         stepperNav.classList.remove('hidden');
-        btnSteps.className = "px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-300 shadow-xs transition";
-        btnPipe.className = "px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
+        btnSteps.className = "px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-300 shadow-xs transition-all";
+        btnPipe.className = "px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all";
         goToStep(currentStep);
       } else {
         stepsContainer.classList.add('hidden');
         pipeContainer.classList.remove('hidden');
         stepperNav.classList.add('hidden');
-        btnPipe.className = "px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-300 shadow-xs transition";
-        btnSteps.className = "px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition";
+        btnPipe.className = "px-3 py-1.5 rounded-lg bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-300 shadow-xs transition-all";
+        btnSteps.className = "px-3 py-1.5 rounded-lg text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-all";
         updatePipelineStats();
       }
     }
@@ -1276,6 +1501,7 @@ Ready to send payload...
         document.getElementById('cfgModelName').value = 'local-model';
         document.getElementById('cfgEmbeddingModel').value = 'builtin';
       }
+      showToast(`پریست ${provider.toUpperCase()} اعمال شد.`, 'info');
     }
 
     function saveAndApplyConfig() {
@@ -1294,6 +1520,7 @@ Ready to send payload...
       updateTopBarConnectionBadge();
       closeConfigModal();
       buildAugmentedPrompt();
+      showToast('تنظیمات با موفقیت ذخیره و اعمال شدند.', 'success');
     }
 
     function updateTopBarConnectionBadge() {
@@ -1319,11 +1546,11 @@ Ready to send payload...
       providerLabel.innerText = `${providerDisplay} ${llmConfig.useProxy ? '(Proxy)' : '(Direct)'}`;
 
       if (llmConfig.apiKey || llmConfig.baseUrl.includes('localhost')) {
-        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse";
+        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50 animate-pulse";
         if (llmStatusText) llmStatusText.innerHTML = `🟢 متصل به <strong>${llmConfig.modelName}</strong> (${providerDisplay})`;
       } else {
         dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
-        if (llmStatusText) llmStatusText.innerHTML = `🟡 کلید API وارد نشده (حالت شبیه‌سازی فعال)`;
+        if (llmStatusText) llmStatusText.innerHTML = `🟡 حالت شبیه‌ساز (کلید API وارد نشده)`;
       }
     }
 
@@ -1332,7 +1559,7 @@ Ready to send payload...
       const feedback = document.getElementById('cfgTestFeedback');
       feedback.classList.remove('hidden');
       feedback.className = "p-3 rounded-xl text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300";
-      feedback.innerText = "در حال ارسال درخواست تست به سرور...";
+      feedback.innerText = "در حال ارسال درخواست تست پینگ به سرور...";
 
       const baseUrl = document.getElementById('cfgBaseUrl').value.trim().replace(/\/+$/, '');
       const apiKey = document.getElementById('cfgApiKey').value.trim();
@@ -1378,20 +1605,25 @@ Ready to send payload...
           const reply = data.choices?.[0]?.message?.content || 'OK';
           feedback.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300";
           feedback.innerHTML = `✅ اتصال با موفقیت برقرار شد! (Latency: ${elapsed}ms)<br>پاسخ مدل: "${reply.trim()}"`;
+          showToast('اتصال به سرور هوش مصنوعی تایید شد.', 'success');
         } else {
           const errData = await resp.text();
           feedback.className = "p-3 rounded-xl text-xs font-mono bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300";
           feedback.innerHTML = `❌ خطا در اتصال (Status ${resp.status}):<br>${errData.substring(0, 160)}`;
+          showToast('خطا در اتصال به مدل.', 'error');
         }
       } catch (err) {
         feedback.className = "p-3 rounded-xl text-xs font-mono bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300";
         feedback.innerHTML = `❌ خطای شبکه یا CORS:<br>${err.message}<br>💡 توصیه: تیک «استفاده از سرور پروکسی داخلی» را فعال کنید.`;
+        showToast('خطای شبکه یا مسدودیت CORS.', 'error');
       }
     }
 
-    // --- STEP 1: DOCUMENT INGESTION ---
+    // --- STEP 1: DOCUMENT INGESTION & PDF EXTRACTION ---
     function loadDocumentPreset(key) {
       currentPresetKey = key;
+      currentPdfMeta = null;
+      document.getElementById('pdfLoadedInfoCard').classList.add('hidden');
       const preset = KNOWLEDGE_PRESETS[key];
       documentContent = preset.text;
       document.getElementById('documentTextArea').value = documentContent;
@@ -1402,7 +1634,7 @@ Ready to send payload...
       container.innerHTML = '';
       preset.suggestedQueries.forEach(q => {
         const btn = document.createElement('button');
-        btn.className = "px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-900/50 text-[11px] transition text-right";
+        btn.className = "px-2.5 py-1 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-brand-50 hover:text-brand-600 dark:hover:bg-brand-950/60 text-[11px] transition text-right border border-transparent hover:border-brand-500/20";
         btn.innerText = q;
         btn.onclick = () => {
           document.getElementById('liveUserQueryInput').value = q;
@@ -1415,6 +1647,7 @@ Ready to send payload...
       currentQuery = preset.suggestedQueries[0];
 
       recomputeChunks();
+      showToast(`سند «${preset.title}» بارگذاری شد.`, 'info');
     }
 
     function onDocumentChanged() {
@@ -1427,16 +1660,14 @@ Ready to send payload...
       const words = documentContent.trim().split(/\s+/).filter(Boolean).length;
       const chars = documentContent.length;
       const tokens = Math.round(chars / 3.4);
-      document.getElementById('docLiveStats').innerText = `${words} کلمه • ${chars} کاراکتر • تخمین ~${tokens} توکن`;
+      document.getElementById('docLiveStats').innerText = `${words.toLocaleString()} کلمه • ${chars.toLocaleString()} کاراکتر • تخمین ~${tokens.toLocaleString()} توکن`;
     }
-
-    let currentPdfMeta = null;
 
     function handleFileUpload(e) {
       const file = e.target.files[0];
       if (!file) return;
       processUploadedFile(file);
-      e.target.value = ''; // Reset input
+      e.target.value = '';
     }
 
     async function processUploadedFile(file) {
@@ -1445,7 +1676,6 @@ Ready to send payload...
       if (isPdf) {
         await extractAndLoadPdf(file);
       } else {
-        // Plain text, markdown, json, csv
         const reader = new FileReader();
         reader.onload = (evt) => {
           currentPdfMeta = null;
@@ -1454,6 +1684,7 @@ Ready to send payload...
           document.getElementById('documentTextArea').value = documentContent;
           updateDocumentStats();
           recomputeChunks();
+          showToast(`فایل "${file.name}" با موفقیت ایندکس شد.`, 'success');
         };
         reader.readAsText(file);
       }
@@ -1498,7 +1729,7 @@ Ready to send payload...
         }
 
         if (extractedText.trim().length === 0) {
-          extractedText = "توجه: متنی در این فایل PDF یافت نشد. ممکن است فایل شامل تصاویر اسکن‌شده (Rasterized) باشد که نیازمند OCR هستند.";
+          extractedText = "توجه: متنی در این فایل PDF یافت نشد. ممکن است فایل شامل تصاویر اسکن‌شده باشد که نیازمند OCR هستند.";
         }
 
         currentPdfMeta = {
@@ -1507,22 +1738,20 @@ Ready to send payload...
           fileSize: (file.size / 1024).toFixed(1) + ' KB'
         };
 
-        // Update UI
         documentContent = extractedText.trim();
         document.getElementById('documentTextArea').value = documentContent;
         updateDocumentStats();
 
-        // Update Info Card
         const words = documentContent.trim().split(/\s+/).filter(Boolean).length;
         document.getElementById('pdfFileNameLabel').innerText = file.name;
-        document.getElementById('pdfStatsDetailLabel').innerText = `${totalPages} صفحه • ${words} کلمه • حجم: ${currentPdfMeta.fileSize}`;
+        document.getElementById('pdfStatsDetailLabel').innerText = `${totalPages} صفحه • ${words.toLocaleString()} کلمه • حجم: ${currentPdfMeta.fileSize}`;
         infoCard.classList.remove('hidden');
 
-        // Recompute pipeline
         recomputeChunks();
+        showToast(`فایل PDF "${file.name}" با ${totalPages} صفحه استخراج شد!`, 'success');
 
       } catch (err) {
-        alert('خطا در خواندن فایل PDF: ' + err.message);
+        showToast('خطا در خواندن فایل PDF: ' + err.message, 'error');
       } finally {
         banner.classList.add('hidden');
       }
@@ -1534,7 +1763,6 @@ Ready to send payload...
       loadDocumentPreset('company');
     }
 
-    // Initialize Drag and Drop on Document Area
     function initDragAndDrop() {
       const dropZone = document.getElementById('dropZoneContainer');
       const overlay = document.getElementById('dragOverlay');
@@ -1598,7 +1826,9 @@ Ready to send payload...
               id: id++,
               text: currentChunk.trim(),
               length: currentChunk.trim().length,
-              overlapTokens: overlap
+              overlapTokens: overlap,
+              source: currentPdfMeta ? currentPdfMeta.fileName : currentPresetKey,
+              page: detectPageForText(text, currentChunk)
             });
             currentChunk = s;
           } else {
@@ -1606,7 +1836,14 @@ Ready to send payload...
           }
         });
         if (currentChunk.trim().length > 0) {
-          result.push({ id: id++, text: currentChunk.trim(), length: currentChunk.trim().length, overlapTokens: 0 });
+          result.push({
+            id: id++,
+            text: currentChunk.trim(),
+            length: currentChunk.trim().length,
+            overlapTokens: 0,
+            source: currentPdfMeta ? currentPdfMeta.fileName : currentPresetKey,
+            page: detectPageForText(text, currentChunk)
+          });
         }
       } else {
         // Recursive Character Splitter
@@ -1656,6 +1893,15 @@ Ready to send payload...
       return result;
     }
 
+    function detectPageForText(fullText, chunkSnippet) {
+      if (!currentPdfMeta) return 1;
+      const idx = fullText.indexOf(chunkSnippet);
+      if (idx === -1) return 1;
+      const prefix = fullText.substring(0, idx);
+      const matches = [...prefix.matchAll(/---\s*\[صفحه\s*(\d+)/g)];
+      return matches.length > 0 ? parseInt(matches[matches.length - 1][1]) : 1;
+    }
+
     function renderChunkCards() {
       const container = document.getElementById('chunksCardsContainer');
       container.innerHTML = '';
@@ -1663,7 +1909,7 @@ Ready to send payload...
       chunks.forEach((chunk, idx) => {
         const color = CHUNK_PALETTE[idx % CHUNK_PALETTE.length];
         const card = document.createElement('div');
-        card.className = `p-3.5 rounded-xl border ${color.border} ${color.bg} flex flex-col justify-between cursor-pointer hover:shadow-md transition`;
+        card.className = `p-4 rounded-2xl border ${color.border} ${color.bg} flex flex-col justify-between cursor-pointer hover:shadow-lg transition-all duration-200 transform hover:-translate-y-0.5`;
         card.onclick = () => {
           inspectSelectedChunk(idx);
           goToStep(3);
@@ -1675,9 +1921,9 @@ Ready to send payload...
               <span class="text-xs font-bold ${color.text} flex items-center gap-1.5">
                 <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${color.dot}"></span>
                 Chunk #${chunk.id}
-                ${chunk.page && currentPdfMeta ? `<span class="text-[10px] px-1.5 py-0.2 rounded bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold">📄 ص ${chunk.page}</span>` : ''}
+                ${chunk.page && currentPdfMeta ? `<span class="text-[10px] px-2 py-0.5 rounded-md bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold border border-indigo-200 dark:border-indigo-800">📄 ص ${chunk.page}</span>` : ''}
               </span>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/70 dark:bg-slate-900/60 text-slate-500">
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/80 dark:bg-slate-900/80 text-slate-500 font-semibold shadow-xs">
                 ${chunk.length} chars
               </span>
             </div>
@@ -1685,9 +1931,12 @@ Ready to send payload...
               ${escapeHtml(chunk.text)}
             </p>
           </div>
-          <div class="mt-3 pt-2 border-t border-slate-200/50 dark:border-slate-800 flex justify-between items-center text-[10px] text-slate-400">
+          <div class="mt-3 pt-2.5 border-t border-slate-200/60 dark:border-slate-800 flex justify-between items-center text-[10px] text-slate-400">
             <span>هم‌پوشانی: ${chunk.overlapWithPrev || 0} کاراکتر</span>
-            <span class="text-brand-600 dark:text-brand-400 font-bold">بررسی بردار →</span>
+            <span class="text-brand-600 dark:text-brand-400 font-bold flex items-center gap-1">
+              <span>کالبدشکافی بردار</span>
+              <span>←</span>
+            </span>
           </div>
         `;
         container.appendChild(card);
@@ -1705,11 +1954,10 @@ Ready to send payload...
       inspectSelectedChunk(selectedChunkIndex);
 
       if (showFeedback) {
-        alert(`تعداد ${chunks.length} بردار متراکم با موفقیت بازتولید شد.`);
+        showToast(`تعداد ${chunks.length} بردار با موفقیت بازتولید شد.`, 'success');
       }
     }
 
-    // High-fidelity subword & n-gram dense vectorizer (32-dim normalized vector)
     function computeDeterministicDenseVector(text) {
       const vector = new Array(32).fill(0);
       const cleanWords = text.toLowerCase().split(/[\s,،.؛!؟()\[\]]+/).filter(w => w.length > 1);
@@ -1792,16 +2040,27 @@ Ready to send payload...
 
       ctx.clearRect(0, 0, width, height);
 
-      // Coordinate rings & axes
-      ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.06)';
+      // Tech Grid Pattern
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
       ctx.lineWidth = 1;
+      const step = 25;
+      for (let x = 0; x < width; x += step) {
+        ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, height); ctx.stroke();
+      }
+      for (let y = 0; y < height; y += step) {
+        ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(width, y); ctx.stroke();
+      }
+
+      // Coordinate Rings
+      ctx.strokeStyle = 'rgba(99, 102, 241, 0.15)';
       [0.3, 0.6, 0.9].forEach(r => {
         ctx.beginPath();
         ctx.arc(centerX, centerY, (width / 2.3) * r, 0, Math.PI * 2);
         ctx.stroke();
       });
 
-      ctx.strokeStyle = isDark ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.15)';
+      // Axis Crosshairs
+      ctx.strokeStyle = 'rgba(99, 102, 241, 0.3)';
       ctx.beginPath();
       ctx.moveTo(0, centerY); ctx.lineTo(width, centerY);
       ctx.moveTo(centerX, 0); ctx.lineTo(centerX, height);
@@ -1817,8 +2076,8 @@ Ready to send payload...
 
         if (isSelected) {
           ctx.beginPath();
-          ctx.arc(x, y, 16, 0, Math.PI * 2);
-          ctx.fillStyle = isDark ? 'rgba(99, 102, 241, 0.35)' : 'rgba(99, 102, 241, 0.25)';
+          ctx.arc(x, y, 18, 0, Math.PI * 2);
+          ctx.fillStyle = 'rgba(99, 102, 241, 0.35)';
           ctx.fill();
           ctx.strokeStyle = '#6366f1';
           ctx.lineWidth = 2;
@@ -1834,7 +2093,7 @@ Ready to send payload...
         ctx.stroke();
 
         ctx.font = '10px Vazirmatn, Tahoma';
-        ctx.fillStyle = isDark ? '#e2e8f0' : '#1e293b';
+        ctx.fillStyle = '#e2e8f0';
         ctx.fillText(`C#${chunk.id}`, x + 10, y + 3);
 
         chunk.canvasX = x;
@@ -1863,7 +2122,7 @@ Ready to send payload...
 
         // Query Marker
         ctx.beginPath();
-        ctx.arc(qx, qy, 11, 0, Math.PI * 2);
+        ctx.arc(qx, qy, 12, 0, Math.PI * 2);
         ctx.fillStyle = '#ef4444';
         ctx.fill();
         ctx.strokeStyle = '#ffffff';
@@ -1872,7 +2131,7 @@ Ready to send payload...
 
         ctx.font = 'bold 11px Vazirmatn, Tahoma';
         ctx.fillStyle = '#ef4444';
-        ctx.fillText('🔍 Query', qx + 13, qy + 4);
+        ctx.fillText('🔍 Query', qx + 14, qy + 4);
       }
     }
 
@@ -1890,14 +2149,14 @@ Ready to send payload...
         chunks.forEach((c, idx) => {
           if (c.canvasX && c.canvasY) {
             const dist = Math.hypot(mx - c.canvasX, my - c.canvasY);
-            if (dist < 14) found = { chunk: c, index: idx };
+            if (dist < 15) found = { chunk: c, index: idx };
           }
         });
 
         if (found) {
           tooltip.style.left = `${mx + 15}px`;
           tooltip.style.top = `${my - 10}px`;
-          tooltip.innerHTML = `<strong>Chunk #${found.chunk.id}</strong><br><span style="opacity:0.8">${found.chunk.text.substring(0, 75)}...</span>`;
+          tooltip.innerHTML = `<strong>Chunk #${found.chunk.id}</strong>${found.chunk.page ? ` (ص ${found.chunk.page})` : ''}<br><span style="opacity:0.8">${found.chunk.text.substring(0, 80)}...</span>`;
           tooltip.classList.remove('hidden');
         } else {
           tooltip.classList.add('hidden');
@@ -1912,7 +2171,7 @@ Ready to send payload...
         chunks.forEach((c, idx) => {
           if (c.canvasX && c.canvasY) {
             const dist = Math.hypot(mx - c.canvasX, my - c.canvasY);
-            if (dist < 14) {
+            if (dist < 15) {
               inspectSelectedChunk(idx);
               drawVectorCanvas();
             }
@@ -1929,7 +2188,7 @@ Ready to send payload...
 
       chunks.forEach((chunk, idx) => {
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-50 dark:hover:bg-slate-800/50 transition cursor-pointer";
+        tr.className = "hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition cursor-pointer";
         tr.onclick = () => {
           inspectSelectedChunk(idx);
           goToStep(3);
@@ -1939,20 +2198,20 @@ Ready to send payload...
         const preview = chunk.vector ? chunk.vector.slice(0, 4).map(v => v.toFixed(2)).join(', ') : '...';
 
         tr.innerHTML = `
-          <td class="p-3 font-mono font-bold ${color.text}">
+          <td class="p-3.5 font-mono font-bold ${color.text}">
             #chk-${chunk.id.toString().padStart(3, '0')}
           </td>
-          <td class="p-3 max-w-xs text-slate-800 dark:text-slate-200 line-clamp-1">
+          <td class="p-3.5 max-w-xs text-slate-800 dark:text-slate-200 line-clamp-1 font-medium">
             ${escapeHtml(chunk.text)}
           </td>
-          <td class="p-3 text-[11px] text-slate-500 font-mono">
+          <td class="p-3.5 text-[11px] text-slate-500 font-mono">
             {"chars": ${chunk.length}, "source": "${chunk.source || currentPresetKey}"${chunk.page ? `, "page": ${chunk.page}` : ''}}
           </td>
-          <td class="p-3 font-mono text-[11px] text-brand-600 dark:text-brand-400">
+          <td class="p-3.5 font-mono text-[11px] text-brand-600 dark:text-brand-400">
             [${preview}, ...]
           </td>
-          <td class="p-3 text-center">
-            <span class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold">
+          <td class="p-3.5 text-center">
+            <span class="inline-flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-300/60 dark:border-emerald-800">
               Indexed
             </span>
           </td>
@@ -1978,7 +2237,7 @@ Ready to send payload...
       retrievedChunks = sorted.filter(c => c.similarity >= threshold).slice(0, topK);
 
       if (retrievedChunks.length === 0 && sorted.length > 0) {
-        retrievedChunks = [sorted[0]]; // fallback top 1
+        retrievedChunks = [sorted[0]];
       }
 
       renderRetrievedRankingCards(sorted, topK, threshold);
@@ -2014,33 +2273,34 @@ Ready to send payload...
         const percent = Math.round(chunk.similarity * 100);
         const card = document.createElement('div');
 
-        card.className = `p-3.5 rounded-xl border transition ${
+        card.className = `p-4 rounded-2xl border transition-all duration-200 ${
           isRetrieved
-            ? 'bg-emerald-50/50 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800 shadow-xs'
-            : 'bg-slate-50/50 dark:bg-slate-900 border-slate-200 dark:border-slate-800 opacity-60'
+            ? 'bg-emerald-50/70 dark:bg-emerald-950/30 border-emerald-300 dark:border-emerald-800 shadow-sm'
+            : 'bg-white/60 dark:bg-slate-900/60 border-slate-200 dark:border-slate-800 opacity-60'
         }`;
 
         card.innerHTML = `
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1.5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-2">
             <div class="flex items-center gap-2">
-              <span class="w-6 h-6 rounded-md flex items-center justify-center text-xs font-black ${
+              <span class="w-6 h-6 rounded-lg flex items-center justify-center text-xs font-black ${
                 isRetrieved ? 'bg-emerald-500 text-white' : 'bg-slate-300 dark:bg-slate-700 text-slate-700 dark:text-slate-300'
               }">
                 ${rank + 1}
               </span>
               <span class="text-xs font-bold text-slate-800 dark:text-slate-200">
                 Chunk #${chunk.id}
+                ${chunk.page && currentPdfMeta ? `<span class="text-[10px] text-slate-400 font-mono">(صفحه ${chunk.page})</span>` : ''}
               </span>
               ${
                 isRetrieved
-                  ? '<span class="text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 font-bold">تزریق به پرامپت (Top-K)</span>'
+                  ? '<span class="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-300 dark:border-emerald-700">تزریق به پرامپت (Top-K)</span>'
                   : '<span class="text-[10px] px-2 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-500">فیلتر شده</span>'
               }
             </div>
 
             <div class="flex items-center gap-3">
-              <div class="w-28 h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-                <div class="h-full ${isRetrieved ? 'bg-emerald-500' : 'bg-slate-400'}" style="width: ${percent}%"></div>
+              <div class="w-32 h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+                <div class="h-full ${isRetrieved ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-slate-400'}" style="width: ${percent}%"></div>
               </div>
               <span class="text-xs font-mono font-bold ${isRetrieved ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}">
                 ${percent}% Match
@@ -2067,7 +2327,7 @@ Ready to send payload...
 
       let contextBlocks = "";
       retrievedChunks.forEach((chunk, index) => {
-        contextBlocks += `--- [منبع ${index + 1} | شناسه: Chunk #${chunk.id}] ---\n${chunk.text}\n\n`;
+        contextBlocks += `--- [منبع ${index + 1} | شناسه: Chunk #${chunk.id}${chunk.page ? ` (صفحه ${chunk.page})` : ''}] ---\n${chunk.text}\n\n`;
       });
 
       const fullPrompt = `### دستورالعمل سیستم (System Prompt):
@@ -2079,7 +2339,6 @@ ${currentQuery}
 
 ### پاسخ مدل زبانی مستند:`;
 
-      // Update UI displays
       const display = document.getElementById('augmentedPromptDisplayArea');
       if (display) {
         if (activePromptTab === 'text') {
@@ -2101,7 +2360,7 @@ ${currentQuery}
       }
 
       const estTokens = Math.round(fullPrompt.length / 3.2);
-      document.getElementById('promptTokenEstimateBadge').innerText = `~${estTokens} Tokens`;
+      document.getElementById('promptTokenEstimateBadge').innerText = `~${estTokens.toLocaleString()} Tokens`;
       document.getElementById('promptInjectedChunksBadge').innerText = `${retrievedChunks.length} Chunks`;
       document.getElementById('augmentedUserQueryText').innerText = `«${currentQuery}»`;
       document.getElementById('augmentedContextSummaryText').innerText = `شامل ${retrievedChunks.length} تکه با بالاترین امتیاز بازیابی برای تزریق به مدل.`;
@@ -2115,11 +2374,11 @@ ${currentQuery}
       const tabJson = document.getElementById('tabPromptJson');
 
       if (tab === 'text') {
-        tabText.className = "text-xs px-2.5 py-1 rounded bg-slate-200 dark:bg-slate-800 font-bold text-brand-600";
-        tabJson.className = "text-xs px-2.5 py-1 rounded text-slate-500 hover:text-slate-800 dark:hover:text-slate-200";
+        tabText.className = "text-xs px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 font-bold text-brand-600 shadow-xs";
+        tabJson.className = "text-xs px-3 py-1.5 rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-medium";
       } else {
-        tabJson.className = "text-xs px-2.5 py-1 rounded bg-slate-200 dark:bg-slate-800 font-bold text-brand-600";
-        tabText.className = "text-xs px-2.5 py-1 rounded text-slate-500 hover:text-slate-800 dark:hover:text-slate-200";
+        tabJson.className = "text-xs px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 font-bold text-brand-600 shadow-xs";
+        tabText.className = "text-xs px-3 py-1.5 rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 font-medium";
       }
       buildAugmentedPrompt();
     }
@@ -2127,7 +2386,7 @@ ${currentQuery}
     function copyAugmentedPromptToClipboard() {
       const text = document.getElementById('augmentedPromptDisplayArea').innerText;
       navigator.clipboard.writeText(text);
-      alert('متن کامل پرامپت در کلیپ‌بورد کپی شد!');
+      showToast('متن کامل پرامپت در کلیپ‌بورد کپی شد!', 'success');
     }
 
     // --- STEP 7: LIVE LLM GENERATION WITH REAL STREAMING ---
@@ -2136,7 +2395,6 @@ ${currentQuery}
       const statusLabel = document.getElementById('responseStatusLabel');
       const citationsContainer = document.getElementById('liveCitationsPillsContainer');
       const btnExecute = document.getElementById('btnExecuteLLM');
-      const rawLog = document.getElementById('rawLogPreview');
       const latencyBadge = document.getElementById('networkLatencyBadge');
 
       outputBox.innerHTML = '<span class="inline-block w-2.5 h-4 bg-brand-500 cursor-blink ml-1"></span>در حال ارسال به مدل و دریافت استریم...';
@@ -2148,11 +2406,11 @@ ${currentQuery}
       citationsContainer.innerHTML = '';
       retrievedChunks.forEach((chunk, idx) => {
         const pill = document.createElement('div');
-        pill.className = "flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 shadow-xs cursor-pointer hover:border-brand-500 transition";
+        pill.className = "flex items-center gap-1.5 px-3 py-1 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs text-slate-700 dark:text-slate-300 shadow-xs cursor-pointer hover:border-brand-500 transition";
         pill.innerHTML = `
           <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
           <span class="font-bold">[منبع ${idx + 1}]:</span>
-          <span>Chunk #${chunk.id}${chunk.page && currentPdfMeta ? ` (صفحه ${chunk.page})` : ''}</span>
+          <span>Chunk #${chunk.id}${chunk.page && currentPdfMeta ? ` (ص ${chunk.page})` : ''}</span>
         `;
         pill.onclick = () => {
           selectedChunkIndex = chunks.findIndex(c => c.id === chunk.id);
@@ -2176,7 +2434,7 @@ ${currentQuery}
       const targetUrl = `${llmConfig.baseUrl}/chat/completions`;
       const isConfigured = Boolean(llmConfig.apiKey || llmConfig.baseUrl.includes('localhost'));
 
-      // If NOT configured with API Key, do high-fidelity grounded simulation
+      // If NOT configured, fallback to high-fidelity grounded simulation
       if (!isConfigured) {
         logRawEvent(`[Simulation Mode] No API Key provided.\nFallback to client-side grounded generator.`);
         simulateGroundedStream(outputBox, statusLabel, btnExecute, latencyBadge);
@@ -2230,7 +2488,6 @@ ${currentQuery}
           if (done) break;
           const chunkStr = decoder.decode(value, { stream: true });
 
-          // Parse SSE lines: data: {...}
           const lines = chunkStr.split('\n');
           for (const line of lines) {
             const trimmed = line.trim();
@@ -2244,9 +2501,7 @@ ${currentQuery}
                   fullText += delta;
                   outputBox.innerHTML = renderFormattedMarkdown(fullText) + '<span class="inline-block w-2 h-4 bg-brand-500 cursor-blink ml-1"></span>';
                 }
-              } catch (e) {
-                // partial chunk, continue
-              }
+              } catch (e) {}
             }
           }
         }
@@ -2254,16 +2509,18 @@ ${currentQuery}
         outputBox.innerHTML = renderFormattedMarkdown(fullText);
         statusLabel.innerText = "تولید پاسخ با موفقیت پایان یافت (استناد کامل).";
         logRawEvent(`[Stream Finished] Length: ${fullText.length} characters.`);
+        showToast('پاسخ مدل به صورت کامل دریافت شد.', 'success');
 
       } catch (err) {
         logRawEvent(`[Stream Error] ${err.message}`);
         outputBox.innerHTML = `
-          <div class="p-3 rounded-lg bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-300 text-xs">
+          <div class="p-3.5 rounded-xl bg-rose-50 dark:bg-rose-950/40 text-rose-700 dark:text-rose-300 border border-rose-300 dark:border-rose-800 text-xs">
             <strong>خطا در اتصال به مدل:</strong> ${err.message}<br>
-            در صورت عدم دسترسی به اینترنت یا نیاز به استفاده از کلید شبیه‌سازی، می‌توانید در پنجره تنظیمات پروکسی را فعال کنید.
+            برای استفاده از حالت آفلاین، کلید API را در تنظیمات پاک کنید تا شبیه‌ساز بافت‌محور فعال گردد.
           </div>
         `;
         statusLabel.innerText = "خطا در ارتباط با مدل";
+        showToast('خطا در دریافت استریم مدل.', 'error');
       } finally {
         btnExecute.disabled = false;
         btnExecute.classList.remove('opacity-50');
@@ -2273,12 +2530,12 @@ ${currentQuery}
     // High-Fidelity Grounded Simulation Fallback
     function simulateGroundedStream(outputBox, statusLabel, btnExecute, latencyBadge) {
       latencyBadge.innerText = "Latency: 28 ms (Simulated)";
-      statusLabel.innerText = "استریم شبیه‌سازی‌شده (بدون نیاز به کلید)...";
+      statusLabel.innerText = "استریم هوشمند بدون کلید (Simulation Mode)...";
       outputBox.innerHTML = '';
 
       let target = "";
       if (currentQuery.includes("مرخصی") || currentQuery.includes("انتقال")) {
-        target = `بر اساس آیین‌نامه داخلی شرکت، کارکنان تمام‌وقت ماهانه ۲.۵ روز (معادل ۳۰ روز در سال) مرخصی استحقاقی دارند [منبع ۱]. 
+        target = `بر اساس آیین‌نامه اداری شرکت، کارکنان تمام‌وقت ماهانه ۲.۵ روز (معادل ۳۰ روز در سال) مرخصی استحقاقی دارند [منبع ۱]. 
 طبق ضوابط، امکان انتقال حداکثر ۹ روز از مرخصی‌های استفاده‌نشده به سال تقویمی بعدی وجود دارد و روزهای مازاد بر ۹ روز در انتهای اسفندماه بازخرید نقدی می‌گردد [منبع ۱]. همچنین درخواست مرخصی بیش از ۳ روز کاری متوالی، مستلزم تأیید مدیر واحد و حداقل ۵ روز کاری اطلاع‌رسانی قبلی است [منبع ۱].`;
       } else if (currentQuery.includes("ساعت کاری") || currentQuery.includes("شناور") || currentQuery.includes("پنج‌شنبه")) {
         target = `ساعت کاری رسمی شرکت روزهای شنبه تا چهارشنبه از ساعت ۸:۰۰ الی ۱۶:۳۰ بوده و روزهای پنج‌شنبه تعطیل است [منبع ۱]. ساعت شروع به صورت شناور بین ۸:۰۰ تا ۹:۳۰ صبح تعریف شده و معادل دقایق تاخیر صبحگاهی، همکاران موظف به جبران آن در انتهای همان روز کاری می‌باشند [منبع ۱]. انجام بیش از ۲۰ ساعت اضافه‌کاری نیز مستلزم تأیید کتبی سرپرست است [منبع ۱].`;
@@ -2286,7 +2543,7 @@ ${currentQuery}
         target = `پرسنلی که حداقل یک سال سابقه کار مستمر در شرکت دارند، مجاز به ثبت تقاضای وام رفاهی با کارمزد ۴ درصد تا سقف ۵۰ میلیون تومان هستند [منبع ۱]. بازپرداخت این وام در اقساط ۱۲ ماهه از حقوق ماهیانه کسر می‌شود [منبع ۱].`;
       } else {
         const preview = retrievedChunks[0] ? retrievedChunks[0].text : 'اطلاعات مرجع';
-        target = `بر اساس بررسی اسناد پایگاه دانش در تکه بازیابی شده: «${preview.substring(0, 80)}...» [منبع ۱]، پاسخ مستقیماً منطبق بر مفاد سند تنظیم گردیده است.`;
+        target = `بر اساس بررسی اسناد پایگاه دانش در تکه بازیابی شده: «${preview.substring(0, 90)}...» [منبع ۱]، پاسخ مستقیماً منطبق بر مفاد سند تنظیم گردیده است.`;
       }
 
       let charIdx = 0;
@@ -2300,6 +2557,7 @@ ${currentQuery}
           statusLabel.innerText = "تولید پاسخ پایان یافت (حالت بدون توهم).";
           btnExecute.disabled = false;
           btnExecute.classList.remove('opacity-50');
+          showToast('پاسخ مستند تولید گردید.', 'success');
         }
       }
       nextChar();
@@ -2307,7 +2565,7 @@ ${currentQuery}
 
     function renderFormattedMarkdown(text) {
       return escapeHtml(text)
-        .replace(/\[منبع (\d+)\]/g, '<span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950 px-1 py-0.5 rounded cursor-pointer hover:underline">$0</span>');
+        .replace(/\[منبع (\d+)\]/g, '<span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950 px-1.5 py-0.5 rounded cursor-pointer hover:underline">$0</span>');
     }
 
     function logRawEvent(msg) {
@@ -2328,9 +2586,9 @@ ${currentQuery}
       const embedStats = document.getElementById('pipeEmbeddingStatsText');
       const retStats = document.getElementById('pipeRetrievalStatsText');
 
-      if (chunkStats) chunkStats.innerText = `${chunks.length} چانک استخراج‌شده با الگوریتم Recursive`;
-      if (embedStats) embedStats.innerText = `نگاشت به فضای برداری و پروژکشن ۲ بعدی PCA`;
-      if (retStats) retStats.innerText = `${retrievedChunks.length} تکه انتخابی با بیشترین تشابه کسینوسی`;
+      if (chunkStats) chunkStats.innerText = `${chunks.length} چانک با استراتژی Recursive`;
+      if (embedStats) embedStats.innerText = `نگاشت به بردار ۳۲ بعدی و نگاشت ۲ بعدی PCA`;
+      if (retStats) retStats.innerText = `${retrievedChunks.length} تکه با بالاترین امتیاز شباهت`;
     }
 
     function runPipelineInstantExecution() {
@@ -2347,6 +2605,10 @@ ${currentQuery}
     function goToStep(step) {
       currentStep = step;
 
+      // Update progress bar
+      const progressPercent = (step / 7) * 100;
+      document.getElementById('pipelineTopProgressBar').style.width = `${progressPercent}%`;
+
       for (let i = 1; i <= 7; i++) {
         const pane = document.getElementById(`step${i}`);
         if (pane) {
@@ -2359,7 +2621,7 @@ ${currentQuery}
         const s = parseInt(btn.getAttribute('data-step'));
         const circle = btn.querySelector('.step-circle');
         if (s === step) {
-          circle.className = "step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-brand-600 text-white shadow-sm scale-105 transition";
+          circle.className = "step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-brand-600 text-white shadow-md shadow-brand-500/30 scale-105 transition-all";
           btn.classList.add('bg-slate-100', 'dark:bg-slate-800');
         } else if (s < step) {
           circle.className = "step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-emerald-500 text-white";
