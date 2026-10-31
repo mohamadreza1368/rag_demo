@@ -1,0 +1,11 @@
+.git
+.gitignore
+.env
+*.log
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.system_generated/
+scratch/
+temp*

@@ -1,0 +1,5 @@
+# RAG Studio Server Requirements
+# The core operational server uses only the Python standard library.
+# Uncomment the packages below if you wish to run sentence-transformers embeddings inside the container:
+# sentence-transformers>=3.0.0
+# torch>=2.0.0

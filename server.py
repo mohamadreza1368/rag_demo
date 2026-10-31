@@ -15,7 +15,7 @@ import os
 import sys
 import webbrowser
 
-PORT = 8080
+PORT = int(os.environ.get('PORT', 8080))
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 
 class RAGStudioHandler(http.server.SimpleHTTPRequestHandler):
@@ -226,7 +226,11 @@ def run():
                 print(f"  [*] Built-in Anti-CORS Proxy active at: {url}/api/proxy")
                 print("  [*] Press Ctrl+C to stop.")
                 print("="*65 + "\n")
-                webbrowser.open(url)
+                if not os.environ.get('DOCKER') and os.environ.get('NO_BROWSER', '0') != '1':
+                    try:
+                        webbrowser.open(url)
+                    except Exception:
+                        pass
                 httpd.serve_forever()
                 break
         except OSError:
