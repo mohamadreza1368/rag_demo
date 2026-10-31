@@ -2134,7 +2134,7 @@ Ready to send payload...
     // --- STEP 3: EMBEDDINGS (Local High-Accuracy Vectorizer, HuggingFace, or Local Python) ---
     async function executeGenerateEmbeddings(showFeedback) {
       const modelName = llmConfig.embeddingModel || 'google/embeddinggemma-2';
-      const provider = llmConfig.embeddingProvider || 'huggingface';
+      const provider = llmConfig.embeddingProvider || 'local_python';
       const badge = document.getElementById('embeddingDimBadge');
       const btn = document.getElementById('btnRecomputeEmbeddings');
 
@@ -2490,7 +2490,7 @@ Ready to send payload...
       currentQuery = document.getElementById('liveUserQueryInput').value || currentQuery;
 
       const modelName = llmConfig.embeddingModel || 'google/embeddinggemma-2';
-      const provider = llmConfig.embeddingProvider || 'huggingface';
+      const provider = llmConfig.embeddingProvider || 'local_python';
 
       if (provider !== 'builtin' && chunks[0]?.vector && chunks[0].vector.length > 32) {
         try {
