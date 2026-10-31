@@ -13,6 +13,7 @@ import urllib.error
 import json
 import os
 import sys
+import shutil
 import webbrowser
 
 PORT = int(os.environ.get('PORT', 8080))
@@ -22,16 +23,34 @@ class ThreadedTCPServer(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
     daemon_threads = True
 
+    def finish_request(self, request, client_address):
+        try:
+            super().finish_request(request, client_address)
+        except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError, OSError):
+            pass
+
     def handle_error(self, request, client_address):
         exc_type, _, _ = sys.exc_info()
         # Suppress normal client disconnection errors (e.g. closed tabs, healthcheck drops)
-        if exc_type in (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
+        if exc_type in (ConnectionResetError, BrokenPipeError, ConnectionAbortedError, OSError):
             return
         super().handle_error(request, client_address)
 
 class RAGStudioHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DIRECTORY, **kwargs)
+
+    def handle(self):
+        try:
+            super().handle()
+        except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError, OSError):
+            pass
+
+    def handle_one_request(self):
+        try:
+            super().handle_one_request()
+        except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError, OSError):
+            pass
 
     def do_GET(self):
         # Fast endpoint for container healthchecks
@@ -42,18 +61,18 @@ class RAGStudioHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             try:
                 self.wfile.write(b'OK')
-            except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
+            except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError, OSError):
                 pass
             return
         try:
             super().do_GET()
-        except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
+        except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError, OSError):
             pass
 
     def copyfile(self, source, outputfile):
         try:
-            super().copyfile(source, outputfile)
-        except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
+            shutil.copyfileobj(source, outputfile)
+        except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError, OSError):
             pass
 
     def do_OPTIONS(self):
