@@ -18,9 +18,43 @@ import webbrowser
 PORT = int(os.environ.get('PORT', 8080))
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
 
+class ThreadedTCPServer(socketserver.ThreadingTCPServer):
+    allow_reuse_address = True
+    daemon_threads = True
+
+    def handle_error(self, request, client_address):
+        exc_type, _, _ = sys.exc_info()
+        # Suppress normal client disconnection errors (e.g. closed tabs, healthcheck drops)
+        if exc_type in (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
+            return
+        super().handle_error(request, client_address)
+
 class RAGStudioHandler(http.server.SimpleHTTPRequestHandler):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=DIRECTORY, **kwargs)
+
+    def do_GET(self):
+        # Fast endpoint for container healthchecks
+        if self.path in ('/health', '/api/health'):
+            self.send_response(200)
+            self.send_header('Content-Type', 'text/plain; charset=utf-8')
+            self.send_header('Content-Length', '2')
+            self.end_headers()
+            try:
+                self.wfile.write(b'OK')
+            except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
+                pass
+            return
+        try:
+            super().do_GET()
+        except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
+            pass
+
+    def copyfile(self, source, outputfile):
+        try:
+            super().copyfile(source, outputfile)
+        except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError):
+            pass
 
     def do_OPTIONS(self):
         # Handle CORS preflight requests
@@ -218,7 +252,7 @@ def run():
     port = PORT
     for attempt in range(5):
         try:
-            with socketserver.TCPServer(("", port), RAGStudioHandler) as httpd:
+            with ThreadedTCPServer(("", port), RAGStudioHandler) as httpd:
                 url = f"http://localhost:{port}"
                 print("\n" + "="*65)
                 print(f"  [+] RAG Studio with Live LLM Connection is RUNNING!")

@@ -45,6 +45,6 @@ EXPOSE 8080
 
 # Native healthcheck using python standard library (no curl required)
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-  CMD python -c "import urllib.request, os; urllib.request.urlopen(f'http://localhost:{os.environ.get(\"PORT\", 8080)}/', timeout=3)" || exit 1
+  CMD python -c "import urllib.request, os; resp = urllib.request.urlopen(f'http://localhost:{os.environ.get(\"PORT\", 8080)}/health', timeout=3); resp.read()" || exit 1
 
 CMD ["python", "server.py"]
