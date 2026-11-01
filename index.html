@@ -1805,9 +1805,25 @@ Ready to send payload...
     };
 
     // ==========================================
+    // GLOBAL MODAL CONTROLLER (ISOLATION SYSTEM)
+    // ==========================================
+    function closeAllModals() {
+      const modalIds = ['helpConceptModal', 'vectorRecordModal', 'citationDetailModal', 'configModal', 'guideModal', 'rawLogModal'];
+      modalIds.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+          el.classList.add('hidden');
+          el.style.setProperty('display', 'none', 'important');
+        }
+      });
+    }
+    window.closeAllModals = closeAllModals;
+
+    // ==========================================
     // EDUCATIONAL CONCEPT MODAL CONTROLLER
     // ==========================================
     function showConceptHelp(topicKey) {
+      closeAllModals();
       const topic = EDUCATIONAL_TOPICS[topicKey];
       if (!topic) {
         console.warn('Unknown concept topic:', topicKey);
@@ -1865,6 +1881,7 @@ Ready to send payload...
     let currentInspectedRecordIdx = 0;
 
     function openVectorRecordModal(idx) {
+      closeAllModals();
       if (!chunks || !chunks[idx]) return;
       currentInspectedRecordIdx = idx;
       const chunk = chunks[idx];
@@ -2111,6 +2128,7 @@ Ready to send payload...
 
     // --- Guide Modal ---
     function openGuideModal() {
+      closeAllModals();
       const modal = document.getElementById('guideModal');
       if (modal) {
         modal.classList.remove('hidden');
@@ -2153,6 +2171,7 @@ Ready to send payload...
 
     // --- CONFIG MODAL & PRESETS ---
     function openConfigModal() {
+      closeAllModals();
       loadConfigIntoUI();
       const modal = document.getElementById('configModal');
       if (modal) {
@@ -3218,6 +3237,7 @@ Ready to send payload...
     let currentInspectedCitationIdx = 0;
 
     function openCitationModal(retrievedIdx) {
+      closeAllModals();
       if (!retrievedChunks || !retrievedChunks[retrievedIdx]) {
         console.warn('Citation chunk not found at index:', retrievedIdx);
         return;
