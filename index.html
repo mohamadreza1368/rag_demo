@@ -14,6 +14,16 @@
     // EDUCATIONAL RAG TOPICS KNOWLEDGE BASE
     // ==========================================
     const EDUCATIONAL_TOPICS = {
+      similarity_metrics: {
+        title: "مقایسه الگوریتم‌های شباهت و فاصله برداری",
+        enTerm: "Vector Similarity & Distance Metrics",
+        icon: "📐",
+        why: "تنها یک روش برای سنجش شباهت وجود ندارد! بسته به اینکه آیا بردارها نرمال شده‌اند، اسناد دارای طول‌های نابرابر هستند، یا نیاز به تطابق دقیق کلمات تخصصی (Keyword Match) داریم، انتخاب سنجه مناسب بر دقت بازیابی اطلاعات تاثیر چشمگیری می‌گذارد.",
+        how: "۱. شباهت کسینوسی (Cosine): زاویه دو بردار را می‌سنجد و طول سند تاثیری در آن ندارد (بازه ۰ تا ۱).\n۲. ضرب داخلی (Dot Product): ترکیب زاویه و اندازه بردار؛ در صورت نرمال‌سازی بردارها سریع‌ترین گزینه در سخت‌افزار است.\n۳. فاصله اقلیدسی (L2 Distance): کوتاهترین فاصله خط‌کشی در فضا؛ فرمول معکوس 1/(1+d) جهت تبدیل به شباهت.\n۴. فاصله منهتن (L1 Distance): مجموع فاصله‌های شبکه‌ای؛ در ابعاد بالا نسبت به نویز ابعاد تکی مقاوم‌تر است.\n۵. جستجوی ترکیبی (Hybrid Search): ترکیب ۶۰٪ شباهت معنایی و ۴۰٪ تطابق واژگانی (BM25) برای پوشش خطاهای ناموجود در امبدینگ.",
+        formula: "Cosine = \\frac{A \\cdot B}{\\|A\\| \\|B\\|}, \\;\\; Dot = \\sum A_i B_i, \\;\\; L2 = \\sqrt{\\sum (A_i - B_i)^2}, \\;\\; Hybrid = 0.6 \\cdot \\text{Dense} + 0.4 \\cdot \\text{BM25}",
+        formulaDesc: "فرمول‌های پنج الگوریتم متداول سنجش شباهت و فاصله در موتورهای بازیابی برداری.",
+        tip: "در پروژه‌های واقعی و سازمانی، استاندارد مدرن استفاده از «Hybrid Search» است تا اصطلاحات فنی، کدهای کالا یا شماره مواد قانونی توسط BM25 پیدا شوند و مفاهیم عمومی با امبدینگ معنایی پوشش داده شوند."
+      },
       ingestion: {
         title: "ورود، پاکسازی و استخراج اسناد",
         enTerm: "Document Ingestion & Preprocessing",
@@ -1011,11 +1021,29 @@
           </div>
         </div>
 
-        <!-- Sliders for Top-K & Threshold -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-5 p-4 rounded-2xl bg-slate-100/60 dark:bg-slate-800/30 border border-slate-200/80 dark:border-slate-700/60">
+        <!-- Similarity Algorithm & Sliders for Top-K & Threshold -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-5 p-4 rounded-2xl bg-slate-100/60 dark:bg-slate-800/30 border border-slate-200/80 dark:border-slate-700/60">
           <div>
             <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-              <span class="flex items-center gap-1"><span>تعداد برترین نتایج برای تزریق (Top-K Chunks):</span><button type="button" onclick="showConceptHelp('top_k')" class="text-[10px] text-slate-400 hover:text-brand-600" title="Top-K در بازیابی چیست؟">❓</button></span>
+              <span class="flex items-center gap-1">
+                <span>الگوریتم شباهت / فاصله:</span>
+                <button type="button" onclick="showConceptHelp('similarity_metrics')" class="text-[10px] text-slate-400 hover:text-brand-600" title="مقایسه الگوریتم‌های شباهت">❓</button>
+              </span>
+              <span id="activeMetricBadge" class="text-indigo-600 dark:text-indigo-400 font-mono text-[10px] bg-indigo-50 dark:bg-indigo-950/60 px-1.5 py-0.5 rounded font-bold">Cosine</span>
+            </div>
+            <select id="similarityMetricSelect" onchange="updateMetricHint(); executeLiveRetrieval();" class="w-full p-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-semibold focus:ring-2 focus:ring-brand-500">
+              <option value="cosine">شباهت کسینوسی (Cosine Similarity)</option>
+              <option value="dot_product">ضرب داخلی (Dot Product / Inner Product)</option>
+              <option value="euclidean">فاصله اقلیدسی معکوس (L2 Euclidean Distance)</option>
+              <option value="manhattan">فاصله منهتن معکوس (L1 Manhattan Distance)</option>
+              <option value="hybrid">جستجوی ترکیبی (Hybrid: BM25 کلمات + کسینوس)</option>
+            </select>
+            <div id="similarityMetricHint" class="text-[10px] text-slate-400 mt-1 leading-tight">سنجش زاویه دو بردار بدون وابستگی به طول سند — استاندارد متداول RAG</div>
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+              <span class="flex items-center gap-1"><span>تعداد برترین نتایج (Top-K Chunks):</span><button type="button" onclick="showConceptHelp('top_k')" class="text-[10px] text-slate-400 hover:text-brand-600" title="Top-K در بازیابی چیست؟">❓</button></span>
               <span id="topKValueLabel" class="text-brand-600 font-mono bg-brand-50 dark:bg-brand-950/60 px-2 py-0.5 rounded-md">2</span>
             </div>
             <input type="range" id="topKSlider" min="1" max="5" value="2" oninput="document.getElementById('topKValueLabel').innerText=this.value; executeLiveRetrieval();" class="w-full">
@@ -1024,11 +1052,11 @@
 
           <div>
             <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-              <span class="flex items-center gap-1"><span>حداقل آستانه شباهت (Min Similarity Threshold):</span><button type="button" onclick="showConceptHelp('threshold')" class="text-[10px] text-slate-400 hover:text-emerald-600" title="حد آستانه شباهت چیست؟">❓</button></span>
+              <span class="flex items-center gap-1"><span>حداقل آستانه شباهت (Threshold):</span><button type="button" onclick="showConceptHelp('threshold')" class="text-[10px] text-slate-400 hover:text-emerald-600" title="حد آستانه شباهت چیست؟">❓</button></span>
               <span id="thresholdValueLabel" class="text-emerald-500 font-mono bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">30%</span>
             </div>
             <input type="range" id="thresholdSlider" min="5" max="80" step="5" value="30" oninput="document.getElementById('thresholdValueLabel').innerText=this.value+'%'; executeLiveRetrieval();" class="w-full">
-            <div class="text-[10px] text-slate-400 mt-1">فیلتر کردن تکه‌هایی که شباهت پایینی دارند</div>
+            <div class="text-[10px] text-slate-400 mt-1">فیلتر کردن تکه‌هایی که امتیاز کمتری دارند</div>
           </div>
         </div>
 
@@ -3220,7 +3248,108 @@ Ready to send payload...
       });
     }
 
-    // --- STEP 5: COSINE RETRIEVAL ---
+    // --- STEP 5: SIMILARITY & RETRIEVAL ENGINE ---
+    function updateMetricHint() {
+      const metric = document.getElementById('similarityMetricSelect')?.value || 'cosine';
+      const badge = document.getElementById('activeMetricBadge');
+      const hint = document.getElementById('similarityMetricHint');
+      const hints = {
+        cosine: { name: 'Cosine', text: 'سنجش زاویه دو بردار بدون وابستگی به طول سند — استاندارد متداول RAG' },
+        dot_product: { name: 'Dot Product', text: 'ضرب نظیر به نظیر ابعاد با احتساب بزرگی و زاویه — سریع‌ترین در سخت‌افزار' },
+        euclidean: { name: 'L2 Euclidean', text: 'فاصله اقلیدسی هندسی مستقیم (خط‌کشی) معکوس‌شده: 1 / (1 + L2)' },
+        manhattan: { name: 'L1 Manhattan', text: 'فاصله منهتن شبکه‌ای معکوس‌شده؛ مقاوم‌تر در برابر مقادیر پرت ابعاد' },
+        hybrid: { name: 'Hybrid (BM25+Dense)', text: 'ترکیب ۶۰٪ هوش معنایی برداری + ۴۰٪ تطابق کلمات کلیدی (BM25) — استاندارد Enterprise' }
+      };
+      if (badge && hints[metric]) badge.innerText = hints[metric].name;
+      if (hint && hints[metric]) hint.innerText = hints[metric].text;
+    }
+
+    function computeCosineSimilarity(vA, vB) {
+      if (!vA || !vB || vA.length !== vB.length) return { score: 0, raw: '0.000', label: 'cos(θ) = 0.00' };
+      let dot = 0, normA = 0, normB = 0;
+      for (let i = 0; i < vA.length; i++) {
+        dot += vA[i] * vB[i];
+        normA += vA[i] * vA[i];
+        normB += vB[i] * vB[i];
+      }
+      normA = Math.sqrt(normA);
+      normB = Math.sqrt(normB);
+      if (normA === 0 || normB === 0) return { score: 0, raw: '0.000', label: 'cos(θ) = 0.00' };
+      const cosVal = dot / (normA * normB);
+      const score = Math.max(0.05, Math.min(0.99, Number(cosVal.toFixed(3))));
+      return { score, raw: cosVal.toFixed(3), label: `cos(θ) = ${cosVal.toFixed(3)}` };
+    }
+
+    function computeDotProduct(vA, vB) {
+      if (!vA || !vB || vA.length !== vB.length) return { score: 0, raw: '0.000', label: 'A · B = 0.00' };
+      let dot = 0;
+      for (let i = 0; i < vA.length; i++) {
+        dot += vA[i] * vB[i];
+      }
+      // Map dot product to normalized UI score [0.05, 0.99]
+      const score = Math.max(0.05, Math.min(0.99, Number(((dot + 1) / 2).toFixed(3))));
+      return { score, raw: dot.toFixed(3), label: `A · B = ${dot.toFixed(3)}` };
+    }
+
+    function computeEuclideanSimilarity(vA, vB) {
+      if (!vA || !vB || vA.length !== vB.length) return { score: 0, raw: '0.000', label: 'L2 Dist = 0.00' };
+      let sumSq = 0;
+      for (let i = 0; i < vA.length; i++) {
+        const diff = vA[i] - vB[i];
+        sumSq += diff * diff;
+      }
+      const dist = Math.sqrt(sumSq);
+      const score = Math.max(0.05, Math.min(0.99, Number((1 / (1 + dist)).toFixed(3))));
+      return { score, raw: dist.toFixed(3), label: `L2 Dist = ${dist.toFixed(3)}` };
+    }
+
+    function computeManhattanSimilarity(vA, vB) {
+      if (!vA || !vB || vA.length !== vB.length) return { score: 0, raw: '0.000', label: 'L1 Dist = 0.00' };
+      let sumDiff = 0;
+      for (let i = 0; i < vA.length; i++) {
+        sumDiff += Math.abs(vA[i] - vB[i]);
+      }
+      const normFactor = Math.sqrt(vA.length);
+      const score = Math.max(0.05, Math.min(0.99, Number((1 / (1 + sumDiff / normFactor)).toFixed(3))));
+      return { score, raw: sumDiff.toFixed(2), label: `L1 Dist = ${sumDiff.toFixed(2)}` };
+    }
+
+    function computeBM25Score(query, text) {
+      if (!query || !text) return 0;
+      const cleanWords = q => q.toLowerCase().split(/[\s,?.!؛،؟()\[\]]+/).filter(w => w.length > 1);
+      const qTokens = cleanWords(query);
+      const docTokens = cleanWords(text);
+      if (qTokens.length === 0 || docTokens.length === 0) return 0;
+
+      let matchCount = 0;
+      const docLen = docTokens.length;
+      const avgDocLen = 40;
+      const k1 = 1.5;
+      const b = 0.75;
+
+      qTokens.forEach(t => {
+        const freq = docTokens.filter(dt => dt === t || dt.includes(t) || t.includes(dt)).length;
+        if (freq > 0) {
+          const tf = (freq * (k1 + 1)) / (freq + k1 * (1 - b + b * (docLen / avgDocLen)));
+          matchCount += tf;
+        }
+      });
+
+      return Math.min(1.0, matchCount / (qTokens.length * 1.4));
+    }
+
+    function computeHybridSimilarity(query, text, vA, vB) {
+      const cosine = computeCosineSimilarity(vA, vB);
+      const bm25 = computeBM25Score(query, text);
+      const alpha = 0.6; // 60% Dense Semantic + 40% Lexical BM25
+      const hybridScore = Math.max(0.05, Math.min(0.99, Number((alpha * cosine.score + (1 - alpha) * bm25).toFixed(3))));
+      return {
+        score: hybridScore,
+        raw: `Dense: ${Math.round(cosine.score * 100)}% | BM25: ${Math.round(bm25 * 100)}%`,
+        label: `Hybrid: Dense ${Math.round(cosine.score * 100)}% + BM25 ${Math.round(bm25 * 100)}%`
+      };
+    }
+
     async function executeLiveRetrieval() {
       currentQuery = document.getElementById('liveUserQueryInput').value || currentQuery;
 
@@ -3235,14 +3364,12 @@ Ready to send payload...
             body: JSON.stringify({
               texts: [currentQuery],
               model: modelName,
-              provider: provider,
-              token: llmConfig.hfToken
+              provider: provider
             })
           });
           const data = await resp.json();
-          let v = Array.isArray(data) ? data[0] : (data.embeddings?.[0] || data.data?.[0]?.embedding);
-          if (v && v.length === chunks[0].vector.length) {
-            queryVector = v;
+          if (data.status === 'ok' && data.embeddings && data.embeddings[0]) {
+            queryVector = data.embeddings[0];
           } else {
             queryVector = computeDeterministicDenseVector(currentQuery);
           }
@@ -3255,10 +3382,26 @@ Ready to send payload...
 
       const topK = parseInt(document.getElementById('topKSlider').value);
       const threshold = parseInt(document.getElementById('thresholdSlider').value) / 100;
+      const metric = document.getElementById('similarityMetricSelect')?.value || 'cosine';
 
-      // Cosine similarity calculation
+      // Calculate similarity based on the chosen algorithm
       chunks.forEach(chunk => {
-        chunk.similarity = computeCosineSimilarity(queryVector, chunk.vector);
+        let result;
+        if (metric === 'dot_product') {
+          result = computeDotProduct(queryVector, chunk.vector);
+        } else if (metric === 'euclidean') {
+          result = computeEuclideanSimilarity(queryVector, chunk.vector);
+        } else if (metric === 'manhattan') {
+          result = computeManhattanSimilarity(queryVector, chunk.vector);
+        } else if (metric === 'hybrid') {
+          result = computeHybridSimilarity(currentQuery, chunk.text, queryVector, chunk.vector);
+        } else {
+          result = computeCosineSimilarity(queryVector, chunk.vector);
+        }
+
+        chunk.similarity = result.score;
+        chunk.metricRaw = result.raw;
+        chunk.metricLabel = result.label;
       });
 
       const sorted = [...chunks].sort((a, b) => b.similarity - a.similarity);
@@ -3272,24 +3415,16 @@ Ready to send payload...
       drawVectorCanvas();
       buildAugmentedPrompt();
 
-      document.getElementById('retrievalStatsBadge').innerText =
-        `${retrievedChunks.length} تکه مرتبط با آستانه ${Math.round(threshold*100)}% انتخاب شد`;
-    }
+      const metricNames = {
+        cosine: 'کسینوسی',
+        dot_product: 'ضرب داخلی',
+        euclidean: 'اقلیدسی (L2)',
+        manhattan: 'منهتن (L1)',
+        hybrid: 'ترکیبی (BM25+Dense)'
+      };
 
-    function computeCosineSimilarity(vA, vB) {
-      if (!vA || !vB || vA.length !== vB.length) return 0;
-      let dot = 0;
-      let normA = 0;
-      let normB = 0;
-      for (let i = 0; i < vA.length; i++) {
-        dot += vA[i] * vB[i];
-        normA += vA[i] * vA[i];
-        normB += vB[i] * vB[i];
-      }
-      normA = Math.sqrt(normA);
-      normB = Math.sqrt(normB);
-      if (normA === 0 || normB === 0) return 0;
-      return Math.max(0.05, Math.min(0.99, Number((dot / (normA * normB)).toFixed(3))));
+      document.getElementById('retrievalStatsBadge').innerText =
+        `${retrievedChunks.length} تکه با سنجه ${metricNames[metric] || 'کسینوسی'} (آستانه ${Math.round(threshold*100)}%) انتخاب شد`;
     }
 
     function renderRetrievedRankingCards(sortedChunks, topK, threshold) {
@@ -3326,12 +3461,15 @@ Ready to send payload...
               }
             </div>
 
-            <div class="flex items-center gap-3">
-              <div class="w-32 h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
+            <div class="flex items-center gap-2 sm:gap-3">
+              <span class="text-[11px] font-mono px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 border border-slate-200 dark:border-slate-700" title="مقدار دقیق محاسبه‌شده با این سنجه">
+                ${chunk.metricLabel || 'cos(θ)'}
+              </span>
+              <div class="w-24 sm:w-28 h-2 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
                 <div class="h-full ${isRetrieved ? 'bg-gradient-to-r from-emerald-500 to-teal-400' : 'bg-slate-400'}" style="width: ${percent}%"></div>
               </div>
               <span class="text-xs font-mono font-bold ${isRetrieved ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400'}">
-                ${percent}% Match
+                ${percent}%
               </span>
             </div>
           </div>
@@ -3344,7 +3482,7 @@ Ready to send payload...
       });
     }
 
-    // --- STEP 6: PROMPT AUGMENTATION BUILDER ---
+        // --- STEP 6: PROMPT AUGMENTATION BUILDER ---
     function buildAugmentedPrompt() {
       const systemPrompt = `شما یک دستیار هوش مصنوعی دقیق و قابل اعتماد سازمانی هستید.
 وظیفه شما پاسخ دادن به سوال کاربر صرفاً بر اساس «اطلاعات و تکه‌های مرجع» ارائه شده در زیر است.
