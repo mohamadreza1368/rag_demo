@@ -238,13 +238,6 @@ class RAGStudioHandler(http.server.SimpleHTTPRequestHandler):
             pkgs = ["transformers>=4.42.0", "torch>=2.1.0", "accelerate>=0.26.0", "huggingface-hub>=0.23.0"]
             pip_cmd = [sys.executable, "-m", "pip", "install", "--no-cache-dir"] + pkgs
 
-            pypi_index = os.environ.get("PIP_INDEX_URL") or os.environ.get("PYPI_INDEX")
-            pypi_host = os.environ.get("PIP_TRUSTED_HOST") or os.environ.get("PYPI_HOST")
-            if pypi_index:
-                pip_cmd.extend(["-i", pypi_index])
-            if pypi_host:
-                pip_cmd.extend(["--trusted-host", pypi_host])
-
             proc = subprocess.run(
                 pip_cmd,
                 stdout=subprocess.PIPE,

@@ -6,8 +6,6 @@ LABEL maintainer="mohamadreza1368"
 LABEL description="RAG Studio - Interactive and Operational Retrieval-Augmented Generation"
 
 ARG DEBIAN_MIRROR="https://linux.repo.ime.co.ir/repository/debian"
-ARG PYPI_INDEX="https://pypi.repo.ime.co.ir/repository/pypi-group/simple"
-ARG PYPI_HOST="pypi.repo.ime.co.ir"
 
 # Configure Debian APT mirror
 RUN set -eux; \
@@ -20,10 +18,8 @@ RUN set -eux; \
         sed -i "s|https://deb.debian.org/debian|${DEBIAN_MIRROR}|g" /etc/apt/sources.list; \
     fi
 
-# Configure PyPI mirror environment variables
-ENV PIP_INDEX_URL="${PYPI_INDEX}" \
-    PIP_TRUSTED_HOST="${PYPI_HOST}" \
-    PIP_NO_CACHE_DIR=1 \
+# Configure Python environment variables (Standard direct PyPI, no mirror)
+ENV PIP_NO_CACHE_DIR=1 \
     PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     DOCKER=1 \
@@ -33,8 +29,7 @@ ENV PIP_INDEX_URL="${PYPI_INDEX}" \
 WORKDIR /app
 
 # Copy dependency configuration
-COPY requirements.txt pip.conf /app/
-ENV PIP_CONFIG_FILE=/app/pip.conf
+COPY requirements.txt /app/
 
 # Install requirements with fallback stages (supports host network in BuildKit and fallback)
 RUN --network=host pip install --no-cache-dir transformers torch accelerate huggingface-hub || \

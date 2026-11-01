@@ -7,8 +7,6 @@ services:
       args:
         DOCKER_REGISTRY: ${DOCKER_REGISTRY:-dockerhub.ime.co.ir/}
         DEBIAN_MIRROR: ${DEBIAN_MIRROR:-https://linux.repo.ime.co.ir/repository/debian}
-        PYPI_INDEX: ${PYPI_INDEX:-https://pypi.repo.ime.co.ir/repository/pypi-group/simple}
-        PYPI_HOST: ${PYPI_HOST:-pypi.repo.ime.co.ir}
     image: dockerhub.ime.co.ir/rag-studio:latest
     container_name: rag_studio
     restart: unless-stopped
