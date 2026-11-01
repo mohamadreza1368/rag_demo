@@ -121,60 +121,37 @@ $$\text{Cosine Similarity}(A, B) = \frac{A \cdot B}{\|A\| \|B\|} = \frac{\sum_{i
 
 ---
 
-## 🚀 راهنمای نصب و راه‌اندازی سریع
+## 🚀 راهنمای نصب و راه‌اندازی (مستقل از داکر با Uvicorn و Python)
 
-### روش ۱: اجرا با Docker Compose روی سرور (پورت 8089 - ویژه سرورها و شبکه سازمانی)
-این پروژه به صورت کامل با **Docker** و **Docker Compose** پیکربندی شده و با رجیستری و مخازن میرور داخلی شرکت (`dockerhub.ime.co.ir`, `pypi.repo.ime.co.ir`, `linux.repo.ime.co.ir`, `npm.repo.ime.co.ir`) هماهنگ است.
+این سامانه به صورت کاملاً مستقل بر پایه **FastAPI** و **Uvicorn** پیاده‌سازی شده و نیازی به هیچ کانتینر یا داکر کامپوزی ندارد و روی آدرس شبکه `0.0.0.0` گوش می‌دهد تا از تمامی سیستم‌های متصل به شبکه محلی/سازمانی قابل دسترسی باشد.
 
-برای اجرای سرویس روی سرور با **پورت ۸۰۸۹**:
+### روش‌های اجرای سرور روی پورت دلخواه (مثلاً ۸۰۸۹):
 
+#### روش ۱: اجرا با Uvicorn (پیشنهادی، پرسرعت و پایدار)
 ```bash
-# ۱. کلون ریپازیتوری
-git clone https://github.com/mohamadreza1368/rag_demo.git
-cd rag_demo
-
-# ۲. اجرای کانتینر در پس‌زمینه با Docker Compose
-docker compose up -d --build
+uvicorn server:app --host 0.0.0.0 --port 8089
 ```
 
-پس از بالا آمدن کانتینر، سامانه روی آدرس زیر در دسترس خواهد بود:
-👉 **`http://<SERVER_IP>:8089`** (یا `http://localhost:8089`)
-
-#### مدیریت کانتینر:
+#### روش ۲: اجرا با اسکریپت پایتون (main.py یا server.py)
 ```bash
-# مشاهده لاگ‌ها
-docker compose logs -f
-
-# متوقف کردن سرویس
-docker compose down
+python main.py --port 8089
+# یا
+python server.py --port 8089
 ```
 
-> ⚙️ **تنظیمات پورت و متغیرها**: در صورت نیاز به تغییر پورت میزبان یا میرورها، می‌توانید مقادیر را در فایل `.env` تغییر دهید:
-> ```ini
-> HOST_PORT=8089
-> DOCKER_REGISTRY=dockerhub.ime.co.ir/
-> PYPI_INDEX=https://pypi.repo.ime.co.ir/repository/pypi-group/simple
-> ```
+#### روش ۳: اجرا در پس‌زمینه سرور لینوکس:
+```bash
+nohup uvicorn server:app --host 0.0.0.0 --port 8089 > rag_studio.log 2>&1 &
+```
 
 ---
 
-### روش ۲: استفاده از سرور پایتون لوکال (با پروکسی ضد-CORS)
-پروژه شامل یک اسکریپت سبک پایتونی با پروکسی اختصاصی است که نیازی به نصب کتابخانه جانبی ندارد:
+### 🌐 دسترسی به رابط کاربری (Web UI):
+پس از اجرا، سامانه از روی تمام کامپیوترهای دیگر شبکه قابل دسترسی است:
+* **از روی سرور:** `http://localhost:8089`
+* **از سیستم‌های دیگر شبکه:** `http://<IP_سرور>:8089`
 
-```bash
-# کلون کردن ریپازیتوری
-git clone https://github.com/mohamadreza1368/rag_demo.git
-cd rag_demo
 
-# اجرای سرور
-python server.py
-```
-مرورگر به صورت خودکار با آدرس **`http://localhost:8080`** باز خواهد شد (یا با تنظیم متغیر `PORT=8089 python server.py`).
-
-### روش ۳: اجرای مستقیم در مرورگر
-می‌توانید مستقیماً روی فایل `index.html` دوبار کلیک کنید. (برای اتصال به برخی APIهای خارجی بدون محدودیت CORS، استفاده از سرور پایتون یا داکر توصیه می‌شود).
-
----
 
 ## 🧬 راهنمای اتصال به مدل امبدینگ (Google EmbeddingGemma-2)
 
@@ -257,14 +234,10 @@ python server.py
 ```
 rag_demo/
 ├── index.html          # استودیو کامل، ریسپانسیو و تعاملی RAG با دیزاین مدرن
-├── server.py           # وب‌سرور سبک پایتون با پروکسی ضد-CORS و اندپوینت امبدینگ (/api/embed)
-├── Dockerfile          # فایل ساخت ایمیج داکر با پشتیبانی از میرورهای سازمانی
-├── docker-compose.yml  # پیکربندی اجرای داکر کامپوز روی پورت 8089
-├── .env.example        # نمونه متغیرهای محیطی، پورت‌ها و میرورها
-├── requirements.txt    # لیست وابستگی‌های اختیاری پایتون
-├── pip.conf            # تنظیمات مخزن داخلی PyPI
-├── .npmrc              # تنظیمات رجیستری داخلی npm
-├── .dockerignore       # استثناهای ساخت کانتینر داکر
+├── server.py           # سرور بر پایه FastAPI و Uvicorn با پروکسی ضد-CORS و اندپوینت امبدینگ
+├── main.py             # فایل اصلی اجرای پروژه با پایتون
+├── run.py              # اسکریپت اجرای سریع (Alias)
+├── requirements.txt    # پکیج‌های سبک پایتون (fastapi, uvicorn, httpx, python-multipart)
 ├── tailwind.min.js     # کتابخانه Tailwind CSS نسخه آفلاین و محلی
 ├── fonts.css           # پیکربندی فونت‌های فارسی و انگلیسی آفلاین
 ├── fonts/              # فایل‌های فونت Vazirmatn و JetBrains Mono (فرمت woff2)
