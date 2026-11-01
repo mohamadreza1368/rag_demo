@@ -9,6 +9,270 @@
   <!-- PDF.js for 100% Client-Side Offline PDF Extraction -->
   <script src="pdf.min.js"></script>
   <script>
+
+    // ==========================================
+    // EDUCATIONAL RAG TOPICS KNOWLEDGE BASE
+    // ==========================================
+    const EDUCATIONAL_TOPICS = {
+      ingestion: {
+        title: "ورود، پاکسازی و استخراج اسناد",
+        enTerm: "Document Ingestion & Preprocessing",
+        icon: "📥",
+        why: "اسناد اولیه سازمانی معمولاً در قالب‌های ناهمگون نظیر PDF، DOCX، HTML یا پایگاه‌های داده وجود دارند. کیفیت کل زنجیره RAG (قانون Garbage In, Garbage Out) به شدت وابسته به این است که چقدر متن خام، تمیز، عاری از کاراکترهای مخرب و دارای ابرداده‌های ساخت‌یافته استخراج گردد.",
+        how: "در این فاز، فایل بارگذاری‌شده به متن خالص تبدیل شده، حروف یکدست می‌شوند (مانند یکنواخت‌سازی ی و ک فارسی) و ابرداده‌هایی نظیر نام فایل، شماره صفحه، تاریخ سند و نویسنده به هر بخش متصل می‌شود تا در فاز بازیابی بتوان فیلترهای دقیق متادیتا اعمال کرد.",
+        formula: "CleanText = NormalizeUnicode(StripHeadersFooters(RawExtractedDoc))",
+        formulaDesc: "نرمال‌سازی یونی‌کد، حذف سرصفحه‌ها و پانویس‌های تکراری و استخراج ابرداده‌های ساخت‌یافته سند.",
+        tip: "در فایل‌های PDF فارسی یا دوزبانه، ترتیب کلمات در استخراج خام ممکن است معکوس شود. استفاده از کتابخانه‌هایی نظیر pdfplumber یا PyMuPDF همراه با Bidi-reordering برای حفظ ترتیب صحیح کلمات الزامی است."
+      },
+      chunking: {
+        title: "قطعه‌بندی هوشمند متن و پنجره بافت",
+        enTerm: "Smart Text Chunking",
+        icon: "✂️",
+        why: "مدل‌های زبانی دارای محدودیت پنجره بافت (Context Window) هستند و هر چه متن ارسالی طولانی‌تر باشد، هزینه توکن بالاتر و پدیده «گم‌شدن اطلاعات در میانه» (Lost in the Middle) رخ می‌دهد. همچنین قطعات کوچک‌تر، بردار معنایی متمرکزتر و دقیق‌تری تولید می‌کنند.",
+        how: "متن به بخش‌هایی با اندازه معین (مثلاً ۱۸۰ تا ۵۰۰ کاراکتر یا توکن) خرد می‌شود. الگوریتم بازگشتی (Recursive Character Splitter) ابتدا تلاش می‌کند در مرز پاراگراف‌ها (\n\n)، سپس مرز جملات (.) و در نهایت مرز کلمات برش ایجاد کند تا ساختار دستوری جمله شکسته نشود.",
+        formula: "Chunks = RecursiveSplit(text, chunkSize=C, overlap=O, separators=['\\n\\n', '\\n', '. ', ' '])",
+        formulaDesc: "برش بازگشتی با اولویت‌بندی جداکننده‌ها به طوری که اندازه هر قطعه حداکثر C کاراکتر باشد.",
+        tip: "اندازه چانک کوچک (۱۰۰-۲۰۰) برای بازیابی فکت‌های دقیق و جزئی عالی است؛ در حالی که اندازه بزرگ‌تر (۵۰۰-۱۰۰۰) برای خلاصه‌سازی و تحلیل روابط پیچیده بین مفاهیم بهتر عمل می‌کند."
+      },
+      overlap: {
+        title: "هم‌پوشانی چانک‌ها برای حفظ پیوستگی معنایی",
+        enTerm: "Chunk Overlap & Sliding Window",
+        icon: "🔗",
+        why: "اگر یک جمله یا شرط مهم دقیقاً در محل مرز برش بین دو چانک بیفتد، نیمی از معنا در قطعه اول و نیم دیگر در قطعه دوم قرار گرفته و معنای کامل آن توسط سیستم برداری قابل بازیابی نخواهد بود.",
+        how: "با تعریف هم‌پوشانی (مثلاً ۱۰ تا ۲۰ درصد اندازه چانک)، انتهای هر چانک در ابتدای چانک بعدی تکرار می‌شود (پنجره لغزان یا Sliding Window). بدین ترتیب زنجیره جملات در مرزها قطع نمی‌شود.",
+        formula: "Chunk[i+1].Start = Chunk[i].End - OverlapLength",
+        formulaDesc: "نقطه آغاز چانک بعدی به اندازه OverlapLength پیش از پایان چانک قبلی قرار می‌گیرد.",
+        tip: "افزایش بیش از حد Overlap باعث ایجاد افزونگی (Redundancy) و اشغال بیهوده توکن‌های بافت مدل می‌شود. مقدار بهینه معمولاً ۱۰٪ تا ۲۰٪ اندازه Chunk Size است."
+      },
+      embeddings: {
+        title: "بردارهای متراکم معنایی",
+        enTerm: "Dense Vector Embeddings",
+        icon: "🧬",
+        why: "رایانه‌ها متن را به صورت کاراکتری درک می‌کنند و متوجه مترادف‌ها، مفاهیم ضمنی و تشابه معنایی نمی‌شوند. امبدینگ‌ها متن را به یک بردار عددی چندبعدی تبدیل می‌کنند به طوری که کلمات و جملات با معنای نزدیک، در این فضا در همسایگی هم قرار گیرند.",
+        how: "یک شبکه عصبی ترنسفورمر (مانند google/embeddinggemma-2 یا BGE-m3) متن را خوانده و یک بردار با طول مشخص (مثلاً ۷۶۸ بعد) تولید می‌کند. این بردار نرمال‌سازی می‌شود تا طول آن برابر ۱ گردد (L2 Norm = 1.0).",
+        formula: "v = EmbedModel(text) \\in \\mathbb{R}^{d}, \\quad \\hat{v} = \\frac{v}{\\|v\\|_2}",
+        formulaDesc: "نگاشت متن به فضای برداری d-بعدی و نرمال‌سازی اقلیدسی جهت سازگاری با ضرب داخلی.",
+        tip: "برای متون فارسی یا چندزبانه حتماً از مدل‌های چندزبانه قدرتمند نظیر Multilingual-E5، BGE-M3 یا EmbeddingGemma استفاده کنید تا دقت بازیابی در زبان فارسی افت نکند."
+      },
+      pca: {
+        title: "کاهش بعد با تحلیل مؤلفه‌های اصلی (PCA)",
+        enTerm: "Principal Component Analysis (PCA)",
+        icon: "📊",
+        why: "بردارهای واقعی امبدینگ دارای ۳۸۴ تا ۱۵۳۶ بعد هستند که توسط ذهن انسان و نمایشگرهای دوبعدی قابل ترسیم نیستند. الگوریتم PCA بیشترین واریانس داده‌ها را به دو یا سه بعد اصلی نگاشت می‌دهد تا چیدمان هندسی خوشه‌ها قابل رویت باشد.",
+        how: "با محاسبه ماتریس کوواریانس بردارها و یافتن مقادیر و بردارهای ویژه (Eigenvectors)، دو راستایی که بیشترین پراکندگی اطلاعات را دارند انتخاب شده و بردارها روی این دو بعد تصویر (Project) می‌شوند.",
+        formula: "z_i = [v_i \\cdot u_1, \\, v_i \\cdot u_2], \\quad u_1, u_2 = \\text{Top-2 Eigenvectors of } \\Sigma",
+        formulaDesc: "تصویر بردار d-بعدی بر روی دو بردار ویژه اول ماتریس کوواریانس.",
+        tip: "تصویر دوبعدی صرفاً تقریب بصری است؛ مقایسه دقیق شباهت در دیتابیس همیشه روی کل ابعاد (مثلاً ۷۶۸ بعد کامل) صورت می‌پذیرد نه روی ۲ بعد PCA."
+      },
+      vector_db: {
+        title: "پایگاه داده برداری و ایندکس سلسله‌مراتبی HNSW",
+        enTerm: "Vector Database & HNSW Indexing",
+        icon: "🗄️",
+        why: "در دیتابیس‌های رابطه‌ای (مانند SQL) جستجوی شباهت معنایی بین بردارها نیازمند محاسبه فاصله با تک‌تک رکوردهای دیتابیس (اسکن کامل یا O(N)) است که با میلیونی شدن اسناد ثانیه‌ها طول می‌کشد. دیتابیس‌های برداری ایندکس‌های تقریبی فوق‌سریع دارند.",
+        how: "الگوریتم HNSW (Hierarchical Navigable Small World) یک گراف چندلایه شبیه به ساختار بزرگ‌راه‌ها و خیابان‌های شهری می‌سازد. در لایه‌های بالا جهش‌های بزرگ به سمت همسایگی بردار انجام شده و در لایه زیرین همسایه‌های دقیق واکشی می‌شوند با زمان O(log N).",
+        formula: "\\text{Query Complexity: } O(\\log N) \\quad \\text{vs Flat Scan: } O(N \\cdot d)",
+        formulaDesc: "پیچیدگی زمانی لگاریتمی در جستجوی همسایگی تقریبی (Approximate Nearest Neighbors).",
+        tip: "در پروژه‌های واقعی سازمانی از پایگاه‌های داده مطرح مانند Qdrant، Milvus یا pgvector استفاده کنید که پشتیبانی عالی از فیلترهای همزمان Metadata دارند."
+      },
+      retrieval: {
+        title: "بردارسازی سوال و جستجوی معنایی",
+        enTerm: "Vector Similarity Retrieval",
+        icon: "🔍",
+        why: "کاربران به زبان طبیعی و کلماتی متفاوت از متن سند سوال می‌پرسند (مثلاً «چند روز استراحت کاری دارم؟» در برابر «مرخصی استحقاقی»). جستجوی متنی سنتی این تطابق را نمی‌فهمد، اما جستجوی برداری مفهوم پشت کلمات را پیدا می‌کند.",
+        how: "سوال کاربر با همان مدل امبدینگ به یک بردار متراکم تبدیل می‌شود. سپس فاصله این بردار با تمامی رکوردهای پایگاه داده سنجیده شده و مواردی که بیشترین شباهت جهت‌گیری دارند استخراج می‌شوند.",
+        formula: "\\text{Top-K} = \\operatorname{arg\\,max}_{c \\in \\mathcal{C}}^{(K)} \\, \\operatorname{CosineSimilarity}(q, c)",
+        formulaDesc: "انتخاب K چانک از مجموعه چانک‌ها که بالاترین همبستگی کسینوسی با بردار سوال دارند.",
+        tip: "ترکیب جستجوی کلیدواژه‌ای (BM25) با جستجوی برداری که به Hybrid Search معروف است، بالاترین دقت را در پروژه‌های واقعی تولید می‌کند."
+      },
+      cosine_sim: {
+        title: "فرمول و مفهوم شباهت کسینوسی",
+        enTerm: "Cosine Similarity Metric",
+        icon: "📐",
+        why: "طول متن (تعداد کلمات) نباید بر شباهت تاثیر منفی بگذارد. برخلاف فاصله اقلیدسی که به اندازه بردار حساس است، شباهت کسینوسی صرفاً زاویه جهت‌گیری دو بردار در فضا را می‌سنجد.",
+        how: "با محاسبه ضرب داخلی دو بردار تقسیم بر حاصل‌ضرب طول آن‌ها، عددی بین -۱ (تضاد کامل)، ۰ (متعامد و بی‌ارتباط) و +۱ (انطباق کامل معنایی) به دست می‌آید.",
+        formula: "\\cos(\\theta) = \\frac{\\mathbf{A} \\cdot \\mathbf{B}}{\\|\\mathbf{A}\\| \\|\\mathbf{B}\\|} = \\frac{\\sum_{i=1}^d A_i B_i}{\\sqrt{\\sum_{i=1}^d A_i^2} \\sqrt{\\sum_{i=1}^d B_i^2}}",
+        formulaDesc: "محاسبه کسینوس زاویه بین دو بردار A و B در فضای d-بعدی.",
+        tip: "اگر بردارها پیش از ایندکس‌گذاری نرمال شوند (||A||=1)، محاسبه شباهت کسینوسی صرفاً به یک ضرب داخلی ساده (Dot Product) تبدیل شده و سرعت پردازش ده‌ها برابر می‌شود."
+      },
+      top_k: {
+        title: "تعداد نتایج منتخب (Top-K)",
+        enTerm: "Top-K Selection",
+        icon: "🎯",
+        why: "نمی‌توانیم تمام اسناد را به مدل بدهیم؛ باید دقیقاً تعداد مشخصی از شبیه‌ترین قطعات جدا شوند. انتخاب K مناسب تعادل میان «پوشش کامل اطلاعات» و «جلوگیری از ورود نویز و سردرگمی مدل» را تضمین می‌کند.",
+        how: "پس از رتبه‌بندی کل چانک‌ها بر اساس امتیاز شباهت، تنها K چانک نخست که بالاتر از حد آستانه هستند جدا شده و مابقی فیلتر می‌شوند.",
+        formula: "K \\in [2, 5] \\quad (\\text{معمولاً ۲ الی ۵ چانک برای پاسخ‌دهی بهینه})",
+        formulaDesc: "تنظیم K به صورت تابعی از اندازه پنجره کانتکست و حجم اطلاعات مورد نیاز سوال.",
+        tip: "مقدار K بالا (مثلاً ۱۰) اگرچه داده بیشتری می‌آورد، اما خطر ورود اطلاعات نامرتبط (Distractors) و کاهش دقت استدلال LLM را به همراه دارد."
+      },
+      threshold: {
+        title: "حد آستانه شباهت (Similarity Threshold)",
+        enTerm: "Minimum Similarity Threshold",
+        icon: "🛡️",
+        why: "گاهی کاربر سوالی کاملاً بی‌ربط می‌پرسد (مثلاً پرسیدن دستور پخت پیتزا از سیستم آیین‌نامه اداری!). اگر حد آستانه نباشد، سیستم باز هم نزدیک‌ترین چانک‌های نامربوط را واکشی می‌کند و مدل ممکن است توهم بزند.",
+        how: "یک فیلتر سخت‌گیرانه روی امتیاز شباهت قرار می‌گیرد (مثلاً 0.30 یا 30%). چانک‌هایی که امتیازشان پایین‌تر از این حد باشد، حتی اگر در بین رتبه‌های برتر باشند، کنار گذاشته می‌شوند.",
+        formula: "\\text{ValidChunks} = \\{ c \\in \\text{Top-K} \\mid \\operatorname{Sim}(q, c) \\ge \\tau \\}",
+        formulaDesc: "پالایش چانک‌های دارای امتیاز شباهت بزرگتر یا مساوی حد آستانه tau.",
+        tip: "اگر هیچ چانکی از حد آستانه عبور نکرد، سیستم باید به جای ارسال داده بی‌ربط به مدل، فوراً پیام «اطلاعاتی در این زمینه در اسناد موجود نیست» را برگرداند."
+      },
+      augmentation: {
+        title: "تقویت پرامپت و مهندسی کانتکست",
+        enTerm: "Context Augmentation & Prompt Engineering",
+        icon: "🧬",
+        why: "مدل زبانی به خودی خود نمی‌داند کدام بخش کانتکست است و کدام بخش سوال. یک ساختاردهی مهندسی‌شده و استاندارد، مرز بین دستورات سیستم، فکت‌های مرجع و سوال کاربر را برای هوش مصنوعی شفاف می‌سازد.",
+        how: "پرامپت نهایی از ترکیب ۳ عنصر تشکیل می‌شود: ۱- دستورالعمل سیستم (Strict Rules)، ۲- تکه‌های استخراج‌شده با برچسب‌گذاری منبع [منبع ۱]، [منبع ۲]، ۳- سوال صریح کاربر.",
+        formula: "Prompt = [\\text{SystemInstructions}] + \\sum_{i=1}^k [\\text{Source } i: c_i] + [\\text{UserQuery}]",
+        formulaDesc: "ترکیب ساخت‌یافته دستورالعمل سیستمی، کانتکست‌های مرجع و پرسش کاربر.",
+        tip: "در سیستم پرامپت حتماً قید کنید: «تنها در صورتی که پاسخ در منابع داده‌شده وجود دارد پاسخ دهید، در غیر این صورت صراحتاً اعلام کنید در مستندات یافت نشد.» این جمله بیش از ۸۰٪ توهم مدل را کاهش می‌دهد."
+      },
+      grounded_gen: {
+        title: "تولید مستند به منابع و رفع توهم",
+        enTerm: "Grounded Generation & Citation",
+        icon: "📝",
+        why: "هدف نهایی RAG، ارائه پاسخی است که قابل استناد، ممیزی و حسابرسی باشد. کاربران و سازمان‌ها باید مطمئن باشند پاسخ هوش مصنوعی از پیش‌فرض‌های نامعلوم نیامده بلکه مستقیماً از پاراگراف مشخصی در سند استخراج شده است.",
+        how: "مدل موظف است در پاسخ خود، شماره منبع را با علائمی نظیر [منبع ۱، صفحه ۲] ذکر کند. در سمت فرانت‌اند، این علائم به تگ‌ها و هایلایت‌های تعاملی تبدیل می‌شوند.",
+        formula: "\\text{Answer} = \\operatorname{LLM}(Prompt) \\quad \\text{Subject to: } \\forall \\text{claim } \\exists \\text{Citation}(c_i)",
+        formulaDesc: "تولید زبانی مقید به این که هر ادعا دارای استناد به یکی از تکه‌های کانتکست باشد.",
+        tip: "ارائه پاسخ به صورت استریم (Streaming SSE) تجربه کاربری بسیار روان‌تری نسبت به انتظار چند ثانیه‌ای ایجاد می‌کند."
+      },
+      rag_triad: {
+        title: "ارزیابی سه‌گانه سیستم‌های RAG",
+        enTerm: "The RAG Triad Evaluation Framework",
+        icon: "📊",
+        why: "بدون متریک‌های شفاف نمی‌توان فهمید آیا سیستم RAG عملکرد مطلوبی دارد یا کجای پایپ‌لاین ایراد دارد. شاخص‌های سه‌گانه RAG Triad استاندارد صنعتی برای ارزیابی این معماری هستند.",
+        how: "این چارچوب سه محور مستقل را می‌سنجد: ۱- وفاداری (Faithfulness): آیا پاسخ صرفاً از کانتکست آمده و توهم ندارد؟ ۲- ربط کانتکست (Context Relevance): آیا چانک‌های واکشی‌شده واقعاً به سوال مربوطند؟ ۳- ربط پاسخ (Answer Relevance): آیا پاسخ واقعاً سوال کاربر را حل کرده است؟",
+        formula: "\\text{RAG Triad} = \\langle \\text{Faithfulness}(A, C), \\; \\text{ContextRelevance}(C, Q), \\; \\text{AnswerRelevance}(A, Q) \\rangle",
+        formulaDesc: "سه‌گانه ارزیابی: وفاداری پاسخ به کانتکست، ربط کانتکست به سوال، و ربط پاسخ به سوال.",
+        tip: "فریم‌ورک‌هایی نظیر TruLens و Ragas برای محاسبه خودکار این ۳ شاخص در محیط Production استفاده می‌شوند."
+      }
+    };
+
+    // ==========================================
+    // EDUCATIONAL CONCEPT MODAL CONTROLLER
+    // ==========================================
+    function showConceptHelp(topicKey) {
+      const topic = EDUCATIONAL_TOPICS[topicKey];
+      if (!topic) return;
+
+      const modal = document.getElementById('helpConceptModal');
+      if (!modal) return;
+
+      document.getElementById('conceptHelpIconBox').innerText = topic.icon || '💡';
+      document.getElementById('conceptHelpTitle').innerText = topic.title;
+      document.getElementById('conceptHelpEnTerm').innerText = topic.enTerm || '';
+      document.getElementById('conceptHelpWhy').innerText = topic.why;
+      document.getElementById('conceptHelpHow').innerText = topic.how;
+
+      const formulaContainer = document.getElementById('conceptHelpFormulaContainer');
+      if (topic.formula) {
+        formulaContainer.classList.remove('hidden');
+        document.getElementById('conceptHelpFormula').innerText = topic.formula;
+        document.getElementById('conceptHelpFormulaDesc').innerText = topic.formulaDesc || '';
+      } else {
+        formulaContainer.classList.add('hidden');
+      }
+
+      document.getElementById('conceptHelpTip').innerText = topic.tip || '';
+      modal.classList.remove('hidden');
+    }
+
+    function closeConceptHelpModal() {
+      const modal = document.getElementById('helpConceptModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    // ==========================================
+    // VECTOR DATABASE RECORD INSPECTOR MODAL
+    // ==========================================
+    let currentInspectedRecordIdx = 0;
+
+    function openVectorRecordModal(idx) {
+      if (!chunks[idx]) return;
+      currentInspectedRecordIdx = idx;
+      const chunk = chunks[idx];
+      const modal = document.getElementById('vectorRecordModal');
+      if (!modal) return;
+
+      document.getElementById('recordModalId').innerText = `#chk-${chunk.id.toString().padStart(3, '0')}`;
+      document.getElementById('recordModalFullText').innerText = chunk.text;
+      document.getElementById('recordModalSource').innerText = chunk.source || (currentPdfMeta ? currentPdfMeta.fileName : currentPresetKey);
+      document.getElementById('recordModalChars').innerText = `${chunk.length || chunk.text.length} کاراکتر`;
+
+      const vec = chunk.vector || [];
+      const dim = vec.length || 32;
+      document.getElementById('recordModalDim').innerText = `${dim}-بعدی`;
+
+      // Calculate L2 Norm = sqrt(sum(v_i^2))
+      let norm = 0;
+      if (vec.length > 0) {
+        for (let i = 0; i < vec.length; i++) norm += vec[i] * vec[i];
+        norm = Math.sqrt(norm);
+      }
+      document.getElementById('recordModalL2Norm').innerText = `||v|| ≈ ${norm.toFixed(3)}`;
+
+      // Render dense vector heatmap
+      const heatmap = document.getElementById('recordModalHeatmap');
+      if (heatmap) {
+        heatmap.innerHTML = '';
+        vec.forEach((val, i) => {
+          const cell = document.createElement('div');
+          const clamped = Math.max(-1, Math.min(1, val));
+          let bg = '';
+          if (clamped > 0) {
+            const opacity = Math.min(1, Math.abs(clamped));
+            bg = `rgba(16, 185, 129, ${0.25 + opacity * 0.75})`;
+          } else {
+            const opacity = Math.min(1, Math.abs(clamped));
+            bg = `rgba(239, 68, 68, ${0.25 + opacity * 0.75})`;
+          }
+          cell.style.backgroundColor = bg;
+          cell.className = 'w-full h-3.5 rounded-xs transition hover:scale-125 hover:z-10 cursor-help';
+          cell.title = `Dim #${i + 1}: ${Number(val).toFixed(4)}`;
+          heatmap.appendChild(cell);
+        });
+      }
+
+      // Render raw vector numbers
+      const arrayBox = document.getElementById('recordModalVectorArray');
+      if (arrayBox) {
+        const formatted = '[
+  ' + vec.map(v => Number(v).toFixed(4)).join(', ') + '
+]';
+        arrayBox.innerText = formatted;
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeVectorRecordModal() {
+      const modal = document.getElementById('vectorRecordModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function copyRecordText() {
+      const chunk = chunks[currentInspectedRecordIdx];
+      if (!chunk) return;
+      navigator.clipboard.writeText(chunk.text).then(() => {
+        showToast('متن کامل چانک با موفقیت کپی شد! 📋', 'success');
+      });
+    }
+
+    function copyRecordFullVector() {
+      const chunk = chunks[currentInspectedRecordIdx];
+      if (!chunk || !chunk.vector) return;
+      const json = JSON.stringify(chunk.vector, null, 2);
+      navigator.clipboard.writeText(json).then(() => {
+        showToast(`کل آرایه بردار (${chunk.vector.length} بعد) در کلیپ‌بورد کپی شد! 🔢`, 'success');
+      });
+    }
+
+    function jumpToChunkIn2DSpace() {
+      closeVectorRecordModal();
+      inspectSelectedChunk(currentInspectedRecordIdx);
+      goToStep(3);
+      showToast(`ناوبری به فضای دو بعدی PCA برای چانک #${currentInspectedRecordIdx + 1}`, 'info');
+    }
+
+
     if (window.pdfjsLib) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
     }
@@ -318,6 +582,7 @@
           <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-bold mb-2 border border-brand-500/20">
               <span>گام ۱ از ۷</span> • <span>بارگذاری اسناد پایگاه دانش (Document Ingestion)</span>
+              <button type="button" onclick="showConceptHelp('ingestion')" class="w-5 h-5 rounded-full bg-brand-200 dark:bg-brand-900 text-brand-800 dark:text-brand-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای مفهومی ورود و پردازش اسناد">❓</button>
             </div>
             <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">انتخاب، ورود متن، یا آپلود فایل PDF</h2>
             <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -433,6 +698,7 @@
           <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold mb-2 border border-amber-500/20">
               <span>گام ۲ از ۷</span> • <span>قطعه‌بندی هوشمند متن (Recursive Text Splitting)</span>
+              <button type="button" onclick="showConceptHelp('chunking')" class="w-5 h-5 rounded-full bg-amber-200 dark:bg-amber-900 text-amber-800 dark:text-amber-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای استراتژی‌های قطعه‌بندی متن">❓</button>
             </div>
             <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">تنظیم اندازه چانک‌ها و هم‌پوشانی (Overlap)</h2>
             <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -450,7 +716,10 @@
         <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-5 p-4 rounded-2xl bg-slate-100/60 dark:bg-slate-800/30 border border-slate-200/80 dark:border-slate-700/60">
           <div>
             <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-              <span>اندازه هر قطعه (Chunk Size):</span>
+              <span class="flex items-center gap-1">
+                <span>اندازه هر قطعه (Chunk Size):</span>
+                <button type="button" onclick="showConceptHelp('chunking')" class="text-[10px] text-slate-400 hover:text-brand-600">❓</button>
+              </span>
               <span id="chunkSizeDisplay" class="text-brand-600 font-mono bg-brand-50 dark:bg-brand-950/60 px-2 py-0.5 rounded-md">180</span>
             </div>
             <input type="range" id="chunkSizeSlider" min="80" max="500" step="20" value="180" oninput="recomputeChunks()" class="w-full">
@@ -459,7 +728,10 @@
 
           <div>
             <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-              <span>هم‌پوشانی (Chunk Overlap):</span>
+              <span class="flex items-center gap-1">
+                <span>هم‌پوشانی (Chunk Overlap):</span>
+                <button type="button" onclick="showConceptHelp('overlap')" class="text-[10px] text-slate-400 hover:text-amber-600">❓</button>
+              </span>
               <span id="chunkOverlapDisplay" class="text-amber-500 font-mono bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-md">35</span>
             </div>
             <input type="range" id="chunkOverlapSlider" min="0" max="100" step="5" value="35" oninput="recomputeChunks()" class="w-full">
@@ -467,7 +739,10 @@
           </div>
 
           <div>
-            <div class="text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">الگوریتم قطعه‌بندی:</div>
+            <div class="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+              <span>الگوریتم قطعه‌بندی:</span>
+              <button type="button" onclick="showConceptHelp('chunking')" class="text-[10px] text-slate-400 hover:text-brand-600">❓</button>
+            </div>
             <select id="splitterAlgorithmSelect" onchange="recomputeChunks()" class="w-full p-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-medium focus:ring-2 focus:ring-brand-500">
               <option value="recursive">Recursive Character (هوشمند بازگشتی بر اساس پاراگراف و جمله)</option>
               <option value="sentence">Sentence Splitter (بر اساس پایان جملات)</option>
@@ -506,6 +781,7 @@
           <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-bold mb-2 border border-sky-500/20">
               <span>گام ۳ از ۷</span> • <span>تبدیل چانک‌ها به بردارهای متراکم (Text Embeddings)</span>
+              <button type="button" onclick="showConceptHelp('embeddings')" class="w-5 h-5 rounded-full bg-sky-200 dark:bg-sky-900 text-sky-800 dark:text-sky-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای مفهومی بردارهای متراکم">❓</button>
             </div>
             <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">فضای برداری و تصویرسازی دوبعدی با کاهش بعد (PCA)</h2>
             <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -532,6 +808,7 @@
               <div class="flex items-center gap-2">
                 <span class="w-3 h-3 rounded-full bg-brand-500 animate-pulse"></span>
                 <span class="text-xs font-bold text-slate-800 dark:text-slate-200">نمودار تعاملی فضای برداری ۲ بعدی (PCA Projection)</span>
+                <button type="button" onclick="showConceptHelp('pca')" class="text-[10px] text-slate-400 hover:text-brand-600" title="تحلیل مؤلفه‌های اصلی (PCA) چیست؟">❓</button>
               </div>
               <span id="embeddingDimBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300 font-semibold">
                 32-dim Dense ➔ 2D Plane
@@ -619,6 +896,7 @@
           <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-xs font-bold mb-2 border border-purple-500/20">
               <span>گام ۴ از ۷</span> • <span>ایندکس‌گذاری پایگاه داده برداری (Vector Store & Indexing)</span>
+              <button type="button" onclick="showConceptHelp('vector_db')" class="w-5 h-5 rounded-full bg-purple-200 dark:bg-purple-900 text-purple-800 dark:text-purple-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای مفهومی پایگاه داده برداری و ایندکس HNSW">❓</button>
             </div>
             <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">جدول ذخیره‌سازی بردارها و فراداده‌ها (Vector Index)</h2>
             <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -634,8 +912,19 @@
           </div>
         </div>
 
+        <!-- Educational Hint Card -->
+        <div class="mt-4 p-3.5 rounded-2xl bg-gradient-to-r from-purple-50/80 to-indigo-50/80 dark:from-purple-950/40 dark:to-indigo-950/40 border border-purple-200/80 dark:border-purple-800/60 flex items-center justify-between text-xs text-purple-900 dark:text-purple-200 shadow-xs">
+          <div class="flex items-center gap-2.5">
+            <span class="text-base">💡</span>
+            <span>روی هر ردیف کلیک کنید تا <strong>شناسنامه کامل رکورد، مقادیر عددی بردار متراکم، نقشه حرارتی و متادیتا</strong> در مودال نمایش داده شود.</span>
+          </div>
+          <span class="text-[10px] font-mono px-2.5 py-1 rounded-lg bg-purple-200/70 dark:bg-purple-900/80 text-purple-800 dark:text-purple-200 font-bold hidden sm:inline-block">
+            👆 کلیک برای مشاهده رکورد
+          </span>
+        </div>
+
         <!-- Table Container -->
-        <div class="mt-5 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
+        <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm">
           <div class="max-h-[380px] overflow-y-auto">
             <table class="w-full text-right text-xs">
               <thead class="sticky top-0 bg-slate-100/90 dark:bg-slate-800/90 backdrop-blur-xs text-slate-700 dark:text-slate-300 border-b border-slate-200 dark:border-slate-700">
@@ -645,6 +934,7 @@
                   <th class="p-3.5">فراداده (Metadata)</th>
                   <th class="p-3.5">اثر انگشت بردار (Vector Preview)</th>
                   <th class="p-3.5 text-center">وضعیت ایندکس</th>
+                  <th class="p-3.5 text-center">شناسنامه رکورد</th>
                 </tr>
               </thead>
               <tbody id="vectorStoreTableBody" class="divide-y divide-slate-100 dark:divide-slate-800/80 bg-white/50 dark:bg-slate-900/50">
@@ -693,6 +983,7 @@
           <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold mb-2 border border-emerald-500/20">
               <span>گام ۵ از ۷</span> • <span>بردارسازی پرسش و بازیابی برترین چانک‌ها (Vector Retrieval)</span>
+              <button type="button" onclick="showConceptHelp('retrieval')" class="w-5 h-5 rounded-full bg-emerald-200 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای بازیابی برداری">❓</button>
             </div>
             <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">محاسبه شباهت کسینوسی پرسش کاربر با پایگاه دانش</h2>
             <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -724,7 +1015,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 my-5 p-4 rounded-2xl bg-slate-100/60 dark:bg-slate-800/30 border border-slate-200/80 dark:border-slate-700/60">
           <div>
             <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-              <span>تعداد برترین نتایج برای تزریق (Top-K Chunks):</span>
+              <span class="flex items-center gap-1"><span>تعداد برترین نتایج برای تزریق (Top-K Chunks):</span><button type="button" onclick="showConceptHelp('top_k')" class="text-[10px] text-slate-400 hover:text-brand-600" title="Top-K در بازیابی چیست؟">❓</button></span>
               <span id="topKValueLabel" class="text-brand-600 font-mono bg-brand-50 dark:bg-brand-950/60 px-2 py-0.5 rounded-md">2</span>
             </div>
             <input type="range" id="topKSlider" min="1" max="5" value="2" oninput="document.getElementById('topKValueLabel').innerText=this.value; executeLiveRetrieval();" class="w-full">
@@ -733,7 +1024,7 @@
 
           <div>
             <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-              <span>حداقل آستانه شباهت (Min Similarity Threshold):</span>
+              <span class="flex items-center gap-1"><span>حداقل آستانه شباهت (Min Similarity Threshold):</span><button type="button" onclick="showConceptHelp('threshold')" class="text-[10px] text-slate-400 hover:text-emerald-600" title="حد آستانه شباهت چیست؟">❓</button></span>
               <span id="thresholdValueLabel" class="text-emerald-500 font-mono bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">30%</span>
             </div>
             <input type="range" id="thresholdSlider" min="5" max="80" step="5" value="30" oninput="document.getElementById('thresholdValueLabel').innerText=this.value+'%'; executeLiveRetrieval();" class="w-full">
@@ -744,8 +1035,9 @@
         <!-- Ranked Retrieval List -->
         <div class="space-y-3">
           <div class="flex justify-between items-center">
-            <h3 class="text-xs font-bold text-slate-700 dark:text-slate-200">
-              نتایج رتبه‌بندی شده شباهت کسینوسی (Similarity Ranking):
+            <h3 class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
+              <span>نتایج رتبه‌بندی شده شباهت کسینوسی (Similarity Ranking):</span>
+              <button type="button" onclick="showConceptHelp('cosine_sim')" class="text-[10px] text-slate-400 hover:text-brand-600" title="فرمول و مفهوم شباهت کسینوسی">❓</button>
             </h3>
             <span id="retrievalStatsBadge" class="text-xs text-brand-600 dark:text-brand-400 font-bold bg-brand-50 dark:bg-brand-950/50 px-2.5 py-1 rounded-lg border border-brand-200 dark:border-brand-800">
               در حال ارزیابی...
@@ -774,6 +1066,7 @@
           <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold mb-2 border border-rose-500/20">
               <span>گام ۶ از ۷</span> • <span>سنتز و تقویت پرامپت (Context Augmentation)</span>
+              <button type="button" onclick="showConceptHelp('augmentation')" class="w-5 h-5 rounded-full bg-rose-200 dark:bg-rose-900 text-rose-800 dark:text-rose-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای تقویت پرامپت">❓</button>
             </div>
             <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">سنتز و تزریق کانتکست به پرامپت ارسالی به هوش مصنوعی</h2>
             <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -870,6 +1163,7 @@
           <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold mb-2 border border-emerald-500/20">
               <span>گام ۷ از ۷ (عملیاتی نهایی)</span> • <span>تولید استریم زنده و استناددهی (Grounded Generation)</span>
+              <button type="button" onclick="showConceptHelp('grounded_gen')" class="w-5 h-5 rounded-full bg-emerald-200 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای تولید مستند و رفع توهم">❓</button>
             </div>
             <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">پاسخ مستند مدل زبانی با دریافت لحظه‌ای توکن‌ها</h2>
             <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -948,7 +1242,7 @@
             <!-- Metrics Panel -->
             <div class="p-4 rounded-2xl bg-slate-100/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 space-y-3">
               <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
-                <span>📊 ارزیابی سه‌گانه (RAG Triad)</span>
+                <span class="flex items-center gap-1"><span>📊 ارزیابی سه‌گانه (RAG Triad)</span><button type="button" onclick="showConceptHelp('rag_triad')" class="text-[10px] text-slate-400 hover:text-brand-600" title="شاخص‌های سه‌گانه RAG چیست؟">❓</button></span>
                 <span id="networkLatencyBadge" class="text-[10px] font-mono text-slate-400 bg-white dark:bg-slate-900 px-2 py-0.5 rounded">Latency: - ms</span>
               </h4>
 
@@ -1331,6 +1625,183 @@ Ready to send payload...
       </div>
       <div class="mt-4">
         <pre id="rawLogFullContent" class="p-4 rounded-2xl bg-black/80 font-mono text-xs text-emerald-400 overflow-y-auto max-h-[460px] whitespace-pre-wrap border border-slate-800"></pre>
+      </div>
+    </div>
+  </div>
+
+  
+  <!-- EDUCATIONAL CONCEPT HELP MODAL -->
+  <div id="helpConceptModal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl relative max-h-[88vh] overflow-y-auto">
+      <div class="flex justify-between items-center pb-4 border-b border-slate-200/80 dark:border-slate-800">
+        <div class="flex items-center gap-3">
+          <div id="conceptHelpIconBox" class="w-10 h-10 rounded-2xl bg-brand-500/10 text-brand-600 flex items-center justify-center text-xl shadow-xs">
+            💡
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="conceptHelpTag" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300">مفهوم آموزشی RAG</span>
+              <span id="conceptHelpEnTerm" class="text-[11px] font-mono text-slate-400">Concept</span>
+            </div>
+            <h3 id="conceptHelpTitle" class="font-black text-slate-900 dark:text-white text-base sm:text-lg mt-0.5">عنوان مفهوم</h3>
+          </div>
+        </div>
+        <button onclick="closeConceptHelpModal()" class="w-8 h-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center transition">
+          ✕
+        </button>
+      </div>
+
+      <div class="mt-5 space-y-4 text-xs leading-relaxed">
+        <!-- Summary / Why it matters -->
+        <div class="p-4 rounded-2xl bg-gradient-to-r from-brand-50/60 to-indigo-50/40 dark:from-brand-950/30 dark:to-indigo-950/20 border border-brand-200/70 dark:border-brand-900/50">
+          <div class="font-bold text-brand-800 dark:text-brand-300 text-xs mb-1 flex items-center gap-1.5">
+            <span>🎯</span> چرا در معماری RAG به این مفهوم نیاز داریم؟
+          </div>
+          <p id="conceptHelpWhy" class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
+            ...
+          </p>
+        </div>
+
+        <!-- How it works -->
+        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800">
+          <div class="font-bold text-slate-800 dark:text-slate-200 text-xs mb-1 flex items-center gap-1.5">
+            <span>⚙️</span> مکانیزم کارکرد و جزئیات فنی:
+          </div>
+          <p id="conceptHelpHow" class="text-slate-600 dark:text-slate-300 text-xs leading-relaxed whitespace-pre-line">
+            ...
+          </p>
+        </div>
+
+        <!-- Math or Formula / Equivalent Code if applicable -->
+        <div id="conceptHelpFormulaContainer" class="p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-200/70 dark:border-indigo-900/50">
+          <div class="font-bold text-indigo-800 dark:text-indigo-300 text-xs mb-1 flex items-center gap-1.5">
+            <span>📐</span> فرمول ریاضی یا استاندارد پیاده‌سازی:
+          </div>
+          <div id="conceptHelpFormula" class="font-mono text-[11px] text-center bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-indigo-100 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 my-2 shadow-2xs">
+            ...
+          </div>
+          <p id="conceptHelpFormulaDesc" class="text-[11px] text-indigo-900/80 dark:text-indigo-300/80 leading-relaxed">
+            ...
+          </p>
+        </div>
+
+        <!-- Pro-Tips / Best Practices -->
+        <div class="p-3.5 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-900/50 text-[11px]">
+          <div class="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5 mb-1">
+            <span>💡</span> نکته طلایی برای محیط واقعی (Production Best Practice):
+          </div>
+          <p id="conceptHelpTip" class="text-emerald-900 dark:text-emerald-200/90 leading-relaxed">
+            ...
+          </p>
+        </div>
+      </div>
+
+      <div class="flex justify-end mt-6 pt-4 border-t border-slate-200/80 dark:border-slate-800">
+        <button onclick="closeConceptHelpModal()" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition shadow-xs">
+          متوجه شدم
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- VECTOR DATABASE RECORD INSPECTOR MODAL -->
+  <div id="vectorRecordModal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-3xl w-full p-6 sm:p-7 shadow-2xl relative max-h-[88vh] overflow-y-auto">
+      <div class="flex justify-between items-center pb-4 border-b border-slate-200/80 dark:border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-purple-500/10 text-purple-600 flex items-center justify-center text-xl shadow-xs">
+            💾
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="recordModalId" class="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-purple-100 dark:bg-purple-950 text-purple-700 dark:text-purple-300">
+                #chk-001
+              </span>
+              <span class="inline-flex items-center gap-1 text-[10px] px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-300/60 dark:border-emerald-800">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                ایندکس‌شده در حافظه (Indexed)
+              </span>
+            </div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-base mt-1">شناسنامه کامل رکورد پایگاه داده برداری</h3>
+          </div>
+        </div>
+        <button onclick="closeVectorRecordModal()" class="w-8 h-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center transition">
+          ✕
+        </button>
+      </div>
+
+      <div class="mt-5 space-y-4">
+        <!-- Document Text Block with Copy Button -->
+        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <span>📄</span> محتوای کامل متن چانک (Document Text):
+            </span>
+            <button onclick="copyRecordText()" class="text-xs px-2.5 py-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:text-brand-600 font-bold flex items-center gap-1 transition shadow-2xs">
+              <span>📋</span> کپی متن
+            </button>
+          </div>
+          <div id="recordModalFullText" class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-200 leading-relaxed max-h-48 overflow-y-auto whitespace-pre-wrap select-text">
+            متن چانک در اینجا قرار خواهد گرفت...
+          </div>
+        </div>
+
+        <!-- Metadata Grid -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 text-xs">
+            <div class="text-[10px] text-slate-400 mb-0.5">منبع سند (Source)</div>
+            <div id="recordModalSource" class="font-bold text-slate-800 dark:text-slate-200 font-mono truncate">company</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 text-xs">
+            <div class="text-[10px] text-slate-400 mb-0.5">طول کاراکتر</div>
+            <div id="recordModalChars" class="font-bold text-slate-800 dark:text-slate-200 font-mono">180</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 text-xs">
+            <div class="text-[10px] text-slate-400 mb-0.5">تعداد ابعاد بردار</div>
+            <div id="recordModalDim" class="font-bold text-brand-600 font-mono">768-D</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 text-xs">
+            <div class="text-[10px] text-slate-400 mb-0.5">نُرم بردار (L2 Norm)</div>
+            <div id="recordModalL2Norm" class="font-bold text-emerald-600 font-mono">||v|| ≈ 1.000</div>
+          </div>
+        </div>
+
+        <!-- Dense Vector Heatmap -->
+        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <span>🧬</span> نقشه حرارتی بردار متراکم (Dense Vector Heatmap):
+            </span>
+            <span class="text-[10px] font-mono text-slate-400">طیف رنگی: [-1.0 تا +1.0]</span>
+          </div>
+          <div id="recordModalHeatmap" class="grid grid-cols-16 sm:grid-cols-32 gap-0.5 min-h-[36px] max-h-24 overflow-y-auto p-1.5 rounded-xl bg-slate-900 border border-slate-800">
+            <!-- Populated via JS -->
+          </div>
+        </div>
+
+        <!-- Raw Numbers Inspector with JSON Array Copy -->
+        <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 text-xs space-y-2">
+          <div class="flex justify-between items-center">
+            <span class="font-mono text-[11px] text-emerald-400 flex items-center gap-1.5">
+              <span>🔢</span> مقادیر کامل اعشاری بردار (Float32 Array):
+            </span>
+            <button onclick="copyRecordFullVector()" class="text-[10px] px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800 text-slate-200 hover:text-white font-mono flex items-center gap-1 transition">
+              <span>📋</span> کپی کل آرایه (JSON)
+            </button>
+          </div>
+          <div id="recordModalVectorArray" class="font-mono text-[10px] p-3 rounded-xl bg-black/80 text-emerald-400 overflow-y-auto max-h-36 whitespace-pre-wrap border border-slate-800 text-left select-all" style="direction: ltr;">
+            [ 0.0000, ... ]
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mt-6 pt-4 border-t border-slate-200/80 dark:border-slate-800">
+        <button onclick="jumpToChunkIn2DSpace()" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-300 dark:border-sky-800 text-sky-700 dark:text-sky-300 text-xs font-bold hover:bg-sky-100 transition flex items-center justify-center gap-1.5">
+          <span>🎯 مشاهده نقطه این چانک در فضای دو بعدی PCA (گام ۳)</span>
+        </button>
+        <button onclick="closeVectorRecordModal()" class="w-full sm:w-auto px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition shadow-xs">
+          بستن
+        </button>
       </div>
     </div>
   </div>
@@ -2702,6 +3173,7 @@ Ready to send payload...
       });
     }
 
+
     // --- STEP 4: VECTOR DATABASE TABLE ---
     function renderVectorDatabaseTable() {
       const tbody = document.getElementById('vectorStoreTableBody');
@@ -2710,24 +3182,24 @@ Ready to send payload...
 
       chunks.forEach((chunk, idx) => {
         const tr = document.createElement('tr');
-        tr.className = "hover:bg-slate-100/70 dark:hover:bg-slate-800/60 transition cursor-pointer";
+        tr.className = "hover:bg-purple-50/60 dark:hover:bg-purple-950/30 transition cursor-pointer group";
         tr.onclick = () => {
-          inspectSelectedChunk(idx);
-          goToStep(3);
+          openVectorRecordModal(idx);
         };
 
         const color = CHUNK_PALETTE[idx % CHUNK_PALETTE.length];
-        const preview = chunk.vector ? chunk.vector.slice(0, 4).map(v => v.toFixed(2)).join(', ') : '...';
+        const preview = chunk.vector ? chunk.vector.slice(0, 4).map(v => Number(v).toFixed(2)).join(', ') : '...';
+        const dim = chunk.vector ? chunk.vector.length : 32;
 
         tr.innerHTML = `
           <td class="p-3.5 font-mono font-bold ${color.text}">
             #chk-${chunk.id.toString().padStart(3, '0')}
           </td>
-          <td class="p-3.5 max-w-xs text-slate-800 dark:text-slate-200 line-clamp-1 font-medium">
+          <td class="p-3.5 max-w-xs text-slate-800 dark:text-slate-200 line-clamp-1 font-medium group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors">
             ${escapeHtml(chunk.text)}
           </td>
           <td class="p-3.5 text-[11px] text-slate-500 font-mono">
-            {"chars": ${chunk.length}, "source": "${chunk.source || currentPresetKey}"${chunk.page ? `, "page": ${chunk.page}` : ''}}
+            {"chars": ${chunk.length}, "dim": ${dim}${chunk.page ? `, "page": ${chunk.page}` : ''}}
           </td>
           <td class="p-3.5 font-mono text-[11px] text-brand-600 dark:text-brand-400">
             [${preview}, ...]
@@ -2736,6 +3208,12 @@ Ready to send payload...
             <span class="inline-flex items-center gap-1 text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-300/60 dark:border-emerald-800">
               Indexed
             </span>
+          </td>
+          <td class="p-3.5 text-center">
+            <button type="button" onclick="event.stopPropagation(); openVectorRecordModal(${idx})" class="px-2.5 py-1 rounded-lg bg-purple-100/80 hover:bg-purple-200 dark:bg-purple-950 dark:hover:bg-purple-900 border border-purple-300/80 dark:border-purple-800 text-purple-700 dark:text-purple-300 font-bold text-[11px] transition inline-flex items-center gap-1 shadow-2xs">
+              <span>🔬</span>
+              <span>مشاهده</span>
+            </button>
           </td>
         `;
         tbody.appendChild(tr);
