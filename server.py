@@ -245,11 +245,13 @@ class RAGStudioHandler(http.server.SimpleHTTPRequestHandler):
                 from transformers import AutoTokenizer, AutoModel
                 if 'gemma2_hf' not in LOADED_MODELS:
                     tok = AutoTokenizer.from_pretrained(model_target, local_files_only=True)
+                    if tok.pad_token is None:
+                        tok.pad_token = tok.eos_token or '[PAD]'
                     mod = AutoModel.from_pretrained(model_target, local_files_only=True)
                     LOADED_MODELS['gemma2_hf'] = (tok, mod)
 
                 tok, mod = LOADED_MODELS['gemma2_hf']
-                inputs = tok(texts, padding=True, truncation=True, return_tensors='pt')
+                inputs = tok(texts, padding=True, truncation=True, max_length=512, return_tensors='pt')
                 with torch.no_grad():
                     outputs = mod(**inputs)
                     mask = inputs['attention_mask'].unsqueeze(-1)
