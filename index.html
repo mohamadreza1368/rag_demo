@@ -1129,7 +1129,7 @@ Ready to send payload...
   </main>
 
   <!-- CONFIGURATION MODAL (API Key, Base URL, Model Name) -->
-  <div id="configModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4">
+  <div id="configModal" onclick="if(event.target === this) closeConfigModal()" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-xl w-full p-6 sm:p-7 shadow-2xl relative max-h-[90vh] overflow-y-auto">
       <div class="flex justify-between items-center pb-4 border-b border-slate-200/80 dark:border-slate-800">
         <div class="flex items-center gap-2.5">
@@ -1302,7 +1302,7 @@ Ready to send payload...
   </div>
 
   <!-- EDUCATIONAL WALKTHROUGH GUIDE MODAL -->
-  <div id="guideModal" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4">
+  <div id="guideModal" onclick="if(event.target === this) closeGuideModal()" class="fixed inset-0 z-50 hidden bg-slate-950/70 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-3xl w-full p-6 sm:p-8 shadow-2xl relative max-h-[88vh] overflow-y-auto">
       <div class="flex justify-between items-center pb-4 border-b border-slate-200/80 dark:border-slate-800">
         <div class="flex items-center gap-2.5">
@@ -1385,7 +1385,7 @@ Ready to send payload...
 
   
   <!-- EDUCATIONAL CONCEPT HELP MODAL -->
-  <div id="helpConceptModal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4">
+  <div id="helpConceptModal" onclick="if(event.target === this) closeConceptHelpModal()" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-2xl w-full p-6 sm:p-7 shadow-2xl relative max-h-[88vh] overflow-y-auto">
       <div class="flex justify-between items-center pb-4 border-b border-slate-200/80 dark:border-slate-800">
         <div class="flex items-center gap-3">
@@ -1459,7 +1459,7 @@ Ready to send payload...
   </div>
 
   <!-- VECTOR DATABASE RECORD INSPECTOR MODAL -->
-  <div id="vectorRecordModal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4">
+  <div id="vectorRecordModal" onclick="if(event.target === this) closeVectorRecordModal()" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-3xl w-full p-6 sm:p-7 shadow-2xl relative max-h-[88vh] overflow-y-auto">
       <div class="flex justify-between items-center pb-4 border-b border-slate-200/80 dark:border-slate-800">
         <div class="flex items-center gap-3">
@@ -1562,7 +1562,7 @@ Ready to send payload...
 
 
   <!-- CITATION & DOCUMENT ALIGNMENT POPUP MODAL -->
-  <div id="citationDetailModal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4">
+  <div id="citationDetailModal" onclick="if(event.target === this) closeCitationModal()" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4">
     <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-3xl w-full p-6 sm:p-7 shadow-2xl relative max-h-[88vh] overflow-y-auto">
       <div class="flex justify-between items-center pb-4 border-b border-slate-200/80 dark:border-slate-800">
         <div class="flex items-center gap-3">
@@ -1829,20 +1829,27 @@ Ready to send payload...
       if (formulaContainer) {
         if (topic.formula) {
           formulaContainer.classList.remove('hidden');
+          formulaContainer.style.setProperty('display', 'block', 'important');
           if (formulaEl) formulaEl.innerText = topic.formula;
           if (formulaDescEl) formulaDescEl.innerText = topic.formulaDesc || '';
         } else {
           formulaContainer.classList.add('hidden');
+          formulaContainer.style.setProperty('display', 'none', 'important');
         }
       }
 
       if (tipEl) tipEl.innerText = topic.tip || '';
       modal.classList.remove('hidden');
+      modal.style.setProperty('display', 'flex', 'important');
+      modal.style.setProperty('z-index', '99999', 'important');
     }
 
     function closeConceptHelpModal() {
       const modal = document.getElementById('helpConceptModal');
-      if (modal) modal.classList.add('hidden');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.style.setProperty('display', 'none', 'important');
+      }
     }
 
     // ==========================================
@@ -1851,7 +1858,7 @@ Ready to send payload...
     let currentInspectedRecordIdx = 0;
 
     function openVectorRecordModal(idx) {
-      if (!chunks[idx]) return;
+      if (!chunks || !chunks[idx]) return;
       currentInspectedRecordIdx = idx;
       const chunk = chunks[idx];
       const modal = document.getElementById('vectorRecordModal');
@@ -1870,8 +1877,8 @@ Ready to send payload...
       if (charsEl) charsEl.innerText = `${chunk.length || chunk.text.length} کاراکتر`;
 
       const vec = chunk.vector || [];
-      const dim = vec.length || 32;
-      if (dimEl) dimEl.innerText = `${dim}-بعدی`;
+      const dim = vec.length || 0;
+      if (dimEl) dimEl.innerText = dim > 0 ? `${dim}-بعدی` : 'در حال انتظار / آماده‌باش';
 
       // Calculate L2 Norm = sqrt(sum(v_i^2))
       let norm = 0;
@@ -1879,42 +1886,55 @@ Ready to send payload...
         for (let i = 0; i < vec.length; i++) norm += vec[i] * vec[i];
         norm = Math.sqrt(norm);
       }
-      if (l2El) l2El.innerText = `||v|| ≈ ${norm.toFixed(3)}`;
+      if (l2El) l2El.innerText = dim > 0 ? `||v|| ≈ ${norm.toFixed(3)}` : 'نامشخص';
 
       // Render dense vector heatmap
       const heatmap = document.getElementById('recordModalHeatmap');
       if (heatmap) {
         heatmap.innerHTML = '';
-        vec.forEach((val, i) => {
-          const cell = document.createElement('div');
-          const clamped = Math.max(-1, Math.min(1, val));
-          let bg = '';
-          if (clamped > 0) {
-            const opacity = Math.min(1, Math.abs(clamped));
-            bg = `rgba(16, 185, 129, ${0.25 + opacity * 0.75})`;
-          } else {
-            const opacity = Math.min(1, Math.abs(clamped));
-            bg = `rgba(239, 68, 68, ${0.25 + opacity * 0.75})`;
-          }
-          cell.style.backgroundColor = bg;
-          cell.className = 'w-full h-3.5 rounded-xs transition hover:scale-125 hover:z-10 cursor-help';
-          cell.title = `Dim #${i + 1}: ${Number(val).toFixed(4)}`;
-          heatmap.appendChild(cell);
-        });
+        if (vec.length === 0) {
+          heatmap.innerHTML = '<div class="col-span-full text-center text-xs text-slate-400 py-3">بردار هنوز محاسبه نشده است. در گام ۳ روی دکمه «تولید مجدد بردارها» کلیک فرمایید.</div>';
+        } else {
+          vec.slice(0, 128).forEach((val, i) => {
+            const cell = document.createElement('div');
+            const clamped = Math.max(-1, Math.min(1, val));
+            let bg = '';
+            if (clamped > 0) {
+              const opacity = Math.min(1, Math.abs(clamped));
+              bg = `rgba(16, 185, 129, ${0.25 + opacity * 0.75})`;
+            } else {
+              const opacity = Math.min(1, Math.abs(clamped));
+              bg = `rgba(239, 68, 68, ${0.25 + opacity * 0.75})`;
+            }
+            cell.style.backgroundColor = bg;
+            cell.className = 'w-full h-3.5 rounded-xs transition hover:scale-125 hover:z-10 cursor-help';
+            cell.title = `Dim #${i + 1}: ${Number(val).toFixed(4)}`;
+            heatmap.appendChild(cell);
+          });
+        }
       }
 
       // Render raw vector numbers
       const arrayBox = document.getElementById('recordModalVectorArray');
       if (arrayBox) {
-        arrayBox.innerText = '[\n  ' + vec.map(v => Number(v).toFixed(4)).join(', ') + '\n]';
+        if (vec.length === 0) {
+          arrayBox.innerText = '[\n  /* بردار برای این چانک هنوز تولید نشده است */\n]';
+        } else {
+          arrayBox.innerText = '[\n  ' + vec.map(v => Number(v).toFixed(4)).join(', ') + '\n]';
+        }
       }
 
       modal.classList.remove('hidden');
+      modal.style.setProperty('display', 'flex', 'important');
+      modal.style.setProperty('z-index', '99999', 'important');
     }
 
     function closeVectorRecordModal() {
       const modal = document.getElementById('vectorRecordModal');
-      if (modal) modal.classList.add('hidden');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.style.setProperty('display', 'none', 'important');
+      }
     }
 
     function copyRecordText() {
@@ -2084,10 +2104,19 @@ Ready to send payload...
 
     // --- Guide Modal ---
     function openGuideModal() {
-      document.getElementById('guideModal').classList.remove('hidden');
+      const modal = document.getElementById('guideModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.style.setProperty('display', 'flex', 'important');
+        modal.style.setProperty('z-index', '99999', 'important');
+      }
     }
     function closeGuideModal() {
-      document.getElementById('guideModal').classList.add('hidden');
+      const modal = document.getElementById('guideModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.style.setProperty('display', 'none', 'important');
+      }
     }
 
     // --- View Modes ---
@@ -2118,11 +2147,20 @@ Ready to send payload...
     // --- CONFIG MODAL & PRESETS ---
     function openConfigModal() {
       loadConfigIntoUI();
-      document.getElementById('configModal').classList.remove('hidden');
+      const modal = document.getElementById('configModal');
+      if (modal) {
+        modal.classList.remove('hidden');
+        modal.style.setProperty('display', 'flex', 'important');
+        modal.style.setProperty('z-index', '99999', 'important');
+      }
     }
 
     function closeConfigModal() {
-      document.getElementById('configModal').classList.add('hidden');
+      const modal = document.getElementById('configModal');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.style.setProperty('display', 'none', 'important');
+      }
     }
 
     function loadConfigIntoUI() {
@@ -2576,7 +2614,7 @@ Ready to send payload...
     const testApiConnection = testLlmConnection;
 
     // --- STEP 1: DOCUMENT INGESTION & PDF EXTRACTION ---
-    function loadDocumentPreset(key) {
+    async function loadDocumentPreset(key) {
       currentPresetKey = key;
       currentPdfMeta = null;
       document.getElementById('pdfLoadedInfoCard').classList.add('hidden');
@@ -2602,14 +2640,14 @@ Ready to send payload...
       document.getElementById('liveUserQueryInput').value = preset.suggestedQueries[0];
       currentQuery = preset.suggestedQueries[0];
 
-      recomputeChunks();
+      await recomputeChunks();
       showToast(`سند «${preset.title}» بارگذاری شد.`, 'info');
     }
 
-    function onDocumentChanged() {
+    async function onDocumentChanged() {
       documentContent = document.getElementById('documentTextArea').value;
       updateDocumentStats();
-      recomputeChunks();
+      await recomputeChunks();
     }
 
     function updateDocumentStats() {
@@ -2852,7 +2890,7 @@ Ready to send payload...
     }
 
     // --- STEP 2: CHUNKING LOGIC ---
-    function recomputeChunks() {
+    async function recomputeChunks() {
       const chunkSize = parseInt(document.getElementById('chunkSizeSlider').value);
       const overlap = parseInt(document.getElementById('chunkOverlapSlider').value);
       const algo = document.getElementById('splitterAlgorithmSelect').value;
@@ -2864,9 +2902,10 @@ Ready to send payload...
       document.getElementById('liveChunkCountBadge').innerText = `تعداد چانک‌ها: ${chunks.length}`;
 
       renderChunkCards();
-      executeGenerateEmbeddings(false);
       renderVectorDatabaseTable();
-      executeLiveRetrieval();
+      await executeGenerateEmbeddings(false);
+      renderVectorDatabaseTable();
+      await executeLiveRetrieval();
       updatePipelineStats();
     }
 
@@ -3227,11 +3266,16 @@ Ready to send payload...
       }
 
       modal.classList.remove('hidden');
+      modal.style.setProperty('display', 'flex', 'important');
+      modal.style.setProperty('z-index', '99999', 'important');
     }
 
     function closeCitationModal() {
       const modal = document.getElementById('citationDetailModal');
-      if (modal) modal.classList.add('hidden');
+      if (modal) {
+        modal.classList.add('hidden');
+        modal.style.setProperty('display', 'none', 'important');
+      }
     }
 
     function copyCitationText() {
@@ -4133,6 +4177,21 @@ ${currentQuery}
 
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    // Keyboard Shortcuts: Escape to close any open modal
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closeConceptHelpModal();
+        closeVectorRecordModal();
+        closeCitationModal();
+        closeConfigModal();
+        closeGuideModal();
+        const rawModal = document.getElementById('rawLogModal');
+        if (rawModal && !rawModal.classList.contains('hidden')) {
+          rawModal.classList.add('hidden');
+        }
+      }
+    });
 
     // Utility escape
     function escapeHtml(text) {

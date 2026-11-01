@@ -442,9 +442,18 @@ async def proxy_endpoint(request: Request):
 
 # 5. Serve Web UI and Static Assets
 @app.get("/", response_class=FileResponse)
+@app.get("/index.html", response_class=FileResponse)
 async def serve_index():
     index_path = os.path.join(BASE_DIR, "index.html")
-    return FileResponse(index_path, media_type="text/html; charset=utf-8")
+    return FileResponse(
+        index_path,
+        media_type="text/html; charset=utf-8",
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0"
+        }
+    )
 
 # Mount base directory for static assets (js, css, fonts)
 app.mount("/", StaticFiles(directory=BASE_DIR, html=False), name="static")
