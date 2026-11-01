@@ -1660,9 +1660,17 @@ Ready to send payload...
 
       feedback.classList.remove('hidden');
       feedback.className = "p-3 rounded-xl text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700";
-      feedback.innerHTML = `⏳ در حال ارسال پینگ آزمایشی به سرور مدل زبانی... (مهلت: ۸ ثانیه)`;
+      
+      const TIMEOUT_SEC = 45;
+      let elapsedSec = 0;
+      feedback.innerHTML = `⏳ در حال ارسال درخواست به سرور مدل زبانی... (زمان سپری‌شده: ۰ ثانیه)`;
       btn.disabled = true;
       icon.innerText = "⏳";
+
+      const progressInterval = setInterval(() => {
+        elapsedSec++;
+        feedback.innerHTML = `⏳ در حال ارسال درخواست به سرور مدل زبانی... (زمان سپری‌شده: ${elapsedSec} از ${TIMEOUT_SEC} ثانیه)`;
+      }, 1000);
 
       const baseUrl = document.getElementById('cfgBaseUrl').value.trim().replace(/\/+$/, '');
       const apiKey = document.getElementById('cfgApiKey').value.trim();
@@ -1678,7 +1686,7 @@ Ready to send payload...
       };
 
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 8000);
+      const timer = setTimeout(() => controller.abort(), TIMEOUT_SEC * 1000);
       const startTime = performance.now();
 
       try {
@@ -1705,6 +1713,7 @@ Ready to send payload...
             body: JSON.stringify(testPayload)
           });
         }
+        clearInterval(progressInterval);
         clearTimeout(timer);
         const elapsed = Math.round(performance.now() - startTime);
 
@@ -1716,20 +1725,44 @@ Ready to send payload...
           showToast('اتصال به سرور هوش مصنوعی تایید شد.', 'success');
         } else {
           const errData = await resp.text();
+          let parsedErr = '';
+          try {
+            const ej = JSON.parse(errData);
+            parsedErr = ej.error?.message || ej.error || ej.hint || errData;
+          } catch(e) {
+            parsedErr = errData.substring(0, 200);
+          }
           feedback.className = "p-3 rounded-xl text-xs font-mono bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300";
-          feedback.innerHTML = `❌ خطا در اتصال (Status ${resp.status}):<br>${errData.substring(0, 160)}`;
+          feedback.innerHTML = `❌ خطا در اتصال به مدل (کد وضعیت ${resp.status}):<br>${parsedErr}<br><br>` +
+            `💡 <b>راهنمای رفع مشکل:</b><br>` +
+            (useProxy ? 
+              `• درخواست از طریق پروکسی سرور ارسال شد. اگر مرورگر شما VPN یا دسترسی مستقیم دارد، <b>تیک «استفاده از سرور پروکسی داخلی» را بردارید</b> و دوباره تست کنید.<br>` :
+              `• درخواست مستقیماً از مرورگر ارسال شد. برای رفع خطای CORS یا مسدودیت مرورگر، <b>تیک «استفاده از سرور پروکسی داخلی» را فعال کنید</b>.<br>`) +
+            (targetUrl.includes('localhost') || targetUrl.includes('127.0.0.1') ? 
+              `• اگر مدل روی هاست محلی (مثلاً Ollama) قرار دارد و سیستم در داکر اجرا می‌شود، از آدرس <code>http://host.docker.internal:11434/v1</code> یا آی‌پی کارت شبکه سرور استفاده کنید.` : '');
           showToast(`خطا در اتصال به مدل (${resp.status})`, 'error');
         }
       } catch (err) {
+        clearInterval(progressInterval);
         clearTimeout(timer);
         feedback.className = "p-3 rounded-xl text-xs font-mono bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300";
         if (err.name === 'AbortError') {
-          feedback.innerHTML = `❌ زمان پاسخ‌دهی به پایان رسید (Timeout 8s):<br>سرور مقصد (${targetUrl}) در دسترس نیست یا مسدود شده است.`;
+          feedback.innerHTML = `❌ <b>زمان پاسخ‌دهی به پایان رسید (Request Timeout - ${TIMEOUT_SEC}s):</b><br>` +
+            `سرور مقصد (${targetUrl}) در مدت ${TIMEOUT_SEC} ثانیه پاسخ نداد.<br><br>` +
+            `🔍 <b>علت‌های احتمالی و راه‌حل:</b><br>` +
+            (useProxy ? 
+              `۱. <b>پروکسی سرور:</b> سرور داکر ممکن است به اینترنت مستقیم دسترسی نداشته باشد. اگر روی رایانه خود فیلترشکن/اینترنت آزاد دارید، <b>تیک «استفاده از سرور پروکسی داخلی» را غیرفعال کنید</b> تا درخواست مستقیم از مرورگر شما برود.<br>` :
+              `۱. <b>مسدودیت مرورگر:</b> <b>تیک «استفاده از سرور پروکسی داخلی» را فعال کنید</b> تا سرور درخواست را فوروارد کند.<br>`) +
+            (targetUrl.includes('localhost') || targetUrl.includes('127.0.0.1') ? 
+              `۲. <b>داکر و لوکال‌هاست:</b> در کانتینر داکر، <code>localhost</code> یعنی خود کانتینر! برای اتصال به سرویس روی سرور میزبان (مثلاً Ollama)، آدرس را به <code>http://host.docker.internal:11434/v1</code> یا آی‌پی شبکه تغییر دهید.<br>` : '') +
+            `۳. <b>ترافیک شبکه سازمانی:</b> مطمئن شوید پورت و آدرس مقصد در فایروال یا شبکه باز است.`;
         } else {
-          feedback.innerHTML = `❌ خطای شبکه یا مسدودیت:<br>${err.message}<br>💡 توصیه: تیک «استفاده از سرور پروکسی داخلی» را فعال کنید.`;
+          feedback.innerHTML = `❌ خطای شبکه یا مسدودیت:<br>${err.message}<br><br>` +
+            `💡 <b>پیشنهاد:</b> حالت «استفاده از سرور پروکسی داخلی» را تغییر دهید (فعال/غیرفعال) و مجدداً تست فرمایید.`;
         }
-        showToast('خطا در اتصال به مدل زبانی.', 'error');
+        showToast('خطای تایم‌اوت در اتصال به مدل زبانی.', 'error');
       } finally {
+        clearInterval(progressInterval);
         btn.disabled = false;
         icon.innerText = "⚡";
       }

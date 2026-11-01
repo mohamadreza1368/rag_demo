@@ -283,6 +283,12 @@ class RAGStudioHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps({'error': 'target-url header or targetUrl in body is required'}).encode('utf-8'))
             return
 
+        # Automatic Docker host mapping:
+        # If running inside Docker and target points to localhost or 127.0.0.1,
+        # redirect to host.docker.internal so it connects to services running on host (e.g. Ollama, LM Studio, vLLM)
+        if os.environ.get('DOCKER') and target_url:
+            target_url = target_url.replace('://localhost:', '://host.docker.internal:').replace('://127.0.0.1:', '://host.docker.internal:')
+
         headers = {
             'Content-Type': 'application/json',
             'User-Agent': 'RAG-Studio-Proxy/1.0'
@@ -290,10 +296,10 @@ class RAGStudioHandler(http.server.SimpleHTTPRequestHandler):
         if auth_header:
             headers['Authorization'] = auth_header
 
+        proxy_timeout = 60  # Allow up to 60 seconds for slow LLM responses / cold starts
         try:
             req = urllib.request.Request(target_url, data=body, headers=headers, method='POST')
-            # 15s timeout for fast response / failure feedback
-            with urllib.request.urlopen(req, timeout=15) as resp:
+            with urllib.request.urlopen(req, timeout=proxy_timeout) as resp:
                 self.send_response(resp.status)
                 self.send_header('Access-Control-Allow-Origin', '*')
                 content_type = resp.headers.get('Content-Type', 'application/json')
@@ -324,14 +330,16 @@ class RAGStudioHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
             self.wfile.write(error_body)
-        except urllib.error.URLError as e:
+        except (TimeoutError, urllib.error.URLError) as e:
             self.send_response(504)
             self.send_header('Access-Control-Allow-Origin', '*')
             self.send_header('Content-Type', 'application/json')
             self.end_headers()
+            reason = str(getattr(e, 'reason', e))
             self.wfile.write(json.dumps({
-                'error': f'Connection failed: {str(e.reason)}',
-                'hint': f'Target URL ({target_url}) is unreachable or blocked. Check if service is running.'
+                'error': f'Request timeout / connection failed: {reason}',
+                'target': target_url,
+                'hint': 'سرور مدل زبانی در مدت ۶۰ ثانیه پاسخ نداد. بررسی فرمایید که مدل در حال اجرا باشد و پورت یا آدرس شبکه از داخل سرور قابل دسترسی باشد.'
             }).encode('utf-8'))
         except Exception as e:
             self.send_response(500)

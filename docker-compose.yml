@@ -11,6 +11,8 @@ services:
     image: dockerhub.ime.co.ir/rag-studio:latest
     container_name: rag_studio
     restart: unless-stopped
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     ports:
       - "${HOST_PORT:-8089}:8080"
     volumes:
@@ -26,6 +28,9 @@ services:
       - DOCKER=1
       - NO_BROWSER=1
       - HF_TOKEN=${HF_TOKEN:-}
+      - HTTP_PROXY=${HTTP_PROXY:-}
+      - HTTPS_PROXY=${HTTPS_PROXY:-}
+      - NO_PROXY=${NO_PROXY:-localhost,127.0.0.1,host.docker.internal}
     env_file:
       - path: .env
         required: false
