@@ -164,7 +164,7 @@ class RAGStudioHandler(http.server.SimpleHTTPRequestHandler):
         self.send_response(200)
         self.send_header('Access-Control-Allow-Origin', '*')
         self.send_header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
-        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, target-url')
+        self.send_header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With, target-url, X-File-Name')
         self.end_headers()
 
     def do_POST(self):
@@ -172,8 +172,91 @@ class RAGStudioHandler(http.server.SimpleHTTPRequestHandler):
             self.handle_proxy()
         elif self.path.startswith('/api/embed'):
             self.handle_embed()
+        elif self.path.startswith('/api/parse-doc'):
+            self.handle_parse_doc()
         else:
             self.send_error(404, "Endpoint not found")
+
+    def handle_parse_doc(self):
+        content_length = int(self.headers.get('Content-Length', 0))
+        body = self.rfile.read(content_length) if content_length > 0 else b''
+
+        raw_filename = self.headers.get('X-File-Name', 'document.docx')
+        filename = urllib.parse.unquote(raw_filename)
+
+        if not body:
+            self.send_response(400)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({'error': 'فایل ارسالی خالی است.'}, ensure_ascii=False).encode('utf-8'))
+            return
+
+        try:
+            import zipfile
+            import xml.etree.ElementTree as ET
+            import io
+
+            docx_file = io.BytesIO(body)
+            paragraphs = []
+
+            if zipfile.is_zipfile(docx_file):
+                with zipfile.ZipFile(docx_file) as z:
+                    ns = {'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'}
+
+                    # 1. Main document body
+                    if 'word/document.xml' in z.namelist():
+                        xml_bytes = z.read('word/document.xml')
+                        tree = ET.fromstring(xml_bytes)
+                        for p in tree.iterfind('.//w:p', ns):
+                            texts = [node.text for node in p.iterfind('.//w:t', ns) if node.text]
+                            if texts:
+                                paragraphs.append(''.join(texts))
+
+                    # 2. Footnotes if present
+                    if 'word/footnotes.xml' in z.namelist():
+                        try:
+                            tree = ET.fromstring(z.read('word/footnotes.xml'))
+                            for p in tree.iterfind('.//w:p', ns):
+                                texts = [node.text for node in p.iterfind('.//w:t', ns) if node.text]
+                                if texts:
+                                    paragraphs.append(''.join(texts))
+                        except Exception:
+                            pass
+            else:
+                # Fallback to UTF-8 plain text if uploaded
+                try:
+                    text_content = body.decode('utf-8')
+                    paragraphs = text_content.splitlines()
+                except UnicodeDecodeError:
+                    raise ValueError('فایل ارسالی ساختار معتبر DOCX یا متن UTF-8 ندارد.')
+
+            extracted_text = '\n\n'.join(paragraphs).strip()
+            if not extracted_text:
+                extracted_text = 'متنی در سند Word یافت نشد.'
+
+            resp_obj = {
+                'status': 'ok',
+                'text': extracted_text,
+                'filename': filename,
+                'paragraphs': len(paragraphs)
+            }
+            self.send_response(200)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps(resp_obj, ensure_ascii=False).encode('utf-8'))
+            return
+
+        except Exception as e:
+            self.send_response(500)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                'error': f'خطا در استخراج متن از فایل Word: {str(e)}',
+                'filename': filename
+            }, ensure_ascii=False).encode('utf-8'))
 
     def handle_embed(self):
         content_length = int(self.headers.get('Content-Length', 0))

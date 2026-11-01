@@ -338,10 +338,10 @@
               🩺 راهنمای سلامت و تغذیه
             </button>
 
-            <!-- File Upload (PDF & Text) -->
+            <!-- File Upload (Word, PDF & Text) -->
             <label class="cursor-pointer px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-brand-500/20">
-              <span>📄 آپلود سند (PDF / متنی)</span>
-              <input type="file" id="fileUploadInput" accept=".pdf,.txt,.md,.json,.csv" onchange="handleFileUpload(event)" class="hidden">
+              <span>📄 بارگذاری سند (Word / PDF / متن)</span>
+              <input type="file" id="fileUploadInput" accept=".docx,.doc,.pdf,.txt,.md,.json,.csv" onchange="handleFileUpload(event)" class="hidden">
             </label>
           </div>
         </div>
@@ -1967,68 +1967,110 @@ Ready to send payload...
       // 3. Remove Arabic Tatweel / Kashida (\u0640)
       normalized = normalized.replace(/\u0640+/g, '');
 
-      // 4. Clean invisible directional and zero-width non-character markers
-      normalized = normalized.replace(/[\u200B\u200E\u200F]/g, '');
-
-      // 5. Normalize multiple whitespace and non-breaking spaces
-      normalized = normalized.replace(/[ \t\u00A0]+/g, ' ');
+      // 4. Remove unprintable binary control bytes & zero-width symbols that cause emoji/box rendering
+      normalized = normalized.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F-\u009F]/g, '');
+      normalized = normalized.replace(/[\u200B\u200E\u200F\uFEFF]/g, '');
 
       return normalized;
     }
 
-    function decodePersianBuffer(buffer) {
-      const bytes = new Uint8Array(buffer);
-      if (!bytes || bytes.length === 0) return '';
+    async function processUploadedFile(file) {
+      const lowerName = file.name.toLowerCase();
+      const isPdf = lowerName.endsWith('.pdf') || file.type === 'application/pdf';
+      const isDocx = lowerName.endsWith('.docx') || lowerName.endsWith('.doc') || file.type.includes('word') || file.type.includes('officedocument');
 
-      // Check BOM headers
-      if (bytes.length >= 3 && bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
-        return normalizePersianUnicode(new TextDecoder('utf-8').decode(bytes.subarray(3)));
-      }
-      if (bytes.length >= 2 && bytes[0] === 0xFF && bytes[1] === 0xFE) {
-        return normalizePersianUnicode(new TextDecoder('utf-16le').decode(bytes.subarray(2)));
-      }
-      if (bytes.length >= 2 && bytes[0] === 0xFE && bytes[1] === 0xFF) {
-        return normalizePersianUnicode(new TextDecoder('utf-16be').decode(bytes.subarray(2)));
-      }
-
-      // Try strict UTF-8 decoding
-      try {
-        const utf8Strict = new TextDecoder('utf-8', { fatal: true });
-        const decoded = utf8Strict.decode(bytes);
-        return normalizePersianUnicode(decoded);
-      } catch (e) {
-        // UTF-8 failed -> file was saved as ANSI / Windows-1256 (standard in Windows Notepad/Excel for Persian)
-        try {
-          const winDecoder = new TextDecoder('windows-1256');
-          const winDecoded = winDecoder.decode(bytes);
-          return normalizePersianUnicode(winDecoded);
-        } catch (errWin) {
-          // Fallback to standard utf-8 replacement
-          return normalizePersianUnicode(new TextDecoder('utf-8').decode(bytes));
-        }
+      if (isDocx) {
+        await extractAndLoadDocx(file);
+      } else if (isPdf) {
+        await extractAndLoadPdf(file);
+      } else {
+        await extractAndLoadText(file);
       }
     }
 
-    async function processUploadedFile(file) {
-      const isPdf = file.name.toLowerCase().endsWith('.pdf') || file.type === 'application/pdf';
+    async function extractAndLoadDocx(file) {
+      const banner = document.getElementById('pdfProcessingBanner');
+      const progressText = document.getElementById('pdfProcessingPageCount');
+      const processingTitle = document.getElementById('pdfProcessingText');
+      const progressBar = document.getElementById('pdfProgressBar');
+      const infoCard = document.getElementById('pdfLoadedInfoCard');
 
-      if (isPdf) {
-        await extractAndLoadPdf(file);
-      } else {
-        try {
-          const buffer = await file.arrayBuffer();
-          const decodedText = decodePersianBuffer(buffer);
+      banner.classList.remove('hidden');
+      infoCard.classList.add('hidden');
+      progressBar.style.width = '30%';
+      processingTitle.innerText = 'در حال استخراج متن از سند Word (.docx)...';
+      progressText.innerText = file.name;
 
-          currentPdfMeta = null;
-          document.getElementById('pdfLoadedInfoCard').classList.add('hidden');
-          documentContent = decodedText;
-          document.getElementById('documentTextArea').value = documentContent;
-          updateDocumentStats();
-          recomputeChunks();
-          showToast(`فایل متنی "${file.name}" با کدگذاری صحیح یونیکد ایندکس شد.`, 'success');
-        } catch (err) {
-          showToast(`خطا در پردازش فایل: ${err.message}`, 'error');
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        progressBar.style.width = '60%';
+
+        const resp = await fetch('/api/parse-doc', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/octet-stream',
+            'X-File-Name': encodeURIComponent(file.name)
+          },
+          body: arrayBuffer
+        });
+
+        const data = await resp.json().catch(() => ({}));
+        if (!resp.ok || !data.text) {
+          throw new Error(data.error || `خطا در پردازش فایل Word (${resp.status})`);
         }
+
+        progressBar.style.width = '100%';
+        const normalizedText = normalizePersianUnicode(data.text);
+
+        currentPdfMeta = {
+          fileName: file.name,
+          numPages: data.paragraphs ? `${data.paragraphs} بند` : 'سند Word',
+          fileSize: (file.size / 1024).toFixed(1) + ' KB'
+        };
+
+        documentContent = normalizedText;
+        document.getElementById('documentTextArea').value = documentContent;
+        updateDocumentStats();
+
+        const words = documentContent.trim().split(/\s+/).filter(Boolean).length;
+        document.getElementById('pdfFileNameLabel').innerText = file.name;
+        document.getElementById('pdfStatsDetailLabel').innerText = `سند Word • ${words.toLocaleString()} کلمه • حجم: ${currentPdfMeta.fileSize}`;
+        infoCard.classList.remove('hidden');
+
+        recomputeChunks();
+        showToast(`سند Word "${file.name}" با موفقیت استخراج و بارگذاری شد!`, 'success');
+
+      } catch (err) {
+        showToast('خطا در خواندن فایل Word: ' + err.message, 'error');
+      } finally {
+        banner.classList.add('hidden');
+      }
+    }
+
+    async function extractAndLoadText(file) {
+      try {
+        const buffer = await file.arrayBuffer();
+        const bytes = new Uint8Array(buffer);
+
+        // Strip UTF-8 BOM if present
+        let textBytes = bytes;
+        if (bytes.length >= 3 && bytes[0] === 0xEF && bytes[1] === 0xBB && bytes[2] === 0xBF) {
+          textBytes = bytes.subarray(3);
+        }
+
+        // Strict UTF-8 decoding as requested by user
+        const rawText = new TextDecoder('utf-8').decode(textBytes);
+        const text = normalizePersianUnicode(rawText);
+
+        currentPdfMeta = null;
+        document.getElementById('pdfLoadedInfoCard').classList.add('hidden');
+        documentContent = text;
+        document.getElementById('documentTextArea').value = documentContent;
+        updateDocumentStats();
+        recomputeChunks();
+        showToast(`فایل متنی "${file.name}" با فرمت UTF-8 بارگذاری شد.`, 'success');
+      } catch (err) {
+        showToast(`خطا در خواندن فایل متنی: ${err.message}`, 'error');
       }
     }
 
