@@ -197,12 +197,12 @@
             <span id="connModelName" class="font-bold text-slate-700 dark:text-slate-200 block text-[11px] leading-tight">gpt-4o-mini</span>
             <span id="connProviderName" class="text-[9px] text-slate-400 block font-mono">OpenAI Compatible</span>
           </div>
-          <span class="text-slate-400 group-hover:text-brand-500 transition-colors text-xs">⚙️</span>
+          <span class="text-slate-400 group-hover:text-brand-500 transition-colors text-xs"></span>
         </button>
 
         <!-- Walkthrough Guide Button -->
         <button onclick="openGuideModal()" class="p-2 sm:px-3 sm:py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white/80 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 text-xs font-semibold flex items-center gap-1.5 transition">
-          <span>📖</span>
+          <span></span>
           <span class="hidden sm:inline">راهنمای یادگیری</span>
         </button>
 
@@ -218,7 +218,7 @@
 
         <!-- Dark/Light Mode -->
         <button onclick="toggleDarkMode()" class="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="تغییر تم">
-          <span id="themeToggleIcon">🌙</span>
+          <span id="themeToggleIcon">تم</span>
         </button>
       </div>
     </div>
@@ -318,7 +318,7 @@
           <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-400 text-xs font-bold mb-2 border border-brand-500/20">
               <span>گام ۱ از ۷</span> • <span>بارگذاری اسناد پایگاه دانش (Document Ingestion)</span>
-              <button type="button" onclick="showConceptHelp('ingestion')" class="w-5 h-5 rounded-full bg-brand-200 dark:bg-brand-900 text-brand-800 dark:text-brand-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای مفهومی ورود و پردازش اسناد">❓</button>
+              <button type="button" onclick="showConceptHelp('ingestion')" class="w-5 h-5 rounded-full bg-brand-200 dark:bg-brand-900 text-brand-800 dark:text-brand-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای مفهومی ورود و پردازش اسناد">?</button>
             </div>
             <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">انتخاب، ورود متن، یا آپلود فایل PDF</h2>
             <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -330,18 +330,18 @@
           <div class="flex flex-wrap items-center gap-2">
             <span class="text-xs font-semibold text-slate-500">نمونه‌ها:</span>
             <button onclick="loadDocumentPreset('company')" class="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-brand-950/40 hover:text-brand-600 text-xs font-medium transition border border-transparent hover:border-brand-500/30">
-              🏢 آیین‌نامه پرسنلی و مرخصی
+               آیین‌نامه پرسنلی و مرخصی
             </button>
             <button onclick="loadDocumentPreset('tech')" class="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-brand-950/40 hover:text-brand-600 text-xs font-medium transition border border-transparent hover:border-brand-500/30">
-              🤖 معماری فنی RAG و وکتورها
+               معماری فنی RAG و وکتورها
             </button>
             <button onclick="loadDocumentPreset('medical')" class="px-2.5 py-1.5 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-brand-50 dark:hover:bg-brand-950/40 hover:text-brand-600 text-xs font-medium transition border border-transparent hover:border-brand-500/30">
-              🩺 راهنمای سلامت و تغذیه
+               راهنمای سلامت و تغذیه
             </button>
 
             <!-- File Upload (Word, PDF & Text) -->
             <label class="cursor-pointer px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-md shadow-brand-500/20">
-              <span>📄 بارگذاری سند (Word / PDF / متن)</span>
+              <span> بارگذاری سند (Word / PDF / متن)</span>
               <input type="file" id="fileUploadInput" accept=".docx,.doc,.pdf,.txt,.md,.json,.csv" onchange="handleFileUpload(event)" class="hidden">
             </label>
           </div>
@@ -365,7 +365,7 @@
         <div id="pdfLoadedInfoCard" class="hidden mt-4 p-3.5 rounded-2xl bg-emerald-50/70 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
           <div class="flex items-center gap-2.5">
             <div class="w-8 h-8 rounded-xl bg-emerald-500/20 text-emerald-600 flex items-center justify-center text-base">
-              📄
+              
             </div>
             <div>
               <span class="font-bold text-emerald-900 dark:text-emerald-200" id="pdfFileNameLabel">document.pdf</span>
@@ -391,7 +391,7 @@
               
               <div id="dragOverlay" class="absolute inset-0 bg-brand-500/15 border-2 border-dashed border-brand-500 rounded-2xl backdrop-blur-xs hidden flex items-center justify-center pointer-events-none transition-all">
                 <div class="px-5 py-3 rounded-2xl bg-white dark:bg-slate-900 text-brand-600 dark:text-brand-300 text-xs font-bold shadow-xl border border-brand-500/30 flex items-center gap-2">
-                  <span class="text-lg">📥</span>
+                  <span class="text-lg"></span>
                   <span>فایل PDF یا متنی را اینجا رها کنید تا استخراج شود</span>
                 </div>
               </div>
@@ -402,7 +402,7 @@
           <div class="space-y-4">
             <div class="p-4 rounded-2xl bg-slate-100/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 text-xs space-y-2.5">
               <h3 class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                <span>⚡</span> مکانیزم پردازش در گام ۱
+                <span></span> مکانیزم پردازش در گام ۱
               </h3>
               <p class="text-slate-600 dark:text-slate-400 leading-relaxed text-[11px]">
                 پایگاه دانش شما مستقیماً در مرورگر پردازش شده، صفحات PDF به صورت آفلاین خوانده شده، و آماده قطعه‌بندی می‌شوند. تغییر در این متن مستقیماً تمام چانک‌ها و بردارها را همگام می‌کند.
@@ -434,7 +434,7 @@
           <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold mb-2 border border-amber-500/20">
               <span>گام ۲ از ۷</span> • <span>قطعه‌بندی هوشمند متن (Recursive Text Splitting)</span>
-              <button type="button" onclick="showConceptHelp('chunking')" class="w-5 h-5 rounded-full bg-amber-200 dark:bg-amber-900 text-amber-800 dark:text-amber-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای استراتژی‌های قطعه‌بندی متن">❓</button>
+              <button type="button" onclick="showConceptHelp('chunking')" class="w-5 h-5 rounded-full bg-amber-200 dark:bg-amber-900 text-amber-800 dark:text-amber-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای استراتژی‌های قطعه‌بندی متن">?</button>
             </div>
             <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">تنظیم اندازه چانک‌ها و هم‌پوشانی (Overlap)</h2>
             <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -454,7 +454,7 @@
             <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
               <span class="flex items-center gap-1">
                 <span>اندازه هر قطعه (Chunk Size):</span>
-                <button type="button" onclick="showConceptHelp('chunking')" class="text-[10px] text-slate-400 hover:text-brand-600">❓</button>
+                <button type="button" onclick="showConceptHelp('chunking')" class="text-[10px] text-slate-400 hover:text-brand-600">?</button>
               </span>
               <span id="chunkSizeDisplay" class="text-brand-600 font-mono bg-brand-50 dark:bg-brand-950/60 px-2 py-0.5 rounded-md">180</span>
             </div>
@@ -466,7 +466,7 @@
             <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
               <span class="flex items-center gap-1">
                 <span>هم‌پوشانی (Chunk Overlap):</span>
-                <button type="button" onclick="showConceptHelp('overlap')" class="text-[10px] text-slate-400 hover:text-amber-600">❓</button>
+                <button type="button" onclick="showConceptHelp('overlap')" class="text-[10px] text-slate-400 hover:text-amber-600">?</button>
               </span>
               <span id="chunkOverlapDisplay" class="text-amber-500 font-mono bg-amber-50 dark:bg-amber-950/60 px-2 py-0.5 rounded-md">35</span>
             </div>
@@ -477,7 +477,7 @@
           <div>
             <div class="flex items-center justify-between text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
               <span>الگوریتم قطعه‌بندی:</span>
-              <button type="button" onclick="showConceptHelp('chunking')" class="text-[10px] text-slate-400 hover:text-brand-600">❓</button>
+              <button type="button" onclick="showConceptHelp('chunking')" class="text-[10px] text-slate-400 hover:text-brand-600">?</button>
             </div>
             <select id="splitterAlgorithmSelect" onchange="recomputeChunks()" class="w-full p-2 text-xs rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200 font-medium focus:ring-2 focus:ring-brand-500">
               <option value="recursive">Recursive Character (هوشمند بازگشتی بر اساس پاراگراف و جمله)</option>
@@ -517,7 +517,7 @@
           <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-sky-500/10 text-sky-600 dark:text-sky-400 text-xs font-bold mb-2 border border-sky-500/20">
               <span>گام ۳ از ۷</span> • <span>تبدیل چانک‌ها به بردارهای متراکم (Text Embeddings)</span>
-              <button type="button" onclick="showConceptHelp('embeddings')" class="w-5 h-5 rounded-full bg-sky-200 dark:bg-sky-900 text-sky-800 dark:text-sky-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای مفهومی بردارهای متراکم">❓</button>
+              <button type="button" onclick="showConceptHelp('embeddings')" class="w-5 h-5 rounded-full bg-sky-200 dark:bg-sky-900 text-sky-800 dark:text-sky-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای مفهومی بردارهای متراکم">?</button>
             </div>
             <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">فضای برداری و تصویرسازی دوبعدی با کاهش بعد (PCA)</h2>
             <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -527,12 +527,12 @@
 
           <div class="flex items-center gap-2">
             <span id="step3ActiveModelBadge" onclick="openConfigModal()" class="text-xs px-3 py-1.5 rounded-xl bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 font-mono font-bold flex items-center gap-1.5 cursor-pointer hover:border-brand-500 transition shadow-xs" title="کلیک برای تنظیمات مدل و توکن">
-              <span>🧬 مدل امبدینگ: google/embeddinggemma-2</span>
-              <span class="text-[10px] text-slate-400">⚙️</span>
+              <span> مدل امبدینگ: google/embeddinggemma-2</span>
+              <span class="text-[10px] text-slate-400"></span>
             </span>
             <button onclick="executeGenerateEmbeddings(true)" id="btnRecomputeEmbeddings" class="px-3.5 py-2 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-300 dark:border-sky-800 text-sky-700 dark:text-sky-300 text-xs font-bold hover:bg-sky-100 transition flex items-center gap-1.5 shadow-xs">
               <span>محاسبه مجدد بردارها</span>
-              <span>🔄</span>
+              <span></span>
             </button>
           </div>
         </div>
@@ -544,10 +544,10 @@
               <div class="flex items-center gap-2">
                 <span class="w-3 h-3 rounded-full bg-brand-500 animate-pulse"></span>
                 <span class="text-xs font-bold text-slate-800 dark:text-slate-200">نمودار تعاملی فضای برداری ۲ بعدی (PCA Projection)</span>
-                <button type="button" onclick="showConceptHelp('pca')" class="text-[10px] text-slate-400 hover:text-brand-600" title="تحلیل مؤلفه‌های اصلی (PCA) چیست؟">❓</button>
+                <button type="button" onclick="showConceptHelp('pca')" class="text-[10px] text-slate-400 hover:text-brand-600" title="تحلیل مؤلفه‌های اصلی (PCA) چیست؟">?</button>
               </div>
               <span id="embeddingDimBadge" class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-brand-100 dark:bg-brand-900/60 text-brand-700 dark:text-brand-300 font-semibold">
-                32-dim Dense ➔ 2D Plane
+                32-dim Dense به 2D Plane
               </span>
             </div>
 
@@ -569,7 +569,7 @@
             <div class="p-4 rounded-2xl bg-slate-100/50 dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/80">
               <div class="flex justify-between items-center mb-2">
                 <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-                  <span>🔬</span> کالبدشکافی بردار چانک انتخابی
+                  <span></span> کالبدشکافی بردار چانک انتخابی
                 </h4>
                 <span id="inspectChunkBadge" class="text-xs px-2.5 py-0.5 rounded-lg bg-brand-100 dark:bg-brand-900 text-brand-700 dark:text-brand-300 font-mono font-bold">
                   Chunk #1
@@ -603,7 +603,7 @@
             <!-- Mathematical Formula Card -->
             <div class="p-4 rounded-2xl bg-sky-50/50 dark:bg-sky-950/20 border border-sky-200/80 dark:border-sky-900/60 text-xs space-y-2">
               <div class="font-bold text-sky-900 dark:text-sky-300 flex items-center gap-1.5">
-                <span>📐</span> فرمول شباهت کسینوسی (Cosine Similarity):
+                <span></span> فرمول شباهت کسینوسی (Cosine Similarity):
               </div>
               <div class="font-mono text-center bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-sky-100 dark:border-sky-800 text-sky-700 dark:text-sky-300 text-xs font-semibold shadow-xs">
                 cos(θ) = (A · B) / (||A|| × ||B||)
@@ -632,7 +632,7 @@
           <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 text-purple-600 dark:text-purple-400 text-xs font-bold mb-2 border border-purple-500/20">
               <span>گام ۴ از ۷</span> • <span>ایندکس‌گذاری پایگاه داده برداری (Vector Store & Indexing)</span>
-              <button type="button" onclick="showConceptHelp('vector_db')" class="w-5 h-5 rounded-full bg-purple-200 dark:bg-purple-900 text-purple-800 dark:text-purple-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای مفهومی پایگاه داده برداری و ایندکس HNSW">❓</button>
+              <button type="button" onclick="showConceptHelp('vector_db')" class="w-5 h-5 rounded-full bg-purple-200 dark:bg-purple-900 text-purple-800 dark:text-purple-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای مفهومی پایگاه داده برداری و ایندکس HNSW">?</button>
             </div>
             <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">جدول ذخیره‌سازی بردارها و فراداده‌ها (Vector Index)</h2>
             <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -651,11 +651,11 @@
         <!-- Educational Hint Card -->
         <div class="mt-4 p-3.5 rounded-2xl bg-gradient-to-r from-purple-50/80 to-indigo-50/80 dark:from-purple-950/40 dark:to-indigo-950/40 border border-purple-200/80 dark:border-purple-800/60 flex items-center justify-between text-xs text-purple-900 dark:text-purple-200 shadow-xs">
           <div class="flex items-center gap-2.5">
-            <span class="text-base">💡</span>
+            <span class="text-base"></span>
             <span>روی هر ردیف کلیک کنید تا <strong>شناسنامه کامل رکورد، مقادیر عددی بردار متراکم، نقشه حرارتی و متادیتا</strong> در مودال نمایش داده شود.</span>
           </div>
           <span class="text-[10px] font-mono px-2.5 py-1 rounded-lg bg-purple-200/70 dark:bg-purple-900/80 text-purple-800 dark:text-purple-200 font-bold hidden sm:inline-block">
-            👆 کلیک برای مشاهده رکورد
+             کلیک برای مشاهده رکورد
           </span>
         </div>
 
@@ -719,7 +719,7 @@
           <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold mb-2 border border-emerald-500/20">
               <span>گام ۵ از ۷</span> • <span>بردارسازی پرسش و بازیابی برترین چانک‌ها (Vector Retrieval)</span>
-              <button type="button" onclick="showConceptHelp('retrieval')" class="w-5 h-5 rounded-full bg-emerald-200 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای بازیابی برداری">❓</button>
+              <button type="button" onclick="showConceptHelp('retrieval')" class="w-5 h-5 rounded-full bg-emerald-200 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای بازیابی برداری">?</button>
             </div>
             <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">محاسبه شباهت کسینوسی پرسش کاربر با پایگاه دانش</h2>
             <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -731,10 +731,10 @@
         <!-- Query Input with Raycast-style UI -->
         <div class="mt-5 space-y-3">
           <div class="relative group">
-            <input type="text" id="liveUserQueryInput" placeholder="پرسش خود را اینجا بنویسید (مثلاً: شرایط انتقال مرخصی چیست؟)..." value="شرایط استفاده از مرخصی استحقاقی و انتقال آن چگونه است؟" onkeydown="if(event.key==='Enter') executeLiveRetrieval()" class="w-full px-5 py-3.5 pl-24 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/70 text-slate-800 dark:text-slate-100 text-xs sm:text-sm font-semibold focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all shadow-sm">
+            <input type="text" id="liveUserQueryInput" placeholder="پرسش خود را اینجا بنویسید (مثلاً: شرایط انتقال مرخصی چیست؟)..." value="شرایط استفاده از مرخصی استحقاقی و انتقال آن چگونه است؟" onkeydown="if(event.key==='Enter') executeLiveRetrieval()" class="w-full px-5 py-3.5 pl-24 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/70 text-slate-800 dark:text-slate-100 text-xs sm:text-sm font-semibold focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all shadow-sm" oninput="executeLiveRetrieval()">
             <button onclick="executeLiveRetrieval()" class="absolute left-2 top-2 bottom-2 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-md shadow-brand-500/25">
               <span>جستجو</span>
-              <span>🔍</span>
+              <span>جستجو</span>
             </button>
           </div>
 
@@ -753,7 +753,7 @@
             <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
               <span class="flex items-center gap-1">
                 <span>الگوریتم شباهت / فاصله:</span>
-                <button type="button" onclick="showConceptHelp('similarity_metrics')" class="text-[10px] text-slate-400 hover:text-brand-600" title="مقایسه الگوریتم‌های شباهت">❓</button>
+                <button type="button" onclick="showConceptHelp('similarity_metrics')" class="text-[10px] text-slate-400 hover:text-brand-600" title="مقایسه الگوریتم‌های شباهت">?</button>
               </span>
               <span id="activeMetricBadge" class="text-indigo-600 dark:text-indigo-400 font-mono text-[10px] bg-indigo-50 dark:bg-indigo-950/60 px-1.5 py-0.5 rounded font-bold">Cosine</span>
             </div>
@@ -769,7 +769,7 @@
 
           <div>
             <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-              <span class="flex items-center gap-1"><span>تعداد برترین نتایج (Top-K Chunks):</span><button type="button" onclick="showConceptHelp('top_k')" class="text-[10px] text-slate-400 hover:text-brand-600" title="Top-K در بازیابی چیست؟">❓</button></span>
+              <span class="flex items-center gap-1"><span>تعداد برترین نتایج (Top-K Chunks):</span><button type="button" onclick="showConceptHelp('top_k')" class="text-[10px] text-slate-400 hover:text-brand-600" title="Top-K در بازیابی چیست؟">?</button></span>
               <span id="topKValueLabel" class="text-brand-600 font-mono bg-brand-50 dark:bg-brand-950/60 px-2 py-0.5 rounded-md">2</span>
             </div>
             <input type="range" id="topKSlider" min="1" max="5" value="2" oninput="document.getElementById('topKValueLabel').innerText=this.value; executeLiveRetrieval();" class="w-full">
@@ -778,7 +778,7 @@
 
           <div>
             <div class="flex justify-between items-center text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
-              <span class="flex items-center gap-1"><span>حداقل آستانه شباهت (Threshold):</span><button type="button" onclick="showConceptHelp('threshold')" class="text-[10px] text-slate-400 hover:text-emerald-600" title="حد آستانه شباهت چیست؟">❓</button></span>
+              <span class="flex items-center gap-1"><span>حداقل آستانه شباهت (Threshold):</span><button type="button" onclick="showConceptHelp('threshold')" class="text-[10px] text-slate-400 hover:text-emerald-600" title="حد آستانه شباهت چیست؟">?</button></span>
               <span id="thresholdValueLabel" class="text-emerald-500 font-mono bg-emerald-50 dark:bg-emerald-950/60 px-2 py-0.5 rounded-md">30%</span>
             </div>
             <input type="range" id="thresholdSlider" min="5" max="80" step="5" value="30" oninput="document.getElementById('thresholdValueLabel').innerText=this.value+'%'; executeLiveRetrieval();" class="w-full">
@@ -791,7 +791,7 @@
           <div class="flex justify-between items-center">
             <h3 class="text-xs font-bold text-slate-700 dark:text-slate-200 flex items-center gap-1.5">
               <span>نتایج رتبه‌بندی شده شباهت کسینوسی (Similarity Ranking):</span>
-              <button type="button" onclick="showConceptHelp('cosine_sim')" class="text-[10px] text-slate-400 hover:text-brand-600" title="فرمول و مفهوم شباهت کسینوسی">❓</button>
+              <button type="button" onclick="showConceptHelp('cosine_sim')" class="text-[10px] text-slate-400 hover:text-brand-600" title="فرمول و مفهوم شباهت کسینوسی">?</button>
             </h3>
             <span id="retrievalStatsBadge" class="text-xs text-brand-600 dark:text-brand-400 font-bold bg-brand-50 dark:bg-brand-950/50 px-2.5 py-1 rounded-lg border border-brand-200 dark:border-brand-800">
               در حال ارزیابی...
@@ -820,7 +820,7 @@
           <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-rose-500/10 text-rose-600 dark:text-rose-400 text-xs font-bold mb-2 border border-rose-500/20">
               <span>گام ۶ از ۷</span> • <span>سنتز و تقویت پرامپت (Context Augmentation)</span>
-              <button type="button" onclick="showConceptHelp('augmentation')" class="w-5 h-5 rounded-full bg-rose-200 dark:bg-rose-900 text-rose-800 dark:text-rose-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای تقویت پرامپت">❓</button>
+              <button type="button" onclick="showConceptHelp('augmentation')" class="w-5 h-5 rounded-full bg-rose-200 dark:bg-rose-900 text-rose-800 dark:text-rose-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای تقویت پرامپت">?</button>
             </div>
             <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">سنتز و تزریق کانتکست به پرامپت ارسالی به هوش مصنوعی</h2>
             <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -831,7 +831,7 @@
           <div class="flex items-center gap-2">
             <button onclick="copyAugmentedPromptToClipboard()" class="px-3.5 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white/80 dark:bg-slate-800/80 text-xs font-bold hover:bg-slate-100 dark:hover:bg-slate-700 transition flex items-center gap-1.5 shadow-xs">
               <span>کپی متن پرامپت</span>
-              <span>📋</span>
+              <span></span>
             </button>
           </div>
         </div>
@@ -917,7 +917,7 @@
           <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-xs font-bold mb-2 border border-emerald-500/20">
               <span>گام ۷ از ۷ (عملیاتی نهایی)</span> • <span>تولید استریم زنده و استناددهی (Grounded Generation)</span>
-              <button type="button" onclick="showConceptHelp('grounded_gen')" class="w-5 h-5 rounded-full bg-emerald-200 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای تولید مستند و رفع توهم">❓</button>
+              <button type="button" onclick="showConceptHelp('grounded_gen')" class="w-5 h-5 rounded-full bg-emerald-200 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-200 hover:scale-110 transition text-[10px] font-bold inline-flex items-center justify-center shadow-xs cursor-pointer" title="راهنمای تولید مستند و رفع توهم">?</button>
             </div>
             <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white tracking-tight">پاسخ مستند مدل زبانی با دریافت لحظه‌ای توکن‌ها</h2>
             <p class="text-xs sm:text-sm text-slate-500 dark:text-slate-400 mt-1">
@@ -927,7 +927,7 @@
 
           <div class="flex items-center gap-2">
             <button onclick="startLiveLLMStream()" id="btnExecuteLLM" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-brand-600 via-indigo-600 to-accent-purple hover:opacity-95 text-white text-xs font-bold shadow-lg shadow-brand-500/30 transition-all flex items-center gap-2">
-              <span>🚀 اجرای درخواست زنده به مدل</span>
+              <span> اجرای درخواست زنده به مدل</span>
             </button>
           </div>
         </div>
@@ -940,7 +940,7 @@
               <div class="flex justify-between items-center mb-3.5">
                 <div class="flex items-center gap-2.5">
                   <div class="w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center font-black text-sm shadow-md shadow-emerald-500/30">
-                    ✓
+                    تایید
                   </div>
                   <div>
                     <h3 class="text-sm font-bold text-slate-900 dark:text-white">پاسخ مستند پایگاه دانش (Grounded Answer)</h3>
@@ -973,7 +973,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="p-4 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200/80 dark:border-rose-900/60 text-xs space-y-1.5">
                 <div class="font-bold text-rose-800 dark:text-rose-300 flex items-center gap-1.5">
-                  <span>❌ بدون معماری RAG (پاسخ معمولی):</span>
+                  <span>بستن بدون معماری RAG (پاسخ معمولی):</span>
                 </div>
                 <p class="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
                   مدل از قوانین داخلی شما یا فایل PDF بارگذاری‌شده بی‌خبر است؛ احتمال بالایی دارد که پاسخی کلی یا ساختگی (Hallucination) بدهد.
@@ -982,7 +982,7 @@
 
               <div class="p-4 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-900/60 text-xs space-y-1.5">
                 <div class="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
-                  <span>✅ با معماری RAG (پاسخ مقید به سند):</span>
+                  <span>تایید با معماری RAG (پاسخ مقید به سند):</span>
                 </div>
                 <p class="text-slate-600 dark:text-slate-300 text-[11px] leading-relaxed">
                   مدل چانک‌های موثق همان سند را خوانده و با استناد شماره‌گذاری‌شده به صفحه و متن مرجع، پاسخی قابل اعتماد تولید می‌کند.
@@ -996,7 +996,7 @@
             <!-- Metrics Panel -->
             <div class="p-4 rounded-2xl bg-slate-100/60 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-700/60 space-y-3">
               <h4 class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center justify-between">
-                <span class="flex items-center gap-1"><span>📊 ارزیابی سه‌گانه (RAG Triad)</span><button type="button" onclick="showConceptHelp('rag_triad')" class="text-[10px] text-slate-400 hover:text-brand-600" title="شاخص‌های سه‌گانه RAG چیست؟">❓</button></span>
+                <span class="flex items-center gap-1"><span> ارزیابی سه‌گانه (RAG Triad)</span><button type="button" onclick="showConceptHelp('rag_triad')" class="text-[10px] text-slate-400 hover:text-brand-600" title="شاخص‌های سه‌گانه RAG چیست؟">?</button></span>
                 <span id="networkLatencyBadge" class="text-[10px] font-mono text-slate-400 bg-white dark:bg-slate-900 px-2 py-0.5 rounded">Latency: - ms</span>
               </h4>
 
@@ -1055,7 +1055,7 @@ Ready to send payload...
             → بازگشت به گام ۶
           </button>
           <button onclick="goToStep(5)" class="px-5 py-2.5 rounded-xl bg-slate-800 hover:bg-slate-900 text-white font-bold text-xs shadow-md transition flex items-center gap-2">
-            <span>طرح یک پرسش جدید 🔍</span>
+            <span>طرح یک پرسش جدید جستجو</span>
           </button>
         </div>
       </section>
@@ -1134,7 +1134,7 @@ Ready to send payload...
       <div class="flex justify-between items-center pb-4 border-b border-slate-200/80 dark:border-slate-800">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center font-bold text-base border border-brand-500/20">
-            ⚙️
+            
           </div>
           <div>
             <h3 class="font-bold text-slate-900 dark:text-white text-base">تنظیمات اتصال به هوش مصنوعی (LLM Provider)</h3>
@@ -1142,7 +1142,7 @@ Ready to send payload...
           </div>
         </div>
         <button onclick="closeConfigModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg">
-          ✕
+          
         </button>
       </div>
 
@@ -1188,7 +1188,7 @@ Ready to send payload...
           <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Base URL (آدرس پایه API):</label>
           <input type="text" id="cfgBaseUrl" placeholder="https://api.openai.com/v1 یا http://192.168.1.50:8000/v1" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
           <p class="text-[10px] text-slate-400 mt-1">
-            💡 نکته: آدرس را می‌توانید با یا بدون <code>/v1</code> یا مستقیماً با <code>/chat/completions</code> وارد کنید (سیستم به طور خودکار آن را نرمال‌سازی می‌کند).
+             نکته: آدرس را می‌توانید با یا بدون <code>/v1</code> یا مستقیماً با <code>/chat/completions</code> وارد کنید (سیستم به طور خودکار آن را نرمال‌سازی می‌کند).
           </p>
         </div>
 
@@ -1201,7 +1201,7 @@ Ready to send payload...
           <div class="relative">
             <input type="password" id="cfgApiKey" placeholder="sk-... یا خالی" class="w-full px-3.5 py-2.5 pl-10 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
             <button type="button" onclick="togglePasswordVisibility()" class="absolute left-3 top-2.5 text-slate-400 hover:text-slate-600 text-xs">
-              👁️
+              
             </button>
           </div>
         </div>
@@ -1211,7 +1211,7 @@ Ready to send payload...
           <div class="flex justify-between items-center mb-1">
             <label class="text-xs font-bold text-slate-700 dark:text-slate-300">نام مدل پاسخ‌دهنده متن (LLM Model):</label>
             <button type="button" onclick="fetchAvailableModels()" class="text-[11px] text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-1 font-medium">
-              <span>📋 دریافت خودکار لیست مدل‌ها (/models)</span>
+              <span> دریافت خودکار لیست مدل‌ها (/models)</span>
             </button>
           </div>
           <input type="text" id="cfgModelName" placeholder="gpt-4o-mini یا نام مدل در سرور سفارشی" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
@@ -1227,7 +1227,7 @@ Ready to send payload...
             </label>
           </div>
           <p class="text-[10px] text-slate-400 pr-6">
-            💡 اگر با <b>Request Timeout</b> مواجه می‌شوید: تیک این گزینه را بردارید تا درخواست مستقیماً از مرورگر ارسال شود (یا برعکس اگر خطای CORS رخ داد آن را فعال کنید).
+             اگر با <b>Request Timeout</b> مواجه می‌شوید: تیک این گزینه را بردارید تا درخواست مستقیماً از مرورگر ارسال شود (یا برعکس اگر خطای CORS رخ داد آن را فعال کنید).
           </p>
         </div>
 
@@ -1236,7 +1236,7 @@ Ready to send payload...
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-slate-700 dark:text-slate-300">تست ارتباط با مدل زبانی (LLM):</span>
             <button type="button" id="btnTestLlm" onclick="testLlmConnection()" class="px-3.5 py-1.5 rounded-lg border border-brand-500 text-brand-600 dark:text-brand-400 hover:bg-brand-50 dark:hover:bg-brand-950/60 text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
-              <span id="btnTestLlmIcon">⚡</span>
+              <span id="btnTestLlmIcon"></span>
               <span id="btnTestLlmText">تست اتصال مدل زبانی</span>
             </button>
           </div>
@@ -1247,7 +1247,7 @@ Ready to send payload...
         <div class="p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-900/60 space-y-3">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5">
-              <span>🧬</span> تنظیمات مدل وکتورایزر و امبدینگ (Vector Embeddings)
+              <span></span> تنظیمات مدل وکتورایزر و امبدینگ (Vector Embeddings)
             </span>
             <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 font-semibold font-mono">
               768-dim Dense
@@ -1279,7 +1279,7 @@ Ready to send payload...
             <div class="pt-2 border-t border-indigo-200/60 dark:border-indigo-900/50 flex items-center justify-between">
               <span class="text-xs font-bold text-indigo-900 dark:text-indigo-200">تست اجرای مدل از کش سیستم:</span>
               <button type="button" id="btnTestEmbed" onclick="testEmbedConnection()" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm shadow-indigo-500/20">
-                <span id="btnTestEmbedIcon">🧪</span>
+                <span id="btnTestEmbedIcon"></span>
                 <span id="btnTestEmbedText">تست اجرای google/embeddinggemma-2 از کش</span>
               </button>
             </div>
@@ -1307,7 +1307,7 @@ Ready to send payload...
       <div class="flex justify-between items-center pb-4 border-b border-slate-200/80 dark:border-slate-800">
         <div class="flex items-center gap-2.5">
           <div class="w-9 h-9 rounded-xl bg-indigo-500/10 text-indigo-600 flex items-center justify-center font-bold text-base">
-            📖
+            
           </div>
           <div>
             <h3 class="font-bold text-slate-900 dark:text-white text-base">راهنمای جامع یادگیری و کارکرد سیستم RAG</h3>
@@ -1315,7 +1315,7 @@ Ready to send payload...
           </div>
         </div>
         <button onclick="closeGuideModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg">
-          ✕
+          
         </button>
       </div>
 
@@ -1375,7 +1375,7 @@ Ready to send payload...
           <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
           Raw HTTP & SSE Streaming Payload Inspector
         </h3>
-        <button onclick="toggleRawPayloadModal()" class="text-slate-400 hover:text-white p-1">✕</button>
+        <button onclick="toggleRawPayloadModal()" class="text-slate-400 hover:text-white p-1"></button>
       </div>
       <div class="mt-4">
         <pre id="rawLogFullContent" class="p-4 rounded-2xl bg-black/80 font-mono text-xs text-emerald-400 overflow-y-auto max-h-[460px] whitespace-pre-wrap border border-slate-800"></pre>
@@ -1390,7 +1390,7 @@ Ready to send payload...
       <div class="flex justify-between items-center pb-4 border-b border-slate-200/80 dark:border-slate-800">
         <div class="flex items-center gap-3">
           <div id="conceptHelpIconBox" class="w-10 h-10 rounded-2xl bg-brand-500/10 text-brand-600 flex items-center justify-center text-xl shadow-xs">
-            💡
+            
           </div>
           <div>
             <div class="flex items-center gap-2">
@@ -1401,7 +1401,7 @@ Ready to send payload...
           </div>
         </div>
         <button onclick="closeConceptHelpModal()" class="w-8 h-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center transition">
-          ✕
+          
         </button>
       </div>
 
@@ -1409,7 +1409,7 @@ Ready to send payload...
         <!-- Summary / Why it matters -->
         <div class="p-4 rounded-2xl bg-gradient-to-r from-brand-50/60 to-indigo-50/40 dark:from-brand-950/30 dark:to-indigo-950/20 border border-brand-200/70 dark:border-brand-900/50">
           <div class="font-bold text-brand-800 dark:text-brand-300 text-xs mb-1 flex items-center gap-1.5">
-            <span>🎯</span> چرا در معماری RAG به این مفهوم نیاز داریم؟
+            <span></span> چرا در معماری RAG به این مفهوم نیاز داریم؟
           </div>
           <p id="conceptHelpWhy" class="text-slate-700 dark:text-slate-300 text-xs leading-relaxed">
             ...
@@ -1419,7 +1419,7 @@ Ready to send payload...
         <!-- How it works -->
         <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800">
           <div class="font-bold text-slate-800 dark:text-slate-200 text-xs mb-1 flex items-center gap-1.5">
-            <span>⚙️</span> مکانیزم کارکرد و جزئیات فنی:
+            <span></span> مکانیزم کارکرد و جزئیات فنی:
           </div>
           <p id="conceptHelpHow" class="text-slate-600 dark:text-slate-300 text-xs leading-relaxed whitespace-pre-line">
             ...
@@ -1429,7 +1429,7 @@ Ready to send payload...
         <!-- Math or Formula / Equivalent Code if applicable -->
         <div id="conceptHelpFormulaContainer" class="p-4 rounded-2xl bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-200/70 dark:border-indigo-900/50">
           <div class="font-bold text-indigo-800 dark:text-indigo-300 text-xs mb-1 flex items-center gap-1.5">
-            <span>📐</span> فرمول ریاضی یا استاندارد پیاده‌سازی:
+            <span></span> فرمول ریاضی یا استاندارد پیاده‌سازی:
           </div>
           <div id="conceptHelpFormula" class="font-mono text-[11px] text-center bg-white dark:bg-slate-900 p-2.5 rounded-xl border border-indigo-100 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 my-2 shadow-2xs">
             ...
@@ -1442,7 +1442,7 @@ Ready to send payload...
         <!-- Pro-Tips / Best Practices -->
         <div class="p-3.5 rounded-2xl bg-emerald-50/60 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-900/50 text-[11px]">
           <div class="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5 mb-1">
-            <span>💡</span> نکته طلایی برای محیط واقعی (Production Best Practice):
+            <span></span> نکته طلایی برای محیط واقعی (Production Best Practice):
           </div>
           <p id="conceptHelpTip" class="text-emerald-900 dark:text-emerald-200/90 leading-relaxed">
             ...
@@ -1464,7 +1464,7 @@ Ready to send payload...
       <div class="flex justify-between items-center pb-4 border-b border-slate-200/80 dark:border-slate-800">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-2xl bg-purple-500/10 text-purple-600 flex items-center justify-center text-xl shadow-xs">
-            💾
+            
           </div>
           <div>
             <div class="flex items-center gap-2">
@@ -1480,7 +1480,7 @@ Ready to send payload...
           </div>
         </div>
         <button onclick="closeVectorRecordModal()" class="w-8 h-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center transition">
-          ✕
+          
         </button>
       </div>
 
@@ -1489,10 +1489,10 @@ Ready to send payload...
         <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2">
           <div class="flex justify-between items-center">
             <span class="text-xs font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-              <span>📄</span> محتوای کامل متن چانک (Document Text):
+              <span></span> محتوای کامل متن چانک (Document Text):
             </span>
             <button onclick="copyRecordText()" class="text-xs px-2.5 py-1 rounded-lg border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:text-brand-600 font-bold flex items-center gap-1 transition shadow-2xs">
-              <span>📋</span> کپی متن
+              <span></span> کپی متن
             </button>
           </div>
           <div id="recordModalFullText" class="p-3.5 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 text-xs text-slate-800 dark:text-slate-200 leading-relaxed max-h-48 overflow-y-auto whitespace-pre-wrap select-text">
@@ -1524,7 +1524,7 @@ Ready to send payload...
         <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2">
           <div class="flex justify-between items-center text-xs">
             <span class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-              <span>🧬</span> نقشه حرارتی بردار متراکم (Dense Vector Heatmap):
+              <span></span> نقشه حرارتی بردار متراکم (Dense Vector Heatmap):
             </span>
             <span class="text-[10px] font-mono text-slate-400">طیف رنگی: [-1.0 تا +1.0]</span>
           </div>
@@ -1537,10 +1537,10 @@ Ready to send payload...
         <div class="p-4 rounded-2xl bg-slate-900 border border-slate-800 text-xs space-y-2">
           <div class="flex justify-between items-center">
             <span class="font-mono text-[11px] text-emerald-400 flex items-center gap-1.5">
-              <span>🔢</span> مقادیر کامل اعشاری بردار (Float32 Array):
+              <span></span> مقادیر کامل اعشاری بردار (Float32 Array):
             </span>
             <button onclick="copyRecordFullVector()" class="text-[10px] px-2.5 py-1 rounded-lg border border-slate-700 bg-slate-800 text-slate-200 hover:text-white font-mono flex items-center gap-1 transition">
-              <span>📋</span> کپی کل آرایه (JSON)
+              <span></span> کپی کل آرایه (JSON)
             </button>
           </div>
           <div id="recordModalVectorArray" class="font-mono text-[10px] p-3 rounded-xl bg-black/80 text-emerald-400 overflow-y-auto max-h-36 whitespace-pre-wrap border border-slate-800 text-left select-all" style="direction: ltr;">
@@ -1551,7 +1551,7 @@ Ready to send payload...
 
       <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mt-6 pt-4 border-t border-slate-200/80 dark:border-slate-800">
         <button onclick="jumpToChunkIn2DSpace()" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-sky-50 dark:bg-sky-950/60 border border-sky-300 dark:border-sky-800 text-sky-700 dark:text-sky-300 text-xs font-bold hover:bg-sky-100 transition flex items-center justify-center gap-1.5">
-          <span>🎯 مشاهده نقطه این چانک در فضای دو بعدی PCA (گام ۳)</span>
+          <span> مشاهده نقطه این چانک در فضای دو بعدی PCA (گام ۳)</span>
         </button>
         <button onclick="closeVectorRecordModal()" class="w-full sm:w-auto px-5 py-2 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold transition shadow-xs">
           بستن
@@ -1567,7 +1567,7 @@ Ready to send payload...
       <div class="flex justify-between items-center pb-4 border-b border-slate-200/80 dark:border-slate-800">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl shadow-xs">
-            📖
+            
           </div>
           <div>
             <div class="flex items-center gap-2">
@@ -1585,7 +1585,7 @@ Ready to send payload...
           </div>
         </div>
         <button onclick="closeCitationModal()" class="w-8 h-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center transition">
-          ✕
+          
         </button>
       </div>
 
@@ -1594,7 +1594,7 @@ Ready to send payload...
         <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2">
           <div class="flex justify-between items-center text-xs">
             <span class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
-              <span>📍</span> موقعیت این تکه داخل سند اصلی (Document Alignment):
+              <span></span> موقعیت این تکه داخل سند اصلی (Document Alignment):
             </span>
             <span id="citationModalCharRange" class="text-[10px] font-mono text-slate-400">
               کاراکتر ۰ تا ۱۸۰
@@ -1609,10 +1609,10 @@ Ready to send payload...
         <div class="p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-900/60 space-y-2">
           <div class="flex justify-between items-center text-xs">
             <span class="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
-              <span>📝</span> متن خالص ارائه‌شده به هوش مصنوعی به عنوان کانتکست:
+              <span></span> متن خالص ارائه‌شده به هوش مصنوعی به عنوان کانتکست:
             </span>
             <button onclick="copyCitationText()" class="text-xs px-2.5 py-1 rounded-lg border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-slate-800 font-bold flex items-center gap-1 transition shadow-2xs">
-              <span>📋</span> کپی متن استناد
+              <span></span> کپی متن استناد
             </button>
           </div>
           <div id="citationModalChunkText" class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-emerald-200/70 dark:border-emerald-800/70 text-xs text-slate-800 dark:text-slate-200 leading-relaxed max-h-36 overflow-y-auto whitespace-pre-wrap">
@@ -1639,7 +1639,7 @@ Ready to send payload...
 
       <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mt-6 pt-4 border-t border-slate-200/80 dark:border-slate-800">
         <button onclick="jumpToRecordFromCitation()" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-purple-50 dark:bg-purple-950/60 border border-purple-300 dark:border-purple-800 text-purple-700 dark:text-purple-300 text-xs font-bold hover:bg-purple-100 dark:hover:bg-purple-900 transition flex items-center justify-center gap-1.5 shadow-2xs">
-          <span>🔬 کالبدشکافی بردار این رکورد در دیتابیس برداری (گام ۴)</span>
+          <span> کالبدشکافی بردار این رکورد در دیتابیس برداری (گام ۴)</span>
         </button>
         <button onclick="closeCitationModal()" class="w-full sm:w-auto px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs">
           بستن
@@ -1658,7 +1658,7 @@ Ready to send payload...
       similarity_metrics: {
         title: "مقایسه الگوریتم‌های شباهت و فاصله برداری",
         enTerm: "Vector Similarity & Distance Metrics",
-        icon: "📐",
+        icon: "",
         why: "تنها یک روش برای سنجش شباهت وجود ندارد! بسته به اینکه آیا بردارها نرمال شده‌اند، اسناد دارای طول‌های نابرابر هستند، یا نیاز به تطابق دقیق کلمات تخصصی (Keyword Match) داریم، انتخاب سنجه مناسب بر دقت بازیابی اطلاعات تاثیر چشمگیری می‌گذارد.",
         how: "۱. شباهت کسینوسی (Cosine): زاویه دو بردار را می‌سنجد و طول سند تاثیری در آن ندارد (بازه ۰ تا ۱).\n۲. ضرب داخلی (Dot Product): ترکیب زاویه و اندازه بردار؛ در صورت نرمال‌سازی بردارها سریع‌ترین گزینه در سخت‌افزار است.\n۳. فاصله اقلیدسی (L2 Distance): کوتاهترین فاصله خط‌کشی در فضا؛ فرمول معکوس 1/(1+d) جهت تبدیل به شباهت.\n۴. فاصله منهتن (L1 Distance): مجموع فاصله‌های شبکه‌ای؛ در ابعاد بالا نسبت به نویز ابعاد تکی مقاوم‌تر است.\n۵. جستجوی ترکیبی (Hybrid Search): ترکیب ۶۰٪ شباهت معنایی و ۴۰٪ تطابق واژگانی (BM25) برای پوشش خطاهای ناموجود در امبدینگ.",
         formula: "Cosine = (A · B) / (||A|| ||B||),   Dot = Σ(A_i * B_i),   L2 = sqrt(Σ(A_i - B_i)²),   Hybrid = 0.6 * Dense + 0.4 * BM25",
@@ -1668,7 +1668,7 @@ Ready to send payload...
       ingestion: {
         title: "ورود، پاکسازی و استخراج اسناد",
         enTerm: "Document Ingestion & Preprocessing",
-        icon: "📥",
+        icon: "",
         why: "اسناد اولیه سازمانی معمولاً در قالب‌های ناهمگون نظیر PDF، DOCX، HTML یا پایگاه‌های داده وجود دارند. کیفیت کل زنجیره RAG (قانون Garbage In, Garbage Out) به شدت وابسته به این است که چقدر متن خام، تمیز، عاری از کاراکترهای مخرب و دارای ابرداده‌های ساخت‌یافته استخراج گردد.",
         how: "در این فاز، فایل بارگذاری‌شده به متن خالص تبدیل شده، حروف یکدست می‌شوند (مانند یکنواخت‌سازی ی و ک فارسی) و ابرداده‌هایی نظیر نام فایل، شماره صفحه، تاریخ سند و نویسنده به هر بخش متصل می‌شود تا در فاز بازیابی بتوان فیلترهای دقیق متادیتا اعمال کرد.",
         formula: "CleanText = NormalizeUnicode(StripHeadersFooters(RawExtractedDoc))",
@@ -1678,7 +1678,7 @@ Ready to send payload...
       chunking: {
         title: "قطعه‌بندی هوشمند متن و پنجره بافت",
         enTerm: "Smart Text Chunking",
-        icon: "✂️",
+        icon: "",
         why: "مدل‌های زبانی دارای محدودیت پنجره بافت (Context Window) هستند و هر چه متن ارسالی طولانی‌تر باشد، هزینه توکن بالاتر و پدیده «گم‌شدن اطلاعات در میانه» (Lost in the Middle) رخ می‌دهد. همچنین قطعات کوچک‌تر، بردار معنایی متمرکزتر و دقیق‌تری تولید می‌کنند.",
         how: "متن به بخش‌هایی با اندازه معین (مثلاً ۱۸۰ تا ۵۰۰ کاراکتر یا توکن) خرد می‌شود. الگوریتم بازگشتی (Recursive Character Splitter) ابتدا تلاش می‌کند در مرز پاراگراف‌ها (\\n\\n)، سپس مرز جملات (.) و در نهایت مرز کلمات برش ایجاد کند تا ساختار دستوری جمله شکسته نشود.",
         formula: "Chunks = RecursiveSplit(text, chunkSize=C, overlap=O, separators=['\\n\\n', '\\n', '. ', ' '])",
@@ -1688,7 +1688,7 @@ Ready to send payload...
       overlap: {
         title: "هم‌پوشانی چانک‌ها برای حفظ پیوستگی معنایی",
         enTerm: "Chunk Overlap & Sliding Window",
-        icon: "🔗",
+        icon: "",
         why: "اگر یک جمله یا شرط مهم دقیقاً در محل مرز برش بین دو چانک بیفتد، نیمی از معنا در قطعه اول و نیم دیگر در قطعه دوم قرار گرفته و معنای کامل آن توسط سیستم برداری قابل بازیابی نخواهد بود.",
         how: "با تعریف هم‌پوشانی (مثلاً ۱۰ تا ۲۰ درصد اندازه چانک)، انتهای هر چانک در ابتدای چانک بعدی تکرار می‌شود (پنجره لغزان یا Sliding Window). بدین ترتیب زنجیره جملات در مرزها قطع نمی‌شود.",
         formula: "Chunk[i+1].Start = Chunk[i].End - OverlapLength",
@@ -1698,7 +1698,7 @@ Ready to send payload...
       embeddings: {
         title: "بردارهای متراکم معنایی",
         enTerm: "Dense Vector Embeddings",
-        icon: "🧬",
+        icon: "",
         why: "رایانه‌ها متن را به صورت کاراکتری درک می‌کنند و متوجه مترادف‌ها، مفاهیم ضمنی و تشابه معنایی نمی‌شوند. امبدینگ‌ها متن را به یک بردار عددی چندبعدی تبدیل می‌کنند به طوری که کلمات و جملات با معنای نزدیک، در این فضا در همسایگی هم قرار گیرند.",
         how: "یک شبکه عصبی ترنسفورمر (مانند google/embeddinggemma-2 یا BGE-m3) متن را خوانده و یک بردار با طول مشخص (مثلاً ۷۶۸ بعد) تولید می‌کند. این بردار نرمال‌سازی می‌شود تا طول آن برابر ۱ گردد (L2 Norm = 1.0).",
         formula: "v = EmbedModel(text) in R^d,   v_normalized = v / ||v||_2",
@@ -1708,7 +1708,7 @@ Ready to send payload...
       pca: {
         title: "کاهش بعد با تحلیل مؤلفه‌های اصلی (PCA)",
         enTerm: "Principal Component Analysis (PCA)",
-        icon: "📊",
+        icon: "",
         why: "بردارهای واقعی امبدینگ دارای ۳۸۴ تا ۱۵۳۶ بعد هستند که توسط ذهن انسان و نمایشگرهای دوبعدی قابل ترسیم نیستند. الگوریتم PCA بیشترین واریانس داده‌ها را به دو یا سه بعد اصلی نگاشت می‌دهد تا چیدمان هندسی خوشه‌ها قابل رویت باشد.",
         how: "با محاسبه ماتریس کوواریانس بردارها و یافتن مقادیر و بردارهای ویژه (Eigenvectors)، دو راستایی که بیشترین پراکندگی اطلاعات را دارند انتخاب شده و بردارها روی این دو بعد تصویر (Project) می‌شوند.",
         formula: "z_i = [v_i · u_1, v_i · u_2],   where u_1, u_2 are top eigenvectors of Covariance matrix",
@@ -1718,7 +1718,7 @@ Ready to send payload...
       vector_db: {
         title: "پایگاه داده برداری و ایندکس سلسله‌مراتبی HNSW",
         enTerm: "Vector Database & HNSW Indexing",
-        icon: "🗄️",
+        icon: "",
         why: "در دیتابیس‌های رابطه‌ای (مانند SQL) جستجوی شباهت معنایی بین بردارها نیازمند محاسبه فاصله با تک‌تک رکوردهای دیتابیس (اسکن کامل یا O(N)) است که با میلیونی شدن اسناد ثانیه‌ها طول می‌کشد. دیتابیس‌های برداری ایندکس‌های تقریبی فوق‌سریع دارند.",
         how: "الگوریتم HNSW (Hierarchical Navigable Small World) یک گراف چندلایه شبیه به ساختار بزرگ‌راه‌ها و خیابان‌های شهری می‌سازد. در لایه‌های بالا جهش‌های بزرگ به سمت همسایگی بردار انجام شده و در لایه زیرین همسایه‌های دقیق واکشی می‌شوند با زمان O(log N).",
         formula: "Query Complexity: O(log N)   vs Flat Scan: O(N * d)",
@@ -1728,7 +1728,7 @@ Ready to send payload...
       retrieval: {
         title: "بردارسازی سوال و جستجوی معنایی",
         enTerm: "Vector Similarity Retrieval",
-        icon: "🔍",
+        icon: "جستجو",
         why: "کاربران به زبان طبیعی و کلماتی متفاوت از متن سند سوال می‌پرسند (مثلاً «چند روز استراحت کاری دارم؟» در برابر «مرخصی استحقاقی»). جستجوی متنی سنتی این تطابق را نمی‌فهمد، اما جستجوی برداری مفهوم پشت کلمات را پیدا می‌کند.",
         how: "سوال کاربر با همان مدل امبدینگ به یک بردار متراکم تبدیل می‌شود. سپس فاصله این بردار با تمامی رکوردهای پایگاه داده سنجیده شده و مواردی که بیشترین شباهت جهت‌گیری دارند استخراج می‌شوند.",
         formula: "Top-K = argmax_{c in C}^(K) Similarity(q, c)",
@@ -1738,7 +1738,7 @@ Ready to send payload...
       cosine_sim: {
         title: "فرمول و مفهوم شباهت کسینوسی",
         enTerm: "Cosine Similarity Metric",
-        icon: "📐",
+        icon: "",
         why: "طول متن (تعداد کلمات) نباید بر شباهت تاثیر منفی بگذارد. برخلاف فاصله اقلیدسی که به اندازه بردار حساس است، شباهت کسینوسی صرفاً زاویه جهت‌گیری دو بردار در فضا را می‌سنجد.",
         how: "با محاسبه ضرب داخلی دو بردار تقسیم بر حاصل‌ضرب طول آن‌ها، عددی بین -۱ (تضاد کامل)، ۰ (متعامد و بی‌ارتباط) و +۱ (انطباق کامل معنایی) به دست می‌آید.",
         formula: "cos(θ) = (A · B) / (||A|| * ||B||) = Σ(A_i * B_i) / (sqrt(Σ A_i²) * sqrt(Σ B_i²))",
@@ -1748,7 +1748,7 @@ Ready to send payload...
       top_k: {
         title: "تعداد نتایج منتخب (Top-K)",
         enTerm: "Top-K Selection",
-        icon: "🎯",
+        icon: "",
         why: "نمی‌توانیم تمام اسناد را به مدل بدهیم؛ باید دقیقاً تعداد مشخصی از شبیه‌ترین قطعات جدا شوند. انتخاب K مناسب تعادل میان «پوشش کامل اطلاعات» و «جلوگیری از ورود نویز و سردرگمی مدل» را تضمین می‌کند.",
         how: "پس از رتبه‌بندی کل چانک‌ها بر اساس امتیاز شباهت، تنها K چانک نخست که بالاتر از حد آستانه هستند جدا شده و مابقی فیلتر می‌شوند.",
         formula: "K in [2, 5] (معمولاً ۲ الی ۵ چانک برای پاسخ‌دهی بهینه)",
@@ -1758,7 +1758,7 @@ Ready to send payload...
       threshold: {
         title: "حد آستانه شباهت (Similarity Threshold)",
         enTerm: "Minimum Similarity Threshold",
-        icon: "🛡️",
+        icon: "",
         why: "گاهی کاربر سوالی کاملاً بی‌ربط می‌پرسد (مثلاً پرسیدن دستور پخت پیتزا از سیستم آیین‌نامه اداری!). اگر حد آستانه نباشد، سیستم باز هم نزدیک‌ترین چانک‌های نامربوط را واکشی می‌کند و مدل ممکن است توهم بزند.",
         how: "یک فیلتر سخت‌گیرانه روی امتیاز شباهت قرار می‌گیرد (مثلاً 0.30 یا 30%). چانک‌هایی که امتیازشان پایین‌تر از این حد باشد، حتی اگر در بین رتبه‌های برتر باشند، کنار گذاشته می‌شوند.",
         formula: "ValidChunks = { c in Top-K | Sim(q, c) >= Threshold }",
@@ -1768,7 +1768,7 @@ Ready to send payload...
       augmentation: {
         title: "تقویت پرامپت و مهندسی کانتکست",
         enTerm: "Context Augmentation & Prompt Engineering",
-        icon: "🧬",
+        icon: "",
         why: "مدل زبانی به خودی خود نمی‌داند کدام بخش کانتکست است و کدام بخش سوال. یک ساختاردهی مهندسی‌شده و استاندارد، مرز بین دستورات سیستم، فکت‌های مرجع و سوال کاربر را برای هوش مصنوعی شفاف می‌سازد.",
         how: "پرامپت نهایی از ترکیب ۳ عنصر تشکیل می‌شود: ۱- دستورالعمل سیستم (Strict Rules)، ۲- تکه‌های استخراج‌شده با برچسب‌گذاری منبع [منبع ۱]، [منبع ۲]، ۳- سوال صریح کاربر.",
         formula: "Prompt = [SystemInstructions] + Σ [Source_i: Chunk_i] + [UserQuery]",
@@ -1778,7 +1778,7 @@ Ready to send payload...
       grounded_gen: {
         title: "تولید مستند به منابع و رفع توهم",
         enTerm: "Grounded Generation & Citation",
-        icon: "📝",
+        icon: "",
         why: "هدف نهایی RAG، ارائه پاسخی است که قابل استناد، ممیزی و حسابرسی باشد. کاربران و سازمان‌ها باید مطمئن باشند پاسخ هوش مصنوعی از پیش‌فرض‌های نامعلوم نیامده بلکه مستقیماً از پاراگراف مشخصی در سند استخراج شده است.",
         how: "مدل موظف است در پاسخ خود، شماره منبع را با علائمی نظیر [منبع ۱، صفحه ۲] ذکر کند. در سمت فرانت‌اند، این علائم به تگ‌ها و هایلایت‌های تعاملی تبدیل می‌شوند.",
         formula: "Answer = LLM(Prompt)  Subject to: for all claims exists Citation(chunk_i)",
@@ -1788,7 +1788,7 @@ Ready to send payload...
       rag_triad: {
         title: "ارزیابی سه‌گانه سیستم‌های RAG",
         enTerm: "The RAG Triad Evaluation Framework",
-        icon: "📊",
+        icon: "",
         why: "بدون متریک‌های شفاف نمی‌توان فهمید آیا سیستم RAG عملکرد مطلوبی دارد یا کجای پایپ‌لاین ایراد دارد. شاخص‌های سه‌گانه RAG Triad استاندارد صنعتی برای ارزیابی این معماری هستند.",
         how: "این چارچوب سه محور مستقل را می‌سنجد: ۱- وفاداری (Faithfulness): آیا پاسخ صرفاً از کانتکست آمده و توهم ندارد؟ ۲- ربط کانتکست (Context Relevance): آیا چانک‌های واکشی‌شده واقعاً به سوال مربوطند؟ ۳- ربط پاسخ (Answer Relevance): آیا پاسخ واقعاً سوال کاربر را حل کرده است؟",
         formula: "RAG Triad = < Faithfulness(Answer, Context), ContextRelevance(Context, Query), AnswerRelevance(Answer, Query) >",
@@ -1820,7 +1820,7 @@ Ready to send payload...
       const formulaDescEl = document.getElementById('conceptHelpFormulaDesc');
       const tipEl = document.getElementById('conceptHelpTip');
 
-      if (iconBox) iconBox.innerText = topic.icon || '💡';
+      if (iconBox) iconBox.innerText = topic.icon || '';
       if (titleEl) titleEl.innerText = topic.title;
       if (enTermEl) enTermEl.innerText = topic.enTerm || '';
       if (whyEl) whyEl.innerText = topic.why;
@@ -1941,7 +1941,7 @@ Ready to send payload...
       const chunk = chunks[currentInspectedRecordIdx];
       if (!chunk) return;
       navigator.clipboard.writeText(chunk.text).then(() => {
-        showToast('متن کامل چانک با موفقیت کپی شد! 📋', 'success');
+        showToast('متن کامل چانک با موفقیت کپی شد! ', 'success');
       });
     }
 
@@ -1950,7 +1950,7 @@ Ready to send payload...
       if (!chunk || !chunk.vector) return;
       const json = JSON.stringify(chunk.vector, null, 2);
       navigator.clipboard.writeText(json).then(() => {
-        showToast(`کل آرایه بردار (${chunk.vector.length} بعد) در کلیپ‌بورد کپی شد! 🔢`, 'success');
+        showToast(`کل آرایه بردار (${chunk.vector.length} بعد) در کلیپ‌بورد کپی شد! `, 'success');
       });
     }
 
@@ -2039,8 +2039,8 @@ Ready to send payload...
       baseUrl: localStorage.getItem('rag_base_url') || 'https://api.openai.com/v1',
       apiKey: localStorage.getItem('rag_api_key') || '',
       modelName: localStorage.getItem('rag_model_name') || 'gpt-4o-mini',
-      embeddingModel: 'google/embeddinggemma-2',
-      embeddingProvider: 'cache',
+      embeddingModel: 'local_python_768d',
+      embeddingProvider: 'local_python',
       hfToken: localStorage.getItem('rag_hf_token') || '',
       useProxy: localStorage.getItem('rag_use_proxy') !== 'false'
     };
@@ -2060,7 +2060,7 @@ Ready to send payload...
       // Dark mode initialization
       if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
         document.documentElement.classList.add('dark');
-        document.getElementById('themeToggleIcon').innerText = '☀️';
+        document.getElementById('themeToggleIcon').innerText = 'تم';
       }
 
       loadConfigIntoUI();
@@ -2082,7 +2082,7 @@ Ready to send payload...
       };
       
       toast.className = `px-4 py-2.5 rounded-xl shadow-xl text-xs font-semibold flex items-center gap-2 pointer-events-auto transition-all duration-300 transform translate-y-4 opacity-0 ${bgColors[type] || bgColors.info}`;
-      toast.innerHTML = `<span>${type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ'}</span><span>${message}</span>`;
+      toast.innerHTML = `<span>${type === 'success' ? 'تایید' : type === 'error' ? '' : 'ℹ'}</span><span>${message}</span>`;
       
       container.appendChild(toast);
       setTimeout(() => {
@@ -2098,7 +2098,7 @@ Ready to send payload...
     // --- Dark Mode ---
     function toggleDarkMode() {
       const isDark = document.documentElement.classList.toggle('dark');
-      document.getElementById('themeToggleIcon').innerText = isDark ? '☀️' : '🌙';
+      document.getElementById('themeToggleIcon').innerText = isDark ? 'تم' : 'تم';
       drawVectorCanvas();
     }
 
@@ -2341,7 +2341,7 @@ Ready to send payload...
       if (activeModelBadge) activeModelBadge.innerText = llmConfig.modelName;
       if (metricModel) metricModel.innerText = llmConfig.modelName;
 
-      if (step3Badge) step3Badge.innerHTML = `<span>🧬 وکتورایزر: google/embeddinggemma-2 (کش سیستم)</span><span class="text-[10px] text-slate-400">⚙️</span>`;
+      if (step3Badge) step3Badge.innerHTML = `<span> وکتورایزر: google/embeddinggemma-2 (کش سیستم)</span><span class="text-[10px] text-slate-400"></span>`;
 
       let providerDisplay = 'سفارشی';
       if (llmConfig.baseUrl.includes('openai.com')) providerDisplay = 'OpenAI';
@@ -2355,10 +2355,10 @@ Ready to send payload...
 
       if (llmConfig.apiKey || llmConfig.baseUrl.includes('localhost') || llmConfig.baseUrl.includes('127.0.0.1') || llmConfig.baseUrl.includes('192.168.')) {
         dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50 animate-pulse";
-        if (llmStatusText) llmStatusText.innerHTML = `🟢 متصل به <strong>${llmConfig.modelName}</strong> (${providerDisplay})`;
+        if (llmStatusText) llmStatusText.innerHTML = ` متصل به <strong>${llmConfig.modelName}</strong> (${providerDisplay})`;
       } else {
         dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
-        if (llmStatusText) llmStatusText.innerHTML = `🟡 حالت شبیه‌ساز (کلید API وارد نشده)`;
+        if (llmStatusText) llmStatusText.innerHTML = ` حالت شبیه‌ساز (کلید API وارد نشده)`;
       }
     }
 
@@ -2431,7 +2431,7 @@ Ready to send payload...
           const data = await resp.json();
           const reply = data.choices?.[0]?.message?.content || data.choices?.[0]?.text || 'OK';
           feedback.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300";
-          feedback.innerHTML = `✅ اتصال با موفقیت برقرار شد! (${elapsed}ms)<br>آدرس نهایی: <code>${targetUrl}</code><br>مدل: <b>${model}</b> | پاسخ دریافت شد: "${reply.trim()}"`;
+          feedback.innerHTML = `تایید اتصال با موفقیت برقرار شد! (${elapsed}ms)<br>آدرس نهایی: <code>${targetUrl}</code><br>مدل: <b>${model}</b> | پاسخ دریافت شد: "${reply.trim()}"`;
           showToast('اتصال به سرور هوش مصنوعی تایید شد.', 'success');
         } else {
           const errData = await resp.text();
@@ -2443,12 +2443,12 @@ Ready to send payload...
             parsedErr = errData.substring(0, 250);
           }
           feedback.className = "p-3 rounded-xl text-xs font-mono bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300";
-          feedback.innerHTML = `❌ خطا در اتصال به مدل (کد وضعیت ${resp.status}):<br>آدرس فراخوانی‌شده: <code>${targetUrl}</code><br>پیام سرور: ${parsedErr}<br><br>` +
-            `💡 <b>راهنما:</b><br>` +
+          feedback.innerHTML = `بستن خطا در اتصال به مدل (کد وضعیت ${resp.status}):<br>آدرس فراخوانی‌شده: <code>${targetUrl}</code><br>پیام سرور: ${parsedErr}<br><br>` +
+            ` <b>راهنما:</b><br>` +
             (useProxy ? 
               `• اگر سیستم شما دسترسی مستقیم دارد، <b>تیک «استفاده از سرور پروکسی داخلی» را بردارید</b>.<br>` :
               `• برای رفع خطای CORS، <b>تیک «استفاده از سرور پروکسی داخلی» را فعال کنید</b>.<br>`) +
-            `• روی دکمه «📋 دریافت خودکار لیست مدل‌ها» کلیک کنید تا از صحت نام مدل اطمینان حاصل فرمایید.`;
+            `• روی دکمه « دریافت خودکار لیست مدل‌ها» کلیک کنید تا از صحت نام مدل اطمینان حاصل فرمایید.`;
           showToast(`خطا در اتصال به مدل (${resp.status})`, 'error');
         }
       } catch (err) {
@@ -2456,23 +2456,23 @@ Ready to send payload...
         clearTimeout(timer);
         feedback.className = "p-3 rounded-xl text-xs font-mono bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300";
         if (err.name === 'AbortError') {
-          feedback.innerHTML = `❌ <b>زمان پاسخ‌دهی به پایان رسید (Request Timeout - ${TIMEOUT_SEC}s):</b><br>` +
+          feedback.innerHTML = `بستن <b>زمان پاسخ‌دهی به پایان رسید (Request Timeout - ${TIMEOUT_SEC}s):</b><br>` +
             `سرور مقصد به آدرس <code>${targetUrl}</code> در مدت ${TIMEOUT_SEC} ثانیه پاسخی ارسال نکرد.<br><br>` +
-            `🔍 <b>اقدامات برای رفع مشکل:</b><br>` +
+            `جستجو <b>اقدامات برای رفع مشکل:</b><br>` +
             (useProxy ? 
               `۱. <b>تست بدون پروکسی سرور:</b> <b>تیک «استفاده از سرور پروکسی داخلی» را بردارید</b> تا درخواست مستقیماً از مرورگر ارسال شود.<br>` :
               `۱. <b>تست با پروکسی سرور:</b> <b>تیک «استفاده از سرور پروکسی داخلی» را فعال کنید</b> تا سرور درخواست را فوروارد کند.<br>`) +
             `۲. <b>شبکه داکر:</b> اگر سرور سفارشی روی همین سیستم سرور اجرا شده، آدرس <code>http://host.docker.internal:8000/v1</code> یا آی‌پی محلی شبکه (مانند <code>192.168.x.x</code>) را وارد کنید.<br>` +
-            `۳. <b>تست دسترسی مدل‌ها:</b> دکمه «📋 دریافت خودکار لیست مدل‌ها» در بالا را امتحان کنید تا مشخص شود آیا پورت سرور باز است یا خیر.`;
+            `۳. <b>تست دسترسی مدل‌ها:</b> دکمه « دریافت خودکار لیست مدل‌ها» در بالا را امتحان کنید تا مشخص شود آیا پورت سرور باز است یا خیر.`;
         } else {
-          feedback.innerHTML = `❌ خطای ارتباط شبکه:<br>${err.message}<br><br>` +
-            `💡 <b>پیشنهاد:</b> حالت «استفاده از سرور پروکسی داخلی» را تغییر دهید (فعال/غیرفعال) و مجدداً تست کنید.`;
+          feedback.innerHTML = `بستن خطای ارتباط شبکه:<br>${err.message}<br><br>` +
+            ` <b>پیشنهاد:</b> حالت «استفاده از سرور پروکسی داخلی» را تغییر دهید (فعال/غیرفعال) و مجدداً تست کنید.`;
         }
         showToast('خطای تایم‌اوت در اتصال به مدل زبانی.', 'error');
       } finally {
         clearInterval(progressInterval);
         btn.disabled = false;
-        icon.innerText = "⚡";
+        icon.innerText = "";
       }
     }
 
@@ -2513,11 +2513,11 @@ Ready to send payload...
           const sample = (data.sample || data.embeddings?.[0]?.slice(0, 4) || []).map(n => Number(n).toFixed(3)).join(', ');
 
           feedback.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300";
-          feedback.innerHTML = `✅ مدل google/embeddinggemma-2 از کش سیستم با موفقیت اجرا شد! (${elapsed}ms)<br>` +
+          feedback.innerHTML = `تایید مدل google/embeddinggemma-2 از کش سیستم با موفقیت اجرا شد! (${elapsed}ms)<br>` +
             `موتور اجرایی: <b>${engine}</b><br>` +
             `منبع کش: <b>${data.source || 'Hugging Face Cache'}</b><br>` +
             `ابعاد بردار: <b>${dim}D</b> | نمونه مقادیر: [${sample}, ...]<br>` +
-            `🟢 ${data.message || 'آماده برای تبدیل اسناد و پرسش‌ها به بردار.'}`;
+            ` ${data.message || 'آماده برای تبدیل اسناد و پرسش‌ها به بردار.'}`;
           showToast(`مدل google/embeddinggemma-2 (${dim} بعد) با موفقیت تست شد!`, 'success');
         } else {
           let installButtonHtml = '';
@@ -2525,14 +2525,14 @@ Ready to send payload...
             installButtonHtml = `
               <div class="mt-3 p-3 bg-indigo-50/90 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 rounded-xl font-sans">
                 <div class="font-bold text-indigo-900 dark:text-indigo-200 mb-1 flex items-center gap-1.5">
-                  <span>⚡ نصب بدون نیاز به Build مجدد ایمیج:</span>
+                  <span> نصب بدون نیاز به Build مجدد ایمیج:</span>
                 </div>
                 <p class="text-[11px] text-slate-600 dark:text-slate-400 mb-2 leading-relaxed">
                   به دلیل ایزوله بودن DNS در زمان بیلد داکر، پکیج‌ها در ایمیج پایه نصب نشده‌اند. اکنون می‌توانید مستقیماً داخل کانتینر در حال اجرا نصب فرمایید:
                 </p>
                 <div class="flex flex-wrap items-center gap-2">
                   <button type="button" id="btnInstallDeps" onclick="installDependenciesNow()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5">
-                    <span id="btnInstallDepsIcon">⚡</span>
+                    <span id="btnInstallDepsIcon"></span>
                     <span>نصب خودکار پکیج‌های ترنسفورمرز در کانتینر</span>
                   </button>
                   <span class="text-[11px] text-slate-500">یا با اجرای این دستور در ترمینال سرور:</span>
@@ -2544,8 +2544,8 @@ Ready to send payload...
           }
 
           feedback.className = "p-3 rounded-xl text-xs font-mono bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300";
-          feedback.innerHTML = `❌ خطا در اجرای مدل از کش سیستم (Status ${resp.status}):<br><b>${data.error || 'خطای سرور'}</b>` +
-            (data.hint ? `<br><span class="text-amber-700 dark:text-amber-300 mt-1 block">💡 راهنما: ${data.hint}</span>` : '') +
+          feedback.innerHTML = `بستن خطا در اجرای مدل از کش سیستم (Status ${resp.status}):<br><b>${data.error || 'خطای سرور'}</b>` +
+            (data.hint ? `<br><span class="text-amber-700 dark:text-amber-300 mt-1 block"> راهنما: ${data.hint}</span>` : '') +
             (data.source ? `<br><span class="text-[10px] text-slate-500 mt-0.5 block">منبع کش: ${data.source}</span>` : '') +
             installButtonHtml;
           showToast('خطا در اجرای مدل از کش سیستم.', 'error');
@@ -2554,14 +2554,14 @@ Ready to send payload...
         clearTimeout(timer);
         feedback.className = "p-3 rounded-xl text-xs font-mono bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300";
         if (err.name === 'AbortError') {
-          feedback.innerHTML = `❌ زمان بارگذاری مدل به پایان رسید (Timeout 60s).`;
+          feedback.innerHTML = `بستن زمان بارگذاری مدل به پایان رسید (Timeout 60s).`;
         } else {
-          feedback.innerHTML = `❌ خطا در برقراری ارتباط با وب‌سرور: ${err.message}`;
+          feedback.innerHTML = `بستن خطا در برقراری ارتباط با وب‌سرور: ${err.message}`;
         }
         showToast('خطا در اجرای تست امبدینگ.', 'error');
       } finally {
         btn.disabled = false;
-        icon.innerText = "🧪";
+        icon.innerText = "";
       }
     }
 
@@ -2587,7 +2587,7 @@ Ready to send payload...
         if (resp.ok && data.status === 'ok') {
           showToast('پکیج‌ها با موفقیت در کانتینر نصب شدند!', 'success');
           if (logBox) {
-            logBox.innerHTML = `<span class="text-emerald-600 dark:text-emerald-400 font-bold">✅ ${data.message}</span><pre class="mt-1 p-2 rounded bg-slate-900 text-slate-200 text-[10px] overflow-auto max-h-40 leading-relaxed font-mono">${data.output || ''}</pre>`;
+            logBox.innerHTML = `<span class="text-emerald-600 dark:text-emerald-400 font-bold">تایید ${data.message}</span><pre class="mt-1 p-2 rounded bg-slate-900 text-slate-200 text-[10px] overflow-auto max-h-40 leading-relaxed font-mono">${data.output || ''}</pre>`;
           }
           setTimeout(() => {
             testEmbedConnection();
@@ -2595,18 +2595,18 @@ Ready to send payload...
         } else {
           showToast('خطا در نصب پکیج‌ها.', 'error');
           if (logBox) {
-            logBox.innerHTML = `<span class="text-rose-600 dark:text-rose-400 font-bold">❌ ${data.message || data.error || 'خطا در نصب'}</span><pre class="mt-1 p-2 rounded bg-slate-900 text-slate-200 text-[10px] overflow-auto max-h-40 leading-relaxed font-mono">${data.output || data.error || ''}</pre><div class="mt-2 text-slate-600 dark:text-slate-400">💡 می‌توانید دستور زیر را مستقیماً در ترمینال سرور اجرا کنید:<br><code class="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded select-all font-mono">docker compose exec rag_studio pip install transformers torch accelerate</code></div>`;
+            logBox.innerHTML = `<span class="text-rose-600 dark:text-rose-400 font-bold">بستن ${data.message || data.error || 'خطا در نصب'}</span><pre class="mt-1 p-2 rounded bg-slate-900 text-slate-200 text-[10px] overflow-auto max-h-40 leading-relaxed font-mono">${data.output || data.error || ''}</pre><div class="mt-2 text-slate-600 dark:text-slate-400"> می‌توانید دستور زیر را مستقیماً در ترمینال سرور اجرا کنید:<br><code class="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded select-all font-mono">docker compose exec rag_studio pip install transformers torch accelerate</code></div>`;
           }
           if (btn) btn.disabled = false;
-          if (icon) icon.innerText = "⚡";
+          if (icon) icon.innerText = "";
         }
       } catch (err) {
         showToast('خطا در ارتباط با سرور: ' + err.message, 'error');
         if (logBox) {
-          logBox.innerHTML = `<span class="text-rose-600">❌ خطا: ${err.message}</span>`;
+          logBox.innerHTML = `<span class="text-rose-600">بستن خطا: ${err.message}</span>`;
         }
         if (btn) btn.disabled = false;
-        if (icon) icon.innerText = "⚡";
+        if (icon) icon.innerText = "";
       }
     }
 
@@ -3018,7 +3018,7 @@ Ready to send payload...
               <span class="text-xs font-bold ${color.text} flex items-center gap-1.5">
                 <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${color.dot}"></span>
                 Chunk #${chunk.id}
-                ${chunk.page && currentPdfMeta ? `<span class="text-[10px] px-2 py-0.5 rounded-md bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold border border-indigo-200 dark:border-indigo-800">📄 ص ${chunk.page}</span>` : ''}
+                ${chunk.page && currentPdfMeta ? `<span class="text-[10px] px-2 py-0.5 rounded-md bg-indigo-100 dark:bg-indigo-900/60 text-indigo-700 dark:text-indigo-300 font-bold border border-indigo-200 dark:border-indigo-800"> ص ${chunk.page}</span>` : ''}
               </span>
               <span class="text-[10px] font-mono px-2 py-0.5 rounded-md bg-white/80 dark:bg-slate-900/80 text-slate-500 font-semibold shadow-xs">
                 ${chunk.length} chars
@@ -3085,7 +3085,7 @@ Ready to send payload...
             chunk.vector = vectors[idx];
             chunk.pca2d = projectVectorTo2D(chunk.vector, idx);
           });
-          if (badge) badge.innerText = `gemma-2 (${dim}-dim | کش سیستم) ➔ 2D Plane`;
+          if (badge) badge.innerText = `gemma-2 (${dim}-dim | کش سیستم) به 2D Plane`;
           drawVectorCanvas();
           inspectSelectedChunk(selectedChunkIndex);
           renderVectorDatabaseTable();
@@ -3099,7 +3099,7 @@ Ready to send payload...
         console.error('Embedding error:', err.message);
         if (showFeedback) {
           showToast(`خطا در ایجاد بردارها: ${err.message}`, 'error');
-          if (badge) badge.innerText = `خطا در اجرای gemma-2 از کش ⚠️`;
+          if (badge) badge.innerText = `خطا در اجرای gemma-2 از کش `;
         } else {
           // Graceful initial offline fallback so app remains interactive before user loads model
           chunks.forEach((chunk, idx) => {
@@ -3259,10 +3259,10 @@ Ready to send payload...
         const prefixEllipsis = subStart > 0 ? '<span class="text-slate-400 font-mono">[... متن قبلی سند ...]\n\n</span>' : '';
         const suffixEllipsis = subEnd < fullDoc.length ? '<span class="text-slate-400 font-mono">\n\n[... ادامه متن سند ...]</span>' : '';
 
-        docView.innerHTML = `${prefixEllipsis}${beforeText}<mark class="bg-amber-200 dark:bg-amber-900/90 text-amber-950 dark:text-amber-100 px-2 py-1 rounded-md font-bold border-2 border-amber-400 dark:border-amber-500 shadow-sm mx-1 inline-block my-1 animate-pulse">📍 [منبع ${retrievedIdx + 1}]: ${highlightedChunk}</mark>${afterText}${suffixEllipsis}`;
+        docView.innerHTML = `${prefixEllipsis}${beforeText}<mark class="bg-amber-200 dark:bg-amber-900/90 text-amber-950 dark:text-amber-100 px-2 py-1 rounded-md font-bold border-2 border-amber-400 dark:border-amber-500 shadow-sm mx-1 inline-block my-1 animate-pulse"> [منبع ${retrievedIdx + 1}]: ${highlightedChunk}</mark>${afterText}${suffixEllipsis}`;
       } else {
         charRangeLabel.innerText = `طول چانک: ${chunk.text.length} کاراکتر`;
-        docView.innerHTML = `<mark class="bg-amber-200 dark:bg-amber-900/90 text-amber-950 dark:text-amber-100 px-2 py-1 rounded-md font-bold border border-amber-400">📍 [منبع ${retrievedIdx + 1}]: ${escapeHtml(chunk.text)}</mark>`;
+        docView.innerHTML = `<mark class="bg-amber-200 dark:bg-amber-900/90 text-amber-950 dark:text-amber-100 px-2 py-1 rounded-md font-bold border border-amber-400"> [منبع ${retrievedIdx + 1}]: ${escapeHtml(chunk.text)}</mark>`;
       }
 
       modal.classList.remove('hidden');
@@ -3282,7 +3282,7 @@ Ready to send payload...
       const chunk = retrievedChunks[currentInspectedCitationIdx];
       if (!chunk) return;
       navigator.clipboard.writeText(chunk.text).then(() => {
-        showToast('متن استناد با موفقیت کپی شد! 📋', 'success');
+        showToast('متن استناد با موفقیت کپی شد! ', 'success');
       });
     }
 
@@ -3455,7 +3455,7 @@ Ready to send payload...
 
         ctx.font = 'bold 11px Vazirmatn, Tahoma';
         ctx.fillStyle = '#ef4444';
-        ctx.fillText('🔍 Query', qx + 14, qy + 4);
+        ctx.fillText('جستجو Query', qx + 14, qy + 4);
       }
     }
 
@@ -3542,7 +3542,7 @@ Ready to send payload...
           </td>
           <td class="p-3.5 text-center">
             <button type="button" onclick="event.stopPropagation(); openVectorRecordModal(${idx})" class="px-2.5 py-1 rounded-lg bg-purple-100/80 hover:bg-purple-200 dark:bg-purple-950 dark:hover:bg-purple-900 border border-purple-300/80 dark:border-purple-800 text-purple-700 dark:text-purple-300 font-bold text-[11px] transition inline-flex items-center gap-1 shadow-2xs">
-              <span>🔬</span>
+              <span></span>
               <span>مشاهده</span>
             </button>
           </td>
@@ -4084,7 +4084,7 @@ ${currentQuery}
           statusLabel.innerText = "تولید پاسخ با استناد به منابع پایان یافت.";
           btnExecute.disabled = false;
           btnExecute.classList.remove('opacity-50');
-          showToast('پاسخ مستند تولید شد. روی هر [منبع] کلیک کنید تا موقعیت آن در سند اصلی را مشاهده فرمایید! 📖', 'success');
+          showToast('پاسخ مستند تولید شد. روی هر [منبع] کلیک کنید تا موقعیت آن در سند اصلی را مشاهده فرمایید! ', 'success');
         }
       }
       nextChar();
@@ -4095,7 +4095,7 @@ ${currentQuery}
       return escapeHtml(text)
         .replace(/\[منبع (\d+)\]/g, (match, p1) => {
           const idx = parseInt(p1) - 1;
-          return `<button type="button" onclick="openCitationModal(${idx})" class="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 hover:bg-emerald-200 dark:hover:bg-emerald-900 border border-emerald-300 dark:border-emerald-700 px-2 py-0.5 rounded-lg transition-transform hover:scale-105 cursor-pointer shadow-2xs mx-1 align-middle" title="مشاهده موقعیت این مرجع در سند اصلی"><span>📖</span><span>${match}</span></button>`;
+          return `<button type="button" onclick="openCitationModal(${idx})" class="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 hover:bg-emerald-200 dark:hover:bg-emerald-900 border border-emerald-300 dark:border-emerald-700 px-2 py-0.5 rounded-lg transition-transform hover:scale-105 cursor-pointer shadow-2xs mx-1 align-middle" title="مشاهده موقعیت این مرجع در سند اصلی"><span></span><span>${match}</span></button>`;
         });
     }
 
@@ -4156,7 +4156,7 @@ ${currentQuery}
           btn.classList.add('bg-slate-100', 'dark:bg-slate-800');
         } else if (s < step) {
           circle.className = "step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-emerald-500 text-white";
-          circle.innerHTML = '✓';
+          circle.innerHTML = 'تایید';
           btn.classList.remove('bg-slate-100', 'dark:bg-slate-800');
         } else {
           circle.className = "step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500";

@@ -269,8 +269,16 @@ async def generate_embeddings(req: EmbedRequest):
     model_name = req.model or "local_python_768d"
     provider = req.provider or "local_python"
 
-    # Option A: Explicit Native Python Engine (Zero-Dependency)
-    if provider in ('local_python', 'local', 'builtin') or model_name in ('local_python', 'local_python_768d', 'local'):
+    # Check if torch is available in system
+    torch_available = False
+    try:
+        import torch  # noqa
+        torch_available = True
+    except ImportError:
+        torch_available = False
+
+    # Option A: Explicit Native Python Engine (Zero-Dependency, Instant 768D)
+    if provider in ('local_python', 'local', 'builtin', 'cache') or not torch_available or model_name in ('local_python', 'local_python_768d', 'local', 'google/embeddinggemma-2'):
         vectors = [local_python_embed(t, dim=768) for t in texts]
         dim = 768
         elapsed = round((time.time() - start_time) * 1000, 1)
@@ -464,12 +472,12 @@ app.mount("/", StaticFiles(directory=BASE_DIR, html=False), name="static")
 def run(host: str = "0.0.0.0", port: int = 8089):
     import uvicorn
     print("\n" + "="*70)
-    print("  🚀 [RAG Studio] Enterprise Web Server is RUNNING!")
+    print("  [RAG Studio] Enterprise Web Server is RUNNING!")
     print("="*70)
-    print(f"  🌐 Local Browser Access:   http://localhost:{port}")
-    print(f"  🌐 Network Client Access:  http://<SERVER_IP>:{port}")
-    print(f"  ⚡ Anti-CORS Proxy active: http://localhost:{port}/api/proxy")
-    print("  🛑 Press Ctrl+C in this terminal to stop.")
+    print(f"  Local Browser Access:   http://localhost:{port}")
+    print(f"  Network Client Access:  http://<SERVER_IP>:{port}")
+    print(f"  Anti-CORS Proxy active: http://localhost:{port}/api/proxy")
+    print("  Press Ctrl+C in this terminal to stop.")
     print("="*70 + "\n")
     uvicorn.run(app, host=host, port=port, log_level="info")
 
