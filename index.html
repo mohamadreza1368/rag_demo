@@ -10,7 +10,13 @@
   <script src="pdf.min.js"></script>
   <script>
     if (window.pdfjsLib) {
-      pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
+      try {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = (window.location.origin && window.location.origin !== 'null') 
+          ? (window.location.origin + '/pdf.worker.min.js') 
+          : 'pdf.worker.min.js';
+      } catch (e) {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
+      }
     }
   </script>
   <script>

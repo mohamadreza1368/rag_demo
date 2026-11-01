@@ -463,6 +463,45 @@ async def serve_index():
         }
     )
 
+@app.get("/pdf.worker.min.js", response_class=FileResponse)
+async def serve_pdf_worker():
+    file_path = os.path.join(BASE_DIR, "pdf.worker.min.js")
+    return FileResponse(
+        file_path,
+        media_type="application/javascript; charset=utf-8",
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0"
+        }
+    )
+
+@app.get("/pdf.min.js", response_class=FileResponse)
+async def serve_pdf_min():
+    file_path = os.path.join(BASE_DIR, "pdf.min.js")
+    return FileResponse(
+        file_path,
+        media_type="application/javascript; charset=utf-8",
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0"
+        }
+    )
+
+@app.get("/tailwind.min.js", response_class=FileResponse)
+async def serve_tailwind_js():
+    file_path = os.path.join(BASE_DIR, "tailwind.min.js")
+    return FileResponse(
+        file_path,
+        media_type="application/javascript; charset=utf-8",
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0"
+        }
+    )
+
 # Mount base directory for static assets (js, css, fonts)
 app.mount("/", StaticFiles(directory=BASE_DIR, html=False), name="static")
 
