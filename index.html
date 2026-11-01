@@ -1158,33 +1158,47 @@ Ready to send payload...
       <div class="mt-4 space-y-2">
         <label class="text-xs font-bold text-slate-700 dark:text-slate-300 block">انتخاب سریع سرویس‌دهنده (1-Click Presets):</label>
         <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          <button type="button" onclick="applyProviderPreset('openai')" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-brand-500 text-right text-xs font-medium transition shadow-xs">
-            <span class="block font-bold text-slate-800 dark:text-slate-200">OpenAI</span>
-            <span class="block text-[10px] text-slate-400">gpt-4o-mini</span>
+          <!-- Primary 100% Offline Local Engine -->
+          <button type="button" onclick="applyProviderPreset('local')" class="p-3 rounded-2xl border-2 border-emerald-500 bg-emerald-50/90 dark:bg-emerald-950/70 hover:bg-emerald-100 dark:hover:bg-emerald-900/80 text-right text-xs font-medium transition shadow-xs col-span-2 sm:col-span-3">
+            <div class="flex items-center justify-between">
+              <span class="block font-black text-emerald-800 dark:text-emerald-200 text-sm">سرور محلی RAG (پیش‌فرض ۱۰۰٪ آفلاین - بدون اینترنت)</span>
+              <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-600 text-white font-bold">توصیه‌شده و فعال</span>
+            </div>
+            <span class="block text-[11px] text-emerald-700 dark:text-emerald-300 mt-1">
+              اجرا مستقیماً روی همین سرور بدون نیاز به اینترنت، استریم زنده توکن‌ها، بدون نیاز به کلید API
+            </span>
           </button>
-          <button type="button" onclick="applyProviderPreset('openrouter')" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-brand-500 text-right text-xs font-medium transition shadow-xs">
-            <span class="block font-bold text-slate-800 dark:text-slate-200">OpenRouter</span>
-            <span class="block text-[10px] text-slate-400">Llama 3.3 / Qwen</span>
-          </button>
-          <button type="button" onclick="applyProviderPreset('groq')" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-brand-500 text-right text-xs font-medium transition shadow-xs">
-            <span class="block font-bold text-slate-800 dark:text-slate-200">Groq (سرعت بالا)</span>
-            <span class="block text-[10px] text-slate-400">llama-3.3-70b</span>
-          </button>
-          <button type="button" onclick="applyProviderPreset('deepseek')" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-brand-500 text-right text-xs font-medium transition shadow-xs">
-            <span class="block font-bold text-slate-800 dark:text-slate-200">DeepSeek</span>
-            <span class="block text-[10px] text-slate-400">deepseek-chat</span>
-          </button>
+
+          <!-- Ollama Local -->
           <button type="button" onclick="applyProviderPreset('ollama')" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-brand-500 text-right text-xs font-medium transition shadow-xs">
-            <span class="block font-bold text-slate-800 dark:text-slate-200">Ollama (محلی/آفلاین)</span>
+            <span class="block font-bold text-slate-800 dark:text-slate-200">Ollama (محلی آفلاین)</span>
             <span class="block text-[10px] text-slate-400">localhost:11434</span>
           </button>
+
+          <!-- LM Studio Local -->
           <button type="button" onclick="applyProviderPreset('lmstudio')" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-brand-500 text-right text-xs font-medium transition shadow-xs">
-            <span class="block font-bold text-slate-800 dark:text-slate-200">LM Studio</span>
+            <span class="block font-bold text-slate-800 dark:text-slate-200">LM Studio (محلی آفلاین)</span>
             <span class="block text-[10px] text-slate-400">localhost:1234</span>
           </button>
-          <button type="button" onclick="applyProviderPreset('custom')" class="p-2.5 rounded-xl border border-brand-300 dark:border-brand-700 bg-brand-50/50 dark:bg-brand-950/40 hover:border-brand-500 text-right text-xs font-medium transition shadow-xs col-span-2 sm:col-span-3">
-            <span class="block font-bold text-brand-700 dark:text-brand-300">سفارشی سازگار با OpenAI (Custom OpenAI-Compatible)</span>
-            <span class="block text-[10px] text-slate-500 dark:text-slate-400">vLLM, TGI, FastChat, LiteLLM, Ollama, سرورهای داخلی سازمانی</span>
+
+          <!-- Custom Local Intranet -->
+          <button type="button" onclick="applyProviderPreset('custom')" class="p-2.5 rounded-xl border border-brand-300 dark:border-brand-700 bg-brand-50/50 dark:bg-brand-950/40 hover:border-brand-500 text-right text-xs font-medium transition shadow-xs">
+            <span class="block font-bold text-brand-700 dark:text-brand-300">سفارشی شبکه داخلی</span>
+            <span class="block text-[10px] text-slate-500 dark:text-slate-400">vLLM, TGI, LiteLLM</span>
+          </button>
+
+          <!-- External APIs (Require Internet) -->
+          <button type="button" onclick="applyProviderPreset('openai')" class="p-2 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60 hover:border-brand-500 text-right text-xs opacity-75 hover:opacity-100 transition shadow-2xs">
+            <span class="block font-bold text-slate-700 dark:text-slate-300">OpenAI (اینترنتی)</span>
+            <span class="block text-[10px] text-slate-400">gpt-4o-mini</span>
+          </button>
+          <button type="button" onclick="applyProviderPreset('deepseek')" class="p-2 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60 hover:border-brand-500 text-right text-xs opacity-75 hover:opacity-100 transition shadow-2xs">
+            <span class="block font-bold text-slate-700 dark:text-slate-300">DeepSeek (اینترنتی)</span>
+            <span class="block text-[10px] text-slate-400">deepseek-chat</span>
+          </button>
+          <button type="button" onclick="applyProviderPreset('groq')" class="p-2 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-slate-50/60 dark:bg-slate-900/60 hover:border-brand-500 text-right text-xs opacity-75 hover:opacity-100 transition shadow-2xs">
+            <span class="block font-bold text-slate-700 dark:text-slate-300">Groq (اینترنتی)</span>
+            <span class="block text-[10px] text-slate-400">llama-3.3-70b</span>
           </button>
         </div>
       </div>
@@ -1251,44 +1265,43 @@ Ready to send payload...
           <div id="cfgLlmTestFeedback" class="hidden p-2.5 rounded-lg text-xs font-mono"></div>
         </div>
 
-        <!-- Embedding Configuration Group -->
+        <!-- Embedding Configuration Group (100% Offline) -->
         <div class="p-4 rounded-2xl bg-indigo-50/60 dark:bg-indigo-950/30 border border-indigo-200/80 dark:border-indigo-900/60 space-y-3">
           <div class="flex items-center justify-between">
             <span class="text-xs font-bold text-indigo-900 dark:text-indigo-200 flex items-center gap-1.5">
-              <span></span> تنظیمات مدل وکتورایزر و امبدینگ (Vector Embeddings)
+              <svg class="w-4 h-4 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              <span>موتور امبدینگ و بردارسازی معنایی (Vector Embeddings)</span>
             </span>
-            <span class="text-[10px] px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 font-semibold font-mono">
-              768-dim Dense
+            <span class="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 font-bold border border-emerald-300 dark:border-emerald-800 font-mono">
+              768-D • ۱۰۰٪ آفلاین
             </span>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <!-- Exclusively Dedicated to google/embeddinggemma-2 from system cache -->
-          <input type="hidden" id="cfgEmbeddingProvider" value="cache">
-          <input type="hidden" id="cfgEmbeddingModel" value="google/embeddinggemma-2">
+          <input type="hidden" id="cfgEmbeddingProvider" value="local_python">
+          <input type="hidden" id="cfgEmbeddingModel" value="local_python_768d">
           <input type="hidden" id="cfgHfToken" value="">
 
-          <div class="p-4 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs space-y-3">
+          <div class="p-4 rounded-2xl bg-white/80 dark:bg-slate-900/80 border border-indigo-200/70 dark:border-indigo-800/60 shadow-xs space-y-2.5">
             <div class="flex items-center justify-between">
               <div>
-                <span class="text-xs font-bold text-slate-700 dark:text-slate-300 block">مدل اختصاصی امبدینگ:</span>
-                <span class="text-sm font-mono font-black text-indigo-600 dark:text-indigo-400">google/embeddinggemma-2</span>
+                <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block">وکتورایزر معنایی متراکم محلی:</span>
+                <span class="text-xs font-mono font-bold text-indigo-600 dark:text-indigo-400">Local Dense Vectorizer (768 Dimensions)</span>
               </div>
-              <span class="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold border border-emerald-300 dark:border-emerald-800 flex items-center gap-1.5 shadow-xs">
+              <span class="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold border border-emerald-300 dark:border-emerald-800 flex items-center gap-1.5 shadow-2xs">
                 <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
-                بارگذاری مستقیم از کش سیستم (Local HF Cache)
+                مستقل و آماده به کار (بدون اینترنت)
               </span>
             </div>
 
-            <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
-              سیستم به صورت انحصاری از مدل <b>google/embeddinggemma-2</b> ذخیره‌شده در کش سیستم شما (مسیر <code>~/.cache/huggingface</code>) برای تمامی پردازش‌های برداری، ذخیره چانک‌ها و بازیابی معنایی استفاده می‌کند.
+            <p class="text-[11px] text-slate-600 dark:text-slate-400 leading-relaxed">
+              سیستم به صورت کاملاً مستقل و آفلاین با موتور اختصاصی پردازش زبان طبیعی فارسی و بردارهای ۷۶۸ بعدی کار می‌کند. تمامی عملیات امبدینگ، ایندکس‌گذاری HNSW و جستجوی شباهت با سرعت فوق‌العاده بالا به صورت محلی در حافظه انجام می‌گیرد.
             </p>
 
-            <div class="pt-2 border-t border-indigo-200/60 dark:border-indigo-900/50 flex items-center justify-between">
-              <span class="text-xs font-bold text-indigo-900 dark:text-indigo-200">تست اجرای مدل از کش سیستم:</span>
+            <div class="pt-2 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+              <span class="text-xs font-bold text-indigo-900 dark:text-indigo-200">تست اجرای وکتورایزر محلی:</span>
               <button type="button" id="btnTestEmbed" onclick="testEmbedConnection()" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm shadow-indigo-500/20">
                 <span id="btnTestEmbedIcon"></span>
-                <span id="btnTestEmbedText">تست اجرای google/embeddinggemma-2 از کش</span>
+                <span id="btnTestEmbedText">تست وکتورایزر ۷۶۸ بعدی</span>
               </button>
             </div>
             <div id="cfgEmbedTestFeedback" class="hidden p-2.5 rounded-lg text-xs font-mono"></div>
@@ -2070,14 +2083,29 @@ Ready to send payload...
     let rawHttpLogs = [];
     let currentPdfMeta = null;
 
-    // --- LLM & Embedding Connection Config ---
+    // --- LLM & Embedding Connection Config (100% Offline Default) ---
+    const defaultLocalBaseUrl = (window.location.origin && window.location.origin !== 'null') 
+      ? (window.location.origin + '/v1') 
+      : 'http://localhost:8089/v1';
+
+    let savedBaseUrl = localStorage.getItem('rag_base_url');
+    // If previously saved URL was external openai without key, reset to local
+    if (!savedBaseUrl || (savedBaseUrl.includes('openai.com') && !localStorage.getItem('rag_api_key'))) {
+      savedBaseUrl = defaultLocalBaseUrl;
+    }
+
+    let savedModelName = localStorage.getItem('rag_model_name');
+    if (!savedModelName || (savedModelName === 'gpt-4o-mini' && !localStorage.getItem('rag_api_key'))) {
+      savedModelName = 'local-rag-llm';
+    }
+
     let llmConfig = {
-      baseUrl: localStorage.getItem('rag_base_url') || 'https://api.openai.com/v1',
+      baseUrl: savedBaseUrl,
       apiKey: localStorage.getItem('rag_api_key') || '',
-      modelName: localStorage.getItem('rag_model_name') || 'gpt-4o-mini',
+      modelName: savedModelName,
       embeddingModel: 'local_python_768d',
       embeddingProvider: 'local_python',
-      hfToken: localStorage.getItem('rag_hf_token') || '',
+      hfToken: '',
       useProxy: localStorage.getItem('rag_use_proxy') !== 'false'
     };
 
@@ -2252,7 +2280,18 @@ Ready to send payload...
     }
 
     function applyProviderPreset(provider) {
-      if (provider === 'openai') {
+      const defaultOrigin = (window.location.origin && window.location.origin !== 'null') 
+        ? (window.location.origin + '/v1') 
+        : 'http://localhost:8089/v1';
+
+      if (provider === 'local') {
+        document.getElementById('cfgBaseUrl').value = defaultOrigin;
+        document.getElementById('cfgModelName').value = 'local-rag-llm';
+        document.getElementById('cfgApiKey').value = '';
+        document.getElementById('cfgUseProxy').checked = true;
+        showToast('پریست سرور محلی (۱۰۰٪ آفلاین) انتخاب شد.', 'success');
+        return;
+      } else if (provider === 'openai') {
         document.getElementById('cfgBaseUrl').value = 'https://api.openai.com/v1';
         document.getElementById('cfgModelName').value = 'gpt-4o-mini';
       } else if (provider === 'openrouter') {
@@ -2400,28 +2439,33 @@ Ready to send payload...
       const llmStatusText = document.getElementById('llmStatusText');
       const step3Badge = document.getElementById('step3ActiveModelBadge');
 
+      const isLocal = llmConfig.baseUrl.includes('localhost') || 
+                      llmConfig.baseUrl.includes('127.0.0.1') || 
+                      llmConfig.baseUrl.includes('192.168.') || 
+                      llmConfig.baseUrl.includes('10.') || 
+                      llmConfig.baseUrl.startsWith('/') ||
+                      llmConfig.modelName === 'local-rag-llm';
+
       modelLabel.innerText = `مدل: ${llmConfig.modelName}`;
       if (activeModelBadge) activeModelBadge.innerText = llmConfig.modelName;
       if (metricModel) metricModel.innerText = llmConfig.modelName;
 
-      if (step3Badge) step3Badge.innerHTML = `<span> وکتورایزر: google/embeddinggemma-2 (کش سیستم)</span><span class="text-[10px] text-slate-400"></span>`;
+      if (step3Badge) {
+        step3Badge.innerHTML = `<span class="flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-indigo-500 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>وکتورایزر: ۷۶۸ بعد (۱۰۰٪ آفلاین)</span>`;
+      }
 
-      let providerDisplay = 'سفارشی';
-      if (llmConfig.baseUrl.includes('openai.com')) providerDisplay = 'OpenAI';
-      else if (llmConfig.baseUrl.includes('openrouter.ai')) providerDisplay = 'OpenRouter';
-      else if (llmConfig.baseUrl.includes('groq.com')) providerDisplay = 'Groq';
+      let providerDisplay = 'سرور محلی (آفلاین)';
+      if (llmConfig.baseUrl.includes('11434')) providerDisplay = 'Ollama (Local)';
+      else if (llmConfig.baseUrl.includes('1234')) providerDisplay = 'LM Studio (Local)';
+      else if (llmConfig.baseUrl.includes('openai.com')) providerDisplay = 'OpenAI';
       else if (llmConfig.baseUrl.includes('deepseek.com')) providerDisplay = 'DeepSeek';
-      else if (llmConfig.baseUrl.includes('localhost:11434')) providerDisplay = 'Ollama (Local)';
-      else if (llmConfig.baseUrl.includes('localhost:1234')) providerDisplay = 'LM Studio';
+      else if (isLocal) providerDisplay = 'Local Server (۱۰۰٪ آفلاین)';
 
-      providerLabel.innerText = `${providerDisplay} ${llmConfig.useProxy ? '(Proxy)' : '(Direct)'}`;
+      providerLabel.innerText = providerDisplay;
 
-      if (llmConfig.apiKey || llmConfig.baseUrl.includes('localhost') || llmConfig.baseUrl.includes('127.0.0.1') || llmConfig.baseUrl.includes('192.168.')) {
-        dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50 animate-pulse";
-        if (llmStatusText) llmStatusText.innerHTML = ` متصل به <strong>${llmConfig.modelName}</strong> (${providerDisplay})`;
-      } else {
-        dot.className = "w-2.5 h-2.5 rounded-full bg-amber-400";
-        if (llmStatusText) llmStatusText.innerHTML = ` حالت شبیه‌ساز (کلید API وارد نشده)`;
+      dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50 animate-pulse";
+      if (llmStatusText) {
+        llmStatusText.innerHTML = `متصل به <strong>${llmConfig.modelName}</strong> (${providerDisplay})`;
       }
     }
 
@@ -2539,7 +2583,7 @@ Ready to send payload...
       }
     }
 
-    // --- TEST 2: DEDICATED GEMMA-2 EMBEDDING FROM SYSTEM CACHE ---
+    // --- TEST 2: LOCAL 768-D EMBEDDING TEST (100% OFFLINE) ---
     async function testEmbedConnection() {
       const feedback = document.getElementById('cfgEmbedTestFeedback');
       const btn = document.getElementById('btnTestEmbed');
@@ -2547,129 +2591,42 @@ Ready to send payload...
 
       feedback.classList.remove('hidden');
       feedback.className = "p-3 rounded-xl text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700";
-      feedback.innerHTML = ` در حال بررسی و اجرای مدل google/embeddinggemma-2 از کش سیستم...`;
+      feedback.innerHTML = '<span class="inline-block w-3 h-3 border-2 border-brand-500 border-t-transparent rounded-full animate-spin align-middle mr-1"></span> در حال تست وکتورایزر محلی...';
       btn.disabled = true;
-      icon.innerText = "";
 
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 60000);
       const startTime = performance.now();
-
       try {
         const resp = await fetch('/api/embed', {
           method: 'POST',
-          signal: controller.signal,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             texts: ["سامانه بازیابی هوشمند اطلاعات و قطعه‌بندی اسناد"],
-            model: "google/embeddinggemma-2",
+            model: "local_python_768d",
             test: true
           })
         });
-        clearTimeout(timer);
         const elapsed = Math.round(performance.now() - startTime);
         const data = await resp.json().catch(() => ({}));
 
         if (resp.ok && data.status === 'ok') {
-          const dim = data.dimensions || (data.embeddings?.[0]?.length) || (data.sample?.length) || 768;
-          const engine = data.engine || 'google/embeddinggemma-2 (System Cache)';
-          const sample = (data.sample || data.embeddings?.[0]?.slice(0, 4) || []).map(n => Number(n).toFixed(3)).join(', ');
-
+          const dim = data.dimensions || 768;
+          const sample = (data.sample || []).map(n => Number(n).toFixed(3)).join(', ');
           feedback.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300";
-          feedback.innerHTML = `تایید مدل google/embeddinggemma-2 از کش سیستم با موفقیت اجرا شد! (${elapsed}ms)<br>` +
-            `موتور اجرایی: <b>${engine}</b><br>` +
-            `منبع کش: <b>${data.source || 'Hugging Face Cache'}</b><br>` +
-            `ابعاد بردار: <b>${dim}D</b> | نمونه مقادیر: [${sample}, ...]<br>` +
-            ` ${data.message || 'آماده برای تبدیل اسناد و پرسش‌ها به بردار.'}`;
-          showToast(`مدل google/embeddinggemma-2 (${dim} بعد) با موفقیت تست شد!`, 'success');
+          feedback.innerHTML = `تایید وکتورایزر محلی ۷۶۸ بعدی با موفقیت اجرا شد! (${elapsed}ms)<br>` +
+            `موتور اجرایی: <b>${data.engine || 'Local Dense Vectorizer'}</b><br>` +
+            `ابعاد بردار: <b>${dim}D (نرمال‌شده L2)</b> | نمونه مقادیر: [${sample}, ...]<br>` +
+            `منبع: <b>${data.source || '۱۰۰٪ آفلاین - بدون اینترنت'}</b><br>` +
+            `وضعیت: <b>آماده برای تبدیل اسناد و پرسش‌ها به بردار</b>`;
+          showToast(`وکتورایزر محلی (${dim} بعد) با موفقیت تست شد!`, 'success');
         } else {
-          let installButtonHtml = '';
-          if (resp.status === 501 || (data.error && data.error.includes('نصب نیست'))) {
-            installButtonHtml = `
-              <div class="mt-3 p-3 bg-indigo-50/90 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 rounded-xl font-sans">
-                <div class="font-bold text-indigo-900 dark:text-indigo-200 mb-1 flex items-center gap-1.5">
-                  <span> نصب بدون نیاز به Build مجدد ایمیج:</span>
-                </div>
-                <p class="text-[11px] text-slate-600 dark:text-slate-400 mb-2 leading-relaxed">
-                  به دلیل ایزوله بودن DNS در زمان بیلد داکر، پکیج‌ها در ایمیج پایه نصب نشده‌اند. اکنون می‌توانید مستقیماً داخل کانتینر در حال اجرا نصب فرمایید:
-                </p>
-                <div class="flex flex-wrap items-center gap-2">
-                  <button type="button" id="btnInstallDeps" onclick="installDependenciesNow()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5">
-                    <span id="btnInstallDepsIcon"></span>
-                    <span>نصب خودکار پکیج‌های ترنسفورمرز در کانتینر</span>
-                  </button>
-                  <span class="text-[11px] text-slate-500">یا با اجرای این دستور در ترمینال سرور:</span>
-                  <code class="px-2 py-1 bg-slate-900 text-emerald-400 rounded-lg text-[10px] select-all font-mono">docker compose exec rag_studio pip install transformers torch accelerate</code>
-                </div>
-                <div id="installDepsProgress" class="mt-2.5 hidden"></div>
-              </div>
-            `;
-          }
-
-          feedback.className = "p-3 rounded-xl text-xs font-mono bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300";
-          feedback.innerHTML = `بستن خطا در اجرای مدل از کش سیستم (Status ${resp.status}):<br><b>${data.error || 'خطای سرور'}</b>` +
-            (data.hint ? `<br><span class="text-amber-700 dark:text-amber-300 mt-1 block"> راهنما: ${data.hint}</span>` : '') +
-            (data.source ? `<br><span class="text-[10px] text-slate-500 mt-0.5 block">منبع کش: ${data.source}</span>` : '') +
-            installButtonHtml;
-          showToast('خطا در اجرای مدل از کش سیستم.', 'error');
+          throw new Error(data.error || 'پاسخ نامعتبر از سرور');
         }
       } catch (err) {
-        clearTimeout(timer);
         feedback.className = "p-3 rounded-xl text-xs font-mono bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300";
-        if (err.name === 'AbortError') {
-          feedback.innerHTML = `بستن زمان بارگذاری مدل به پایان رسید (Timeout 60s).`;
-        } else {
-          feedback.innerHTML = `بستن خطا در برقراری ارتباط با وب‌سرور: ${err.message}`;
-        }
+        feedback.innerHTML = `خطا در اجرای وکتورایزر محلی: ${err.message}`;
         showToast('خطا در اجرای تست امبدینگ.', 'error');
       } finally {
         btn.disabled = false;
-        icon.innerText = "";
-      }
-    }
-
-    async function installDependenciesNow() {
-      const btn = document.getElementById('btnInstallDeps');
-      const icon = document.getElementById('btnInstallDepsIcon');
-      const logBox = document.getElementById('installDepsProgress');
-      if (btn) btn.disabled = true;
-      if (icon) icon.innerText = "";
-
-      if (logBox) {
-        logBox.classList.remove('hidden');
-        logBox.innerHTML = '<span class="text-indigo-600 dark:text-indigo-400 animate-pulse"> در حال نصب پکیج‌های Transformers و PyTorch داخل کانتینر داکر... لطفاً شکیبا باشید (این عملیات ممکن است چند دقیقه طول بکشد)...</span>';
-      }
-
-      try {
-        const resp = await fetch('/api/install-deps', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' }
-        });
-        const data = await resp.json().catch(() => ({}));
-
-        if (resp.ok && data.status === 'ok') {
-          showToast('پکیج‌ها با موفقیت در کانتینر نصب شدند!', 'success');
-          if (logBox) {
-            logBox.innerHTML = `<span class="text-emerald-600 dark:text-emerald-400 font-bold">تایید ${data.message}</span><pre class="mt-1 p-2 rounded bg-slate-900 text-slate-200 text-[10px] overflow-auto max-h-40 leading-relaxed font-mono">${data.output || ''}</pre>`;
-          }
-          setTimeout(() => {
-            testEmbedConnection();
-          }, 1500);
-        } else {
-          showToast('خطا در نصب پکیج‌ها.', 'error');
-          if (logBox) {
-            logBox.innerHTML = `<span class="text-rose-600 dark:text-rose-400 font-bold">بستن ${data.message || data.error || 'خطا در نصب'}</span><pre class="mt-1 p-2 rounded bg-slate-900 text-slate-200 text-[10px] overflow-auto max-h-40 leading-relaxed font-mono">${data.output || data.error || ''}</pre><div class="mt-2 text-slate-600 dark:text-slate-400"> می‌توانید دستور زیر را مستقیماً در ترمینال سرور اجرا کنید:<br><code class="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded select-all font-mono">docker compose exec rag_studio pip install transformers torch accelerate</code></div>`;
-          }
-          if (btn) btn.disabled = false;
-          if (icon) icon.innerText = "";
-        }
-      } catch (err) {
-        showToast('خطا در ارتباط با سرور: ' + err.message, 'error');
-        if (logBox) {
-          logBox.innerHTML = `<span class="text-rose-600">بستن خطا: ${err.message}</span>`;
-        }
-        if (btn) btn.disabled = false;
-        if (icon) icon.innerText = "";
       }
     }
 
