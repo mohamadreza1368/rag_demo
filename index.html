@@ -1126,6 +1126,10 @@ Ready to send payload...
             <span class="block font-bold text-slate-800 dark:text-slate-200">LM Studio</span>
             <span class="block text-[10px] text-slate-400">localhost:1234</span>
           </button>
+          <button type="button" onclick="applyProviderPreset('custom')" class="p-2.5 rounded-xl border border-brand-300 dark:border-brand-700 bg-brand-50/50 dark:bg-brand-950/40 hover:border-brand-500 text-right text-xs font-medium transition shadow-xs col-span-2 sm:col-span-3">
+            <span class="block font-bold text-brand-700 dark:text-brand-300">سفارشی سازگار با OpenAI (Custom OpenAI-Compatible)</span>
+            <span class="block text-[10px] text-slate-500 dark:text-slate-400">vLLM, TGI, FastChat, LiteLLM, Ollama, سرورهای داخلی سازمانی</span>
+          </button>
         </div>
       </div>
 
@@ -1134,17 +1138,20 @@ Ready to send payload...
         <!-- Base URL -->
         <div>
           <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Base URL (آدرس پایه API):</label>
-          <input type="text" id="cfgBaseUrl" placeholder="https://api.openai.com/v1" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
+          <input type="text" id="cfgBaseUrl" placeholder="https://api.openai.com/v1 یا http://192.168.1.50:8000/v1" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
+          <p class="text-[10px] text-slate-400 mt-1">
+            💡 نکته: آدرس را می‌توانید با یا بدون <code>/v1</code> یا مستقیماً با <code>/chat/completions</code> وارد کنید (سیستم به طور خودکار آن را نرمال‌سازی می‌کند).
+          </p>
         </div>
 
         <!-- API Key -->
         <div>
           <div class="flex justify-between items-center mb-1">
-            <label class="text-xs font-bold text-slate-700 dark:text-slate-300">کلید دسترسی (API Key):</label>
-            <span class="text-[10px] text-slate-400">در مرورگر شما محلی ذخیره می‌شود</span>
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300">کلید دسترسی (API Key - در صورت نیاز سرور سفارشی):</label>
+            <span class="text-[10px] text-slate-400">اگر سرور نیازی به کلید ندارد خالی بگذارید</span>
           </div>
           <div class="relative">
-            <input type="password" id="cfgApiKey" placeholder="sk-..." class="w-full px-3.5 py-2.5 pl-10 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
+            <input type="password" id="cfgApiKey" placeholder="sk-... یا خالی" class="w-full px-3.5 py-2.5 pl-10 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
             <button type="button" onclick="togglePasswordVisibility()" class="absolute left-3 top-2.5 text-slate-400 hover:text-slate-600 text-xs">
               👁️
             </button>
@@ -1153,17 +1160,27 @@ Ready to send payload...
 
         <!-- Model Name -->
         <div>
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">نام مدل پاسخ‌دهنده متن (LLM Model):</label>
-          <input type="text" id="cfgModelName" placeholder="gpt-4o-mini" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
+          <div class="flex justify-between items-center mb-1">
+            <label class="text-xs font-bold text-slate-700 dark:text-slate-300">نام مدل پاسخ‌دهنده متن (LLM Model):</label>
+            <button type="button" onclick="fetchAvailableModels()" class="text-[11px] text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-1 font-medium">
+              <span>📋 دریافت خودکار لیست مدل‌ها (/models)</span>
+            </button>
+          </div>
+          <input type="text" id="cfgModelName" placeholder="gpt-4o-mini یا نام مدل در سرور سفارشی" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-950 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
+          <div id="cfgDetectedModelsContainer" class="hidden mt-2 p-2.5 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-xs"></div>
         </div>
 
         <!-- Routing option: Proxy vs Direct -->
-        <div class="flex items-center gap-2.5 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs">
-          <input type="checkbox" id="cfgUseProxy" checked class="rounded text-brand-600 focus:ring-brand-500 w-4 h-4">
-          <label for="cfgUseProxy" class="text-slate-700 dark:text-slate-300 cursor-pointer">
-            <strong>استفاده از سرور پروکسی داخلی ضد-CORS (/api/proxy)</strong>
-            <span class="block text-[10px] text-slate-400">جلوگیری از خطای محدودیت مرورگر در فراخوانی دامنه‌های خارجی و انتقال استریم روان</span>
-          </label>
+        <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 text-xs space-y-1">
+          <div class="flex items-center gap-2.5">
+            <input type="checkbox" id="cfgUseProxy" checked class="rounded text-brand-600 focus:ring-brand-500 w-4 h-4">
+            <label for="cfgUseProxy" class="text-slate-700 dark:text-slate-300 cursor-pointer font-bold">
+              استفاده از سرور پروکسی داخلی ضد-CORS (/api/proxy)
+            </label>
+          </div>
+          <p class="text-[10px] text-slate-400 pr-6">
+            💡 اگر با <b>Request Timeout</b> مواجه می‌شوید: تیک این گزینه را بردارید تا درخواست مستقیماً از مرورگر ارسال شود (یا برعکس اگر خطای CORS رخ داد آن را فعال کنید).
+          </p>
         </div>
 
         <!-- LLM Connection Test Section -->
@@ -1586,9 +1603,104 @@ Ready to send payload...
         document.getElementById('cfgModelName').value = 'local-model';
         document.getElementById('cfgEmbeddingModel').value = 'local_python_768d';
         document.getElementById('cfgEmbeddingProvider').value = 'local_python';
+      } else if (provider === 'custom') {
+        document.getElementById('cfgBaseUrl').value = 'http://localhost:8000/v1';
+        document.getElementById('cfgModelName').value = '';
+        document.getElementById('cfgEmbeddingModel').value = 'local_python_768d';
+        document.getElementById('cfgEmbeddingProvider').value = 'local_python';
+        document.getElementById('cfgUseProxy').checked = true;
       }
       onEmbeddingProviderChanged();
       showToast(`پریست ${provider.toUpperCase()} اعمال شد.`, 'info');
+    }
+
+    function resolveChatCompletionsUrl(rawUrl) {
+      if (!rawUrl) return '';
+      let url = rawUrl.trim().replace(/\/+$/, '');
+      if (url.endsWith('/chat/completions')) return url;
+      if (url.endsWith('/v1')) return `${url}/chat/completions`;
+      if (/\/(v\d+|api\/v\d+|v\d+beta)/i.test(url)) {
+        return `${url}/chat/completions`;
+      }
+      return `${url}/v1/chat/completions`;
+    }
+
+    function resolveModelsUrl(rawUrl) {
+      if (!rawUrl) return '';
+      let url = rawUrl.trim().replace(/\/+$/, '');
+      if (url.endsWith('/chat/completions')) {
+        url = url.replace(/\/chat\/completions$/, '');
+      }
+      if (url.endsWith('/v1')) return `${url}/models`;
+      if (/\/(v\d+|api\/v\d+|v\d+beta)/i.test(url)) {
+        return `${url}/models`;
+      }
+      return `${url}/v1/models`;
+    }
+
+    async function fetchAvailableModels() {
+      const baseUrl = document.getElementById('cfgBaseUrl').value.trim();
+      const apiKey = document.getElementById('cfgApiKey').value.trim();
+      const useProxy = document.getElementById('cfgUseProxy').checked;
+      const container = document.getElementById('cfgDetectedModelsContainer');
+
+      if (!baseUrl) {
+        showToast('لطفاً ابتدا آدرس Base URL را وارد کنید.', 'warning');
+        return;
+      }
+
+      container.classList.remove('hidden');
+      container.innerHTML = `<span class="text-slate-500 dark:text-slate-400 animate-pulse">⏳ در حال دریافت لیست مدل‌ها از سرور (${baseUrl})...</span>`;
+
+      const modelsUrl = resolveModelsUrl(baseUrl);
+      try {
+        let resp;
+        const headers = { 'Content-Type': 'application/json' };
+        if (apiKey) headers['Authorization'] = `Bearer ${apiKey}`;
+
+        if (useProxy) {
+          resp = await fetch('/api/proxy', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'target-url': modelsUrl,
+              ...(apiKey ? { 'Authorization': `Bearer ${apiKey}` } : {})
+            },
+            body: JSON.stringify({ method: 'GET' })
+          });
+        } else {
+          resp = await fetch(modelsUrl, { method: 'GET', headers });
+        }
+
+        if (resp.ok) {
+          const data = await resp.json();
+          const list = data.data || data.models || (Array.isArray(data) ? data : []);
+          if (list.length > 0) {
+            container.innerHTML = `<span class="block w-full font-bold text-slate-700 dark:text-slate-300 text-[11px] mb-1">مدل‌های شناسایی‌شده روی سرور (روی مدل موردنظر کلیک کنید):</span>`;
+            list.forEach(m => {
+              const modelId = typeof m === 'string' ? m : (m.id || m.name);
+              if (!modelId) return;
+              const pill = document.createElement('button');
+              pill.type = 'button';
+              pill.className = "px-2 py-0.5 rounded-lg bg-brand-100 dark:bg-brand-950 text-brand-700 dark:text-brand-300 text-[11px] font-mono hover:bg-brand-200 transition border border-brand-300 dark:border-brand-800";
+              pill.innerText = modelId;
+              pill.onclick = () => {
+                document.getElementById('cfgModelName').value = modelId;
+                showToast(`مدل ${modelId} انتخاب شد.`, 'info');
+              };
+              container.appendChild(pill);
+            });
+            showToast(`تعداد ${list.length} مدل روی سرور شناسایی شد.`, 'success');
+          } else {
+            container.innerHTML = `<span class="text-amber-600">پاسخ دریافت شد اما لیست مدل‌ها خالی بود.</span>`;
+          }
+        } else {
+          const errText = await resp.text();
+          container.innerHTML = `<span class="text-rose-600">عدم دسترسی به لیست مدل‌ها (${resp.status}): ${errText.substring(0, 120)}</span>`;
+        }
+      } catch (err) {
+        container.innerHTML = `<span class="text-rose-600">خطا در دریافت لیست مدل‌ها: ${err.message}</span>`;
+      }
     }
 
     function saveAndApplyConfig() {
@@ -1642,7 +1754,7 @@ Ready to send payload...
 
       providerLabel.innerText = `${providerDisplay} ${llmConfig.useProxy ? '(Proxy)' : '(Direct)'}`;
 
-      if (llmConfig.apiKey || llmConfig.baseUrl.includes('localhost')) {
+      if (llmConfig.apiKey || llmConfig.baseUrl.includes('localhost') || llmConfig.baseUrl.includes('127.0.0.1') || llmConfig.baseUrl.includes('192.168.')) {
         dot.className = "w-2.5 h-2.5 rounded-full bg-emerald-500 shadow-sm shadow-emerald-500/50 animate-pulse";
         if (llmStatusText) llmStatusText.innerHTML = `🟢 متصل به <strong>${llmConfig.modelName}</strong> (${providerDisplay})`;
       } else {
@@ -1656,32 +1768,31 @@ Ready to send payload...
       const feedback = document.getElementById('cfgLlmTestFeedback');
       const btn = document.getElementById('btnTestLlm');
       const icon = document.getElementById('btnTestLlmIcon');
-      const text = document.getElementById('btnTestLlmText');
 
       feedback.classList.remove('hidden');
       feedback.className = "p-3 rounded-xl text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700";
       
-      const TIMEOUT_SEC = 45;
+      const TIMEOUT_SEC = 50;
       let elapsedSec = 0;
-      feedback.innerHTML = `⏳ در حال ارسال درخواست به سرور مدل زبانی... (زمان سپری‌شده: ۰ ثانیه)`;
+      feedback.innerHTML = `⏳ در حال ارسال درخواست تست به سرور مدل زبانی... (زمان سپری‌شده: ۰ ثانیه)`;
       btn.disabled = true;
       icon.innerText = "⏳";
 
       const progressInterval = setInterval(() => {
         elapsedSec++;
-        feedback.innerHTML = `⏳ در حال ارسال درخواست به سرور مدل زبانی... (زمان سپری‌شده: ${elapsedSec} از ${TIMEOUT_SEC} ثانیه)`;
+        feedback.innerHTML = `⏳ در حال انتظار برای پاسخ مدل زبانی... (زمان سپری‌شده: ${elapsedSec} از ${TIMEOUT_SEC} ثانیه)`;
       }, 1000);
 
-      const baseUrl = document.getElementById('cfgBaseUrl').value.trim().replace(/\/+$/, '');
+      const rawBaseUrl = document.getElementById('cfgBaseUrl').value.trim();
       const apiKey = document.getElementById('cfgApiKey').value.trim();
-      const model = document.getElementById('cfgModelName').value.trim() || 'gpt-4o-mini';
+      const model = document.getElementById('cfgModelName').value.trim() || 'default';
       const useProxy = document.getElementById('cfgUseProxy').checked;
 
-      const targetUrl = `${baseUrl}/chat/completions`;
+      const targetUrl = resolveChatCompletionsUrl(rawBaseUrl);
       const testPayload = {
         model: model,
-        messages: [{ role: 'user', content: 'Ping' }],
-        max_tokens: 5,
+        messages: [{ role: 'user', content: 'Hi' }],
+        max_tokens: 10,
         temperature: 0.1
       };
 
@@ -1691,6 +1802,9 @@ Ready to send payload...
 
       try {
         let resp;
+        const requestHeaders = { 'Content-Type': 'application/json' };
+        if (apiKey) requestHeaders['Authorization'] = `Bearer ${apiKey}`;
+
         if (useProxy) {
           resp = await fetch('/api/proxy', {
             method: 'POST',
@@ -1698,7 +1812,7 @@ Ready to send payload...
             headers: {
               'Content-Type': 'application/json',
               'target-url': targetUrl,
-              'Authorization': apiKey ? `Bearer ${apiKey}` : ''
+              ...(apiKey ? { 'Authorization': `Bearer ${apiKey}` } : {})
             },
             body: JSON.stringify(testPayload)
           });
@@ -1706,10 +1820,7 @@ Ready to send payload...
           resp = await fetch(targetUrl, {
             method: 'POST',
             signal: controller.signal,
-            headers: {
-              'Content-Type': 'application/json',
-              ...(apiKey ? { 'Authorization': `Bearer ${apiKey}` } : {})
-            },
+            headers: requestHeaders,
             body: JSON.stringify(testPayload)
           });
         }
@@ -1719,9 +1830,9 @@ Ready to send payload...
 
         if (resp.ok) {
           const data = await resp.json();
-          const reply = data.choices?.[0]?.message?.content || 'PONG';
+          const reply = data.choices?.[0]?.message?.content || data.choices?.[0]?.text || 'OK';
           feedback.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300";
-          feedback.innerHTML = `✅ اتصال با موفقیت برقرار شد! (${elapsed}ms)<br>مدل: <b>${model}</b> | پاسخ دریافت شد: "${reply.trim()}"`;
+          feedback.innerHTML = `✅ اتصال با موفقیت برقرار شد! (${elapsed}ms)<br>آدرس نهایی: <code>${targetUrl}</code><br>مدل: <b>${model}</b> | پاسخ دریافت شد: "${reply.trim()}"`;
           showToast('اتصال به سرور هوش مصنوعی تایید شد.', 'success');
         } else {
           const errData = await resp.text();
@@ -1730,16 +1841,15 @@ Ready to send payload...
             const ej = JSON.parse(errData);
             parsedErr = ej.error?.message || ej.error || ej.hint || errData;
           } catch(e) {
-            parsedErr = errData.substring(0, 200);
+            parsedErr = errData.substring(0, 250);
           }
           feedback.className = "p-3 rounded-xl text-xs font-mono bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300";
-          feedback.innerHTML = `❌ خطا در اتصال به مدل (کد وضعیت ${resp.status}):<br>${parsedErr}<br><br>` +
-            `💡 <b>راهنمای رفع مشکل:</b><br>` +
+          feedback.innerHTML = `❌ خطا در اتصال به مدل (کد وضعیت ${resp.status}):<br>آدرس فراخوانی‌شده: <code>${targetUrl}</code><br>پیام سرور: ${parsedErr}<br><br>` +
+            `💡 <b>راهنما:</b><br>` +
             (useProxy ? 
-              `• درخواست از طریق پروکسی سرور ارسال شد. اگر مرورگر شما VPN یا دسترسی مستقیم دارد، <b>تیک «استفاده از سرور پروکسی داخلی» را بردارید</b> و دوباره تست کنید.<br>` :
-              `• درخواست مستقیماً از مرورگر ارسال شد. برای رفع خطای CORS یا مسدودیت مرورگر، <b>تیک «استفاده از سرور پروکسی داخلی» را فعال کنید</b>.<br>`) +
-            (targetUrl.includes('localhost') || targetUrl.includes('127.0.0.1') ? 
-              `• اگر مدل روی هاست محلی (مثلاً Ollama) قرار دارد و سیستم در داکر اجرا می‌شود، از آدرس <code>http://host.docker.internal:11434/v1</code> یا آی‌پی کارت شبکه سرور استفاده کنید.` : '');
+              `• اگر سیستم شما دسترسی مستقیم دارد، <b>تیک «استفاده از سرور پروکسی داخلی» را بردارید</b>.<br>` :
+              `• برای رفع خطای CORS، <b>تیک «استفاده از سرور پروکسی داخلی» را فعال کنید</b>.<br>`) +
+            `• روی دکمه «📋 دریافت خودکار لیست مدل‌ها» کلیک کنید تا از صحت نام مدل اطمینان حاصل فرمایید.`;
           showToast(`خطا در اتصال به مدل (${resp.status})`, 'error');
         }
       } catch (err) {
@@ -1748,17 +1858,16 @@ Ready to send payload...
         feedback.className = "p-3 rounded-xl text-xs font-mono bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300";
         if (err.name === 'AbortError') {
           feedback.innerHTML = `❌ <b>زمان پاسخ‌دهی به پایان رسید (Request Timeout - ${TIMEOUT_SEC}s):</b><br>` +
-            `سرور مقصد (${targetUrl}) در مدت ${TIMEOUT_SEC} ثانیه پاسخ نداد.<br><br>` +
-            `🔍 <b>علت‌های احتمالی و راه‌حل:</b><br>` +
+            `سرور مقصد به آدرس <code>${targetUrl}</code> در مدت ${TIMEOUT_SEC} ثانیه پاسخی ارسال نکرد.<br><br>` +
+            `🔍 <b>اقدامات برای رفع مشکل:</b><br>` +
             (useProxy ? 
-              `۱. <b>پروکسی سرور:</b> سرور داکر ممکن است به اینترنت مستقیم دسترسی نداشته باشد. اگر روی رایانه خود فیلترشکن/اینترنت آزاد دارید، <b>تیک «استفاده از سرور پروکسی داخلی» را غیرفعال کنید</b> تا درخواست مستقیم از مرورگر شما برود.<br>` :
-              `۱. <b>مسدودیت مرورگر:</b> <b>تیک «استفاده از سرور پروکسی داخلی» را فعال کنید</b> تا سرور درخواست را فوروارد کند.<br>`) +
-            (targetUrl.includes('localhost') || targetUrl.includes('127.0.0.1') ? 
-              `۲. <b>داکر و لوکال‌هاست:</b> در کانتینر داکر، <code>localhost</code> یعنی خود کانتینر! برای اتصال به سرویس روی سرور میزبان (مثلاً Ollama)، آدرس را به <code>http://host.docker.internal:11434/v1</code> یا آی‌پی شبکه تغییر دهید.<br>` : '') +
-            `۳. <b>ترافیک شبکه سازمانی:</b> مطمئن شوید پورت و آدرس مقصد در فایروال یا شبکه باز است.`;
+              `۱. <b>تست بدون پروکسی سرور:</b> <b>تیک «استفاده از سرور پروکسی داخلی» را بردارید</b> تا درخواست مستقیماً از مرورگر ارسال شود.<br>` :
+              `۱. <b>تست با پروکسی سرور:</b> <b>تیک «استفاده از سرور پروکسی داخلی» را فعال کنید</b> تا سرور درخواست را فوروارد کند.<br>`) +
+            `۲. <b>شبکه داکر:</b> اگر سرور سفارشی روی همین سیستم سرور اجرا شده، آدرس <code>http://host.docker.internal:8000/v1</code> یا آی‌پی محلی شبکه (مانند <code>192.168.x.x</code>) را وارد کنید.<br>` +
+            `۳. <b>تست دسترسی مدل‌ها:</b> دکمه «📋 دریافت خودکار لیست مدل‌ها» در بالا را امتحان کنید تا مشخص شود آیا پورت سرور باز است یا خیر.`;
         } else {
-          feedback.innerHTML = `❌ خطای شبکه یا مسدودیت:<br>${err.message}<br><br>` +
-            `💡 <b>پیشنهاد:</b> حالت «استفاده از سرور پروکسی داخلی» را تغییر دهید (فعال/غیرفعال) و مجدداً تست فرمایید.`;
+          feedback.innerHTML = `❌ خطای ارتباط شبکه:<br>${err.message}<br><br>` +
+            `💡 <b>پیشنهاد:</b> حالت «استفاده از سرور پروکسی داخلی» را تغییر دهید (فعال/غیرفعال) و مجدداً تست کنید.`;
         }
         showToast('خطای تایم‌اوت در اتصال به مدل زبانی.', 'error');
       } finally {
@@ -2757,12 +2866,13 @@ ${currentQuery}
         stream: true
       };
 
-      const targetUrl = `${llmConfig.baseUrl}/chat/completions`;
-      const isConfigured = Boolean(llmConfig.apiKey || llmConfig.baseUrl.includes('localhost'));
+      const targetUrl = resolveChatCompletionsUrl(llmConfig.baseUrl);
+      // Configured if API key is provided OR if it's a custom server/localhost that doesn't mandate API key
+      const isConfigured = Boolean(llmConfig.baseUrl && (llmConfig.apiKey || !llmConfig.baseUrl.includes('openai.com')));
 
       // If NOT configured, fallback to high-fidelity grounded simulation
       if (!isConfigured) {
-        logRawEvent(`[Simulation Mode] No API Key provided.\nFallback to client-side grounded generator.`);
+        logRawEvent(`[Simulation Mode] No API Key provided for OpenAI.\nFallback to client-side grounded generator.`);
         simulateGroundedStream(outputBox, statusLabel, btnExecute, latencyBadge);
         return;
       }
@@ -2773,22 +2883,26 @@ ${currentQuery}
       try {
         let response;
         if (llmConfig.useProxy) {
+          const proxyHeaders = {
+            'Content-Type': 'application/json',
+            'target-url': targetUrl
+          };
+          if (llmConfig.apiKey) proxyHeaders['Authorization'] = `Bearer ${llmConfig.apiKey}`;
+
           response = await fetch('/api/proxy', {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'target-url': targetUrl,
-              'Authorization': llmConfig.apiKey ? `Bearer ${llmConfig.apiKey}` : ''
-            },
+            headers: proxyHeaders,
             body: JSON.stringify(payload)
           });
         } else {
+          const directHeaders = {
+            'Content-Type': 'application/json'
+          };
+          if (llmConfig.apiKey) directHeaders['Authorization'] = `Bearer ${llmConfig.apiKey}`;
+
           response = await fetch(targetUrl, {
             method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              ...(llmConfig.apiKey ? { 'Authorization': `Bearer ${llmConfig.apiKey}` } : {})
-            },
+            headers: directHeaders,
             body: JSON.stringify(payload)
           });
         }

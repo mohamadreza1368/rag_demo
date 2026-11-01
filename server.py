@@ -10,6 +10,7 @@ import http.server
 import socketserver
 import urllib.request
 import urllib.error
+import urllib.parse
 import json
 import os
 import sys
@@ -19,6 +20,12 @@ import math
 import hashlib
 import re
 import time
+import ssl
+
+# Unverified SSL context for internal corporate / self-signed certificate gateways
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
 
 PORT = int(os.environ.get('PORT', 8080))
 DIRECTORY = os.path.dirname(os.path.abspath(__file__))
@@ -107,6 +114,9 @@ class RAGStudioHandler(http.server.SimpleHTTPRequestHandler):
                 self.wfile.write(b'OK')
             except (ConnectionResetError, BrokenPipeError, ConnectionAbortedError, OSError):
                 pass
+            return
+        elif self.path.startswith('/api/proxy'):
+            self.handle_proxy(method='GET')
             return
         try:
             super().do_GET()
@@ -256,13 +266,18 @@ class RAGStudioHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps({'error': f'Unsupported provider: {provider}'}).encode('utf-8'))
 
-    def handle_proxy(self):
+    def handle_proxy(self, method=None):
         content_length = int(self.headers.get('Content-Length', 0))
         body = self.rfile.read(content_length) if content_length > 0 else b''
 
-        # Target URL passed via header or json body
+        # Target URL passed via header, query string or JSON body
         target_url = self.headers.get('target-url')
         auth_header = self.headers.get('Authorization')
+
+        if not target_url and '?' in self.path:
+            query = urllib.parse.urlparse(self.path).query
+            params = urllib.parse.parse_qs(query)
+            target_url = params.get('targetUrl', [None])[0]
 
         try:
             req_data = json.loads(body.decode('utf-8')) if body else {}
@@ -280,8 +295,10 @@ class RAGStudioHandler(http.server.SimpleHTTPRequestHandler):
             self.send_header('Content-Type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
-            self.wfile.write(json.dumps({'error': 'target-url header or targetUrl in body is required'}).encode('utf-8'))
+            self.wfile.write(json.dumps({'error': 'target-url header, query parameter or targetUrl in body is required'}).encode('utf-8'))
             return
+
+        http_method = method or req_data.get('method') or getattr(self, 'command', 'POST')
 
         # Automatic Docker host mapping:
         # If running inside Docker and target points to localhost or 127.0.0.1,
@@ -290,16 +307,20 @@ class RAGStudioHandler(http.server.SimpleHTTPRequestHandler):
             target_url = target_url.replace('://localhost:', '://host.docker.internal:').replace('://127.0.0.1:', '://host.docker.internal:')
 
         headers = {
-            'Content-Type': 'application/json',
             'User-Agent': 'RAG-Studio-Proxy/1.0'
         }
-        if auth_header:
-            headers['Authorization'] = auth_header
+        if http_method != 'GET':
+            headers['Content-Type'] = 'application/json'
+
+        if auth_header and auth_header.strip():
+            headers['Authorization'] = auth_header.strip()
 
         proxy_timeout = 60  # Allow up to 60 seconds for slow LLM responses / cold starts
         try:
-            req = urllib.request.Request(target_url, data=body, headers=headers, method='POST')
-            with urllib.request.urlopen(req, timeout=proxy_timeout) as resp:
+            post_data = body if (http_method != 'GET' and body) else None
+            req = urllib.request.Request(target_url, data=post_data, headers=headers, method=http_method)
+            # Use ssl_context with unverified certs so self-signed / internal corporate certs work smoothly
+            with urllib.request.urlopen(req, timeout=proxy_timeout, context=ssl_context) as resp:
                 self.send_response(resp.status)
                 self.send_header('Access-Control-Allow-Origin', '*')
                 content_type = resp.headers.get('Content-Type', 'application/json')
