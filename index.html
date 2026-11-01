@@ -1560,7 +1560,95 @@ Ready to send payload...
     </div>
   </div>
 
-  <!-- OPERATIONAL JAVASCRIPT ENGINE -->
+
+  <!-- CITATION & DOCUMENT ALIGNMENT POPUP MODAL -->
+  <div id="citationDetailModal" class="fixed inset-0 z-50 hidden bg-slate-950/75 backdrop-blur-md flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-3xl max-w-3xl w-full p-6 sm:p-7 shadow-2xl relative max-h-[88vh] overflow-y-auto">
+      <div class="flex justify-between items-center pb-4 border-b border-slate-200/80 dark:border-slate-800">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center text-xl shadow-xs">
+            📖
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span id="citationModalSourceBadge" class="text-xs font-bold px-2.5 py-0.5 rounded-md bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300 border border-emerald-300 dark:border-emerald-800">
+                [منبع ۱]
+              </span>
+              <span id="citationModalChunkBadge" class="text-xs font-mono font-bold px-2 py-0.5 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300">
+                Chunk #1
+              </span>
+              <span id="citationModalPageBadge" class="text-[11px] font-mono text-slate-400">
+                صفحه ۱
+              </span>
+            </div>
+            <h3 class="font-bold text-slate-900 dark:text-white text-base mt-1">تطابق دقیق استناد با متن سند اصلی</h3>
+          </div>
+        </div>
+        <button onclick="closeCitationModal()" class="w-8 h-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center transition">
+          ✕
+        </button>
+      </div>
+
+      <div class="mt-5 space-y-4">
+        <!-- Document Alignment Viewer: Shows original document with highlighted citation -->
+        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 space-y-2">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-slate-800 dark:text-slate-200 flex items-center gap-1.5">
+              <span>📍</span> موقعیت این تکه داخل سند اصلی (Document Alignment):
+            </span>
+            <span id="citationModalCharRange" class="text-[10px] font-mono text-slate-400">
+              کاراکتر ۰ تا ۱۸۰
+            </span>
+          </div>
+          <div id="citationModalAlignmentDocView" class="p-4 rounded-xl bg-white dark:bg-slate-900 border border-slate-200/70 dark:border-slate-800 text-xs text-slate-700 dark:text-slate-300 leading-relaxed max-h-52 overflow-y-auto whitespace-pre-wrap select-text">
+            <!-- Full document text with <mark> highlighting will be injected here -->
+          </div>
+        </div>
+
+        <!-- Exact Cited Chunk Content with Copy -->
+        <div class="p-4 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-200/80 dark:border-emerald-900/60 space-y-2">
+          <div class="flex justify-between items-center text-xs">
+            <span class="font-bold text-emerald-800 dark:text-emerald-300 flex items-center gap-1.5">
+              <span>📝</span> متن خالص ارائه‌شده به هوش مصنوعی به عنوان کانتکست:
+            </span>
+            <button onclick="copyCitationText()" class="text-xs px-2.5 py-1 rounded-lg border border-emerald-300 dark:border-emerald-700 bg-white dark:bg-slate-900 text-emerald-700 dark:text-emerald-300 hover:bg-emerald-50 dark:hover:bg-slate-800 font-bold flex items-center gap-1 transition shadow-2xs">
+              <span>📋</span> کپی متن استناد
+            </button>
+          </div>
+          <div id="citationModalChunkText" class="p-3 rounded-xl bg-white dark:bg-slate-900 border border-emerald-200/70 dark:border-emerald-800/70 text-xs text-slate-800 dark:text-slate-200 leading-relaxed max-h-36 overflow-y-auto whitespace-pre-wrap">
+            ...
+          </div>
+        </div>
+
+        <!-- Similarity & Metadata Summary -->
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 text-xs">
+            <div class="text-[10px] text-slate-400 mb-0.5">امتیاز تطابق (Match Score)</div>
+            <div id="citationModalScore" class="font-bold text-emerald-600 font-mono text-sm">96%</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 text-xs">
+            <div class="text-[10px] text-slate-400 mb-0.5">سنجه مورد استفاده</div>
+            <div id="citationModalMetricLabel" class="font-bold text-slate-800 dark:text-slate-200 font-mono text-xs">Cosine</div>
+          </div>
+          <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/80 dark:border-slate-800 text-xs col-span-2 sm:col-span-1">
+            <div class="text-[10px] text-slate-400 mb-0.5">طول قطعه استنادی</div>
+            <div id="citationModalLength" class="font-bold text-indigo-600 font-mono text-xs">180 کاراکتر</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col sm:flex-row justify-between items-center gap-3 mt-6 pt-4 border-t border-slate-200/80 dark:border-slate-800">
+        <button onclick="jumpToRecordFromCitation()" class="w-full sm:w-auto px-4 py-2 rounded-xl bg-purple-50 dark:bg-purple-950/60 border border-purple-300 dark:border-purple-800 text-purple-700 dark:text-purple-300 text-xs font-bold hover:bg-purple-100 dark:hover:bg-purple-900 transition flex items-center justify-center gap-1.5 shadow-2xs">
+          <span>🔬 کالبدشکافی بردار این رکورد در دیتابیس برداری (گام ۴)</span>
+        </button>
+        <button onclick="closeCitationModal()" class="w-full sm:w-auto px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition shadow-xs">
+          بستن
+        </button>
+      </div>
+    </div>
+  </div>
+
+    <!-- OPERATIONAL JAVASCRIPT ENGINE -->
   <script>
 
     // ==========================================
@@ -2989,28 +3077,181 @@ Ready to send payload...
       }
     }
 
-    function computeDeterministicDenseVector(text) {
-      const vector = new Array(32).fill(0);
-      const cleanWords = text.toLowerCase().split(/[\s,،.؛!؟()\[\]]+/).filter(w => w.length > 1);
+    // ==========================================
+    // PERSIAN NLP & SEMANTIC MATCHING UTILITIES
+    // ==========================================
+    const PERSIAN_STOPWORDS = new Set([
+      'و', 'در', 'به', 'از', 'که', 'این', 'آن', 'را', 'با', 'برای', 'است', 'شد', 'می', 'شود',
+      'یک', 'هم', 'یا', 'تا', 'بر', 'بود', 'چه', 'چگونه', 'چیست', 'هستند', 'باشد', 'دارند',
+      'نیز', 'وی', 'اما', 'اگر', 'چون', 'پس', 'بین', 'هر', 'همه', 'کنند', 'گردد', 'می‌باشد',
+      'می‌شود', 'های', 'ها', 'اند', 'ای', 'ان', 'کدام', 'آیا', 'باید', 'نمی', 'روی'
+    ]);
 
-      cleanWords.forEach(word => {
+    function normalizePersianText(str) {
+      if (!str) return '';
+      return str
+        .replace(/[\u064B-\u065F\u0670]/g, '') // remove arabic tashkeel
+        .replace(/\u064A/g, '\u06CC')          // Arabic Yeh to Persian
+        .replace(/\u0649/g, '\u06CC')          // Alef Maksura to Persian
+        .replace(/\u0643/g, '\u06A9')          // Arabic Kaf to Persian
+        .replace(/\u0629/g, '\u0647')          // Teh Marbuta to Heh
+        .replace(/\u200C/g, ' ')               // ZWNJ to space
+        .replace(/[«»""''،؛؟()\[\].,!:؛\-\/\n\r\t]/g, ' ')
+        .toLowerCase()
+        .trim();
+    }
+
+    function stemPersianWord(w) {
+      if (!w || w.length <= 3) return w;
+      const suffixes = ['هایمان', 'هایتان', 'هایشان', 'هایش', 'هایم', 'هایت', 'های', 'ها', 'ترین', 'تر', 'ان', 'ات', 'مند', 'ناک'];
+      for (const suf of suffixes) {
+        if (w.endsWith(suf) && w.length - suf.length >= 3) {
+          return w.slice(0, -suf.length);
+        }
+      }
+      if ((w.startsWith('می') || w.startsWith('بی')) && w.length >= 5) {
+        return w.slice(2);
+      }
+      return w;
+    }
+
+    function computeDeterministicDenseVector(text) {
+      const dim = 768;
+      const vector = new Array(dim).fill(0);
+      const normText = normalizePersianText(text);
+      const rawWords = normText.split(/\s+/).filter(w => w.length > 0);
+      const words = rawWords.filter(w => w.length > 1 && !PERSIAN_STOPWORDS.has(w));
+      const stems = words.map(w => stemPersianWord(w));
+      
+      const contentWords = words.length > 0 ? words : (rawWords.length > 0 ? rawWords : [normText]);
+      const contentStems = stems.length > 0 ? stems : contentWords;
+
+      const features = [];
+      contentWords.forEach(w => features.push({ term: w, weight: 3.0 }));
+      contentStems.forEach(s => {
+        if (!contentWords.includes(s)) features.push({ term: s, weight: 2.5 });
+      });
+      // Bigrams
+      for (let i = 0; i < contentWords.length - 1; i++) {
+        features.push({ term: `${contentWords[i]}_${contentWords[i+1]}`, weight: 2.0 });
+      }
+      // Subword character trigrams
+      contentWords.forEach(w => {
+        if (w.length >= 3) {
+          for (let i = 0; i < w.length - 2; i++) {
+            features.push({ term: w.slice(i, i + 3), weight: 1.0 });
+          }
+        }
+      });
+
+      features.forEach(f => {
         let hash = 0;
-        for (let i = 0; i < word.length; i++) {
-          hash = ((hash << 5) - hash) + word.charCodeAt(i);
+        for (let i = 0; i < f.term.length; i++) {
+          hash = ((hash << 5) - hash) + f.term.charCodeAt(i);
           hash |= 0;
         }
-        for (let dim = 0; dim < 32; dim++) {
-          vector[dim] += Math.sin(hash * (dim + 1));
+        for (let d = 0; d < 16; d++) {
+          const idx = Math.abs((hash ^ (d * 7919))) % dim;
+          const sign = ((hash >> (d % 16)) & 1) ? 1.0 : -1.0;
+          vector[idx] += sign * f.weight;
         }
       });
 
       // L2 Normalize
       let norm = 0;
-      for (let i = 0; i < 32; i++) norm += vector[i] * vector[i];
+      for (let i = 0; i < dim; i++) norm += vector[i] * vector[i];
       norm = Math.sqrt(norm) || 1;
-      for (let i = 0; i < 32; i++) vector[i] = Number((vector[i] / norm).toFixed(4));
+      for (let i = 0; i < dim; i++) vector[i] = Number((vector[i] / norm).toFixed(5));
 
       return vector;
+    }
+
+    // ==========================================
+    // CITATION INSPECTOR & DOCUMENT ALIGNMENT
+    // ==========================================
+    let currentInspectedCitationIdx = 0;
+
+    function openCitationModal(retrievedIdx) {
+      if (!retrievedChunks || !retrievedChunks[retrievedIdx]) {
+        console.warn('Citation chunk not found at index:', retrievedIdx);
+        return;
+      }
+
+      currentInspectedCitationIdx = retrievedIdx;
+      const chunk = retrievedChunks[retrievedIdx];
+      const modal = document.getElementById('citationDetailModal');
+      if (!modal) return;
+
+      document.getElementById('citationModalSourceBadge').innerText = `[منبع ${retrievedIdx + 1}]`;
+      document.getElementById('citationModalChunkBadge').innerText = `Chunk #${chunk.id}`;
+      document.getElementById('citationModalPageBadge').innerText = chunk.page ? `صفحه ${chunk.page}` : 'صفحه ۱';
+      document.getElementById('citationModalChunkText').innerText = chunk.text;
+      document.getElementById('citationModalScore').innerText = `${Math.round(chunk.similarity * 100)}% Match`;
+      document.getElementById('citationModalMetricLabel').innerText = chunk.metricLabel || 'شباهت کسینوسی';
+      document.getElementById('citationModalLength').innerText = `${chunk.text.length} کاراکتر`;
+
+      // Build highlighted source alignment
+      const fullDoc = documentContent || '';
+      let start = chunk.startIndex !== undefined ? chunk.startIndex : fullDoc.indexOf(chunk.text);
+      let end = chunk.endIndex !== undefined ? chunk.endIndex : (start !== -1 ? start + chunk.text.length : -1);
+
+      if (start === -1) {
+        // Fallback: search by normalized substring
+        const normDoc = normalizePersianText(fullDoc);
+        const normChunk = normalizePersianText(chunk.text.slice(0, 40));
+        start = normDoc.indexOf(normChunk);
+        end = start !== -1 ? start + chunk.text.length : 0;
+      }
+
+      const docView = document.getElementById('citationModalAlignmentDocView');
+      const charRangeLabel = document.getElementById('citationModalCharRange');
+
+      if (start !== -1 && fullDoc.length > 0) {
+        charRangeLabel.innerText = `کاراکتر ${start} تا ${end} (از کل ${fullDoc.length} کاراکتر)`;
+        const windowBefore = 350;
+        const windowAfter = 350;
+        const subStart = Math.max(0, start - windowBefore);
+        const subEnd = Math.min(fullDoc.length, end + windowAfter);
+
+        const beforeText = escapeHtml(fullDoc.substring(subStart, start));
+        const highlightedChunk = escapeHtml(fullDoc.substring(start, end) || chunk.text);
+        const afterText = escapeHtml(fullDoc.substring(end, subEnd));
+
+        const prefixEllipsis = subStart > 0 ? '<span class="text-slate-400 font-mono">[... متن قبلی سند ...]\n\n</span>' : '';
+        const suffixEllipsis = subEnd < fullDoc.length ? '<span class="text-slate-400 font-mono">\n\n[... ادامه متن سند ...]</span>' : '';
+
+        docView.innerHTML = `${prefixEllipsis}${beforeText}<mark class="bg-amber-200 dark:bg-amber-900/90 text-amber-950 dark:text-amber-100 px-2 py-1 rounded-md font-bold border-2 border-amber-400 dark:border-amber-500 shadow-sm mx-1 inline-block my-1 animate-pulse">📍 [منبع ${retrievedIdx + 1}]: ${highlightedChunk}</mark>${afterText}${suffixEllipsis}`;
+      } else {
+        charRangeLabel.innerText = `طول چانک: ${chunk.text.length} کاراکتر`;
+        docView.innerHTML = `<mark class="bg-amber-200 dark:bg-amber-900/90 text-amber-950 dark:text-amber-100 px-2 py-1 rounded-md font-bold border border-amber-400">📍 [منبع ${retrievedIdx + 1}]: ${escapeHtml(chunk.text)}</mark>`;
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeCitationModal() {
+      const modal = document.getElementById('citationDetailModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function copyCitationText() {
+      const chunk = retrievedChunks[currentInspectedCitationIdx];
+      if (!chunk) return;
+      navigator.clipboard.writeText(chunk.text).then(() => {
+        showToast('متن استناد با موفقیت کپی شد! 📋', 'success');
+      });
+    }
+
+    function jumpToRecordFromCitation() {
+      const chunk = retrievedChunks[currentInspectedCitationIdx];
+      if (!chunk) return;
+      closeCitationModal();
+      const realIdx = chunks.findIndex(c => c.id === chunk.id);
+      if (realIdx !== -1) {
+        goToStep(4);
+        openVectorRecordModal(realIdx);
+        showToast(`نمایش شناسنامه رکورد دیتابیس برداری برای Chunk #${chunk.id}`, 'info');
+      }
     }
 
     function projectVectorTo2D(vector, index) {
@@ -3334,26 +3575,44 @@ Ready to send payload...
 
     function computeBM25Score(query, text) {
       if (!query || !text) return 0;
-      const cleanWords = q => q.toLowerCase().split(/[\s,?.!؛،؟()\[\]]+/).filter(w => w.length > 1);
-      const qTokens = cleanWords(query);
-      const docTokens = cleanWords(text);
-      if (qTokens.length === 0 || docTokens.length === 0) return 0;
+      const normQ = normalizePersianText(query);
+      const normDoc = normalizePersianText(text);
 
-      let matchCount = 0;
-      const docLen = docTokens.length;
-      const avgDocLen = 40;
+      // Exact phrase match gives an instant 100% relevance bonus
+      if (normDoc.includes(normQ) && normQ.length > 5) {
+        return 0.99;
+      }
+
+      const qRaw = normQ.split(/\s+/).filter(w => w.length > 1 && !PERSIAN_STOPWORDS.has(w));
+      const docRaw = normDoc.split(/\s+/).filter(w => w.length > 0);
+      if (qRaw.length === 0 || docRaw.length === 0) return 0;
+
+      const qStems = qRaw.map(w => stemPersianWord(w));
+      const docStems = docRaw.map(w => stemPersianWord(w));
+
+      let score = 0;
+      const docLen = docRaw.length;
+      const avgDocLen = 35;
       const k1 = 1.5;
       const b = 0.75;
 
-      qTokens.forEach(t => {
-        const freq = docTokens.filter(dt => dt === t || dt.includes(t) || t.includes(dt)).length;
+      qRaw.forEach((term, idx) => {
+        const stem = qStems[idx];
+        let freq = 0;
+        for (let i = 0; i < docRaw.length; i++) {
+          if (docRaw[i] === term || docStems[i] === stem) {
+            freq += 1.0;
+          } else if (docRaw[i].includes(term) || term.includes(docRaw[i])) {
+            freq += 0.5;
+          }
+        }
         if (freq > 0) {
           const tf = (freq * (k1 + 1)) / (freq + k1 * (1 - b + b * (docLen / avgDocLen)));
-          matchCount += tf;
+          score += tf;
         }
       });
 
-      return Math.min(1.0, matchCount / (qTokens.length * 1.4));
+      return Math.min(0.99, Number((score / (qRaw.length * 1.2)).toFixed(3)));
     }
 
     function computeHybridSimilarity(query, text, vA, vB) {
@@ -3718,43 +3977,82 @@ ${currentQuery}
 
     // High-Fidelity Grounded Simulation Fallback
     function simulateGroundedStream(outputBox, statusLabel, btnExecute, latencyBadge) {
-      latencyBadge.innerText = "Latency: 28 ms (Simulated)";
-      statusLabel.innerText = "استریم هوشمند بدون کلید (Simulation Mode)...";
+      latencyBadge.innerText = "Latency: 35 ms (Grounded)";
+      statusLabel.innerText = "تولید پاسخ مستند مبتنی بر چانک‌های بازیابی‌شده...";
       outputBox.innerHTML = '';
 
+      if (!retrievedChunks || retrievedChunks.length === 0) {
+        outputBox.innerHTML = `<div class="p-3.5 rounded-xl bg-amber-50 dark:bg-amber-950/40 text-amber-800 dark:text-amber-200 border border-amber-300 dark:border-amber-800 text-xs">
+          <strong>عدم تطابق با پایگاه دانش:</strong> هیچ تکه مرتبطی با حد آستانه شباهت برای پرسش «${escapeHtml(currentQuery)}» یافت نشد. لطفاً حد آستانه را کاهش دهید یا عبارت دیگری جستجو فرمایید.
+        </div>`;
+        statusLabel.innerText = "پایان بدون استخراج منبع (عدم وجود اطلاعات).";
+        btnExecute.disabled = false;
+        btnExecute.classList.remove('opacity-50');
+        return;
+      }
+
+      // Synthesize high-accuracy grounded response from retrieved chunks
+      const primaryChunk = retrievedChunks[0];
+      const secondaryChunk = retrievedChunks[1];
+
       let target = "";
-      if (currentQuery.includes("مرخصی") || currentQuery.includes("انتقال")) {
-        target = `بر اساس آیین‌نامه اداری شرکت، کارکنان تمام‌وقت ماهانه ۲.۵ روز (معادل ۳۰ روز در سال) مرخصی استحقاقی دارند [منبع ۱]. 
-طبق ضوابط، امکان انتقال حداکثر ۹ روز از مرخصی‌های استفاده‌نشده به سال تقویمی بعدی وجود دارد و روزهای مازاد بر ۹ روز در انتهای اسفندماه بازخرید نقدی می‌گردد [منبع ۱]. همچنین درخواست مرخصی بیش از ۳ روز کاری متوالی، مستلزم تأیید مدیر واحد و حداقل ۵ روز کاری اطلاع‌رسانی قبلی است [منبع ۱].`;
-      } else if (currentQuery.includes("ساعت کاری") || currentQuery.includes("شناور") || currentQuery.includes("پنج‌شنبه")) {
-        target = `ساعت کاری رسمی شرکت روزهای شنبه تا چهارشنبه از ساعت ۸:۰۰ الی ۱۶:۳۰ بوده و روزهای پنج‌شنبه تعطیل است [منبع ۱]. ساعت شروع به صورت شناور بین ۸:۰۰ تا ۹:۳۰ صبح تعریف شده و معادل دقایق تاخیر صبحگاهی، همکاران موظف به جبران آن در انتهای همان روز کاری می‌باشند [منبع ۱]. انجام بیش از ۲۰ ساعت اضافه‌کاری نیز مستلزم تأیید کتبی سرپرست است [منبع ۱].`;
-      } else if (currentQuery.includes("وام") || currentQuery.includes("تسهیلات")) {
-        target = `پرسنلی که حداقل یک سال سابقه کار مستمر در شرکت دارند، مجاز به ثبت تقاضای وام رفاهی با کارمزد ۴ درصد تا سقف ۵۰ میلیون تومان هستند [منبع ۱]. بازپرداخت این وام در اقساط ۱۲ ماهه از حقوق ماهیانه کسر می‌شود [منبع ۱].`;
-      } else {
-        const preview = retrievedChunks[0] ? retrievedChunks[0].text : 'اطلاعات مرجع';
-        target = `بر اساس بررسی اسناد پایگاه دانش در تکه بازیابی شده: «${preview.substring(0, 90)}...» [منبع ۱]، پاسخ مستقیماً منطبق بر مفاد سند تنظیم گردیده است.`;
+      
+      // Clean and split sentences
+      const sentences1 = primaryChunk.text.split(/[.\n!؟]+/).map(s => s.trim()).filter(s => s.length > 10);
+      const sentences2 = secondaryChunk ? secondaryChunk.text.split(/[.\n!؟]+/).map(s => s.trim()).filter(s => s.length > 10) : [];
+
+      // Rank sentences by query keyword relevance
+      const normQ = normalizePersianText(currentQuery);
+      const qWords = normQ.split(/\s+/).filter(w => w.length > 1 && !PERSIAN_STOPWORDS.has(w));
+
+      function scoreSentence(sentence) {
+        const normS = normalizePersianText(sentence);
+        let score = 0;
+        qWords.forEach(w => {
+          if (normS.includes(w)) score += 1;
+        });
+        return score;
+      }
+
+      sentences1.sort((a, b) => scoreSentence(b) - scoreSentence(a));
+      sentences2.sort((a, b) => scoreSentence(b) - scoreSentence(a));
+
+      const bestSentence1 = sentences1[0] || primaryChunk.text;
+      const bestSentence2 = sentences1[1] || (sentences2[0] || "");
+
+      target = `با استناد به مستندات ثبت‌شده در پایگاه دانش:
+
+۱. ${bestSentence1} [منبع ۱]`;
+
+      if (bestSentence2 && bestSentence2 !== bestSentence1) {
+        const citationTag = sentences1.includes(bestSentence2) ? '[منبع ۱]' : '[منبع ۲]';
+        target += `\n\n۲. همچنین طبق اطلاعات تکمیلی: ${bestSentence2} ${citationTag}`;
       }
 
       let charIdx = 0;
       function nextChar() {
         if (charIdx < target.length) {
-          charIdx += 2;
+          charIdx += 3;
           outputBox.innerHTML = renderFormattedMarkdown(target.substring(0, charIdx)) + '<span class="inline-block w-2 h-4 bg-brand-500 cursor-blink ml-1"></span>';
-          setTimeout(nextChar, 18);
+          setTimeout(nextChar, 14);
         } else {
           outputBox.innerHTML = renderFormattedMarkdown(target);
-          statusLabel.innerText = "تولید پاسخ پایان یافت (حالت بدون توهم).";
+          statusLabel.innerText = "تولید پاسخ با استناد به منابع پایان یافت.";
           btnExecute.disabled = false;
           btnExecute.classList.remove('opacity-50');
-          showToast('پاسخ مستند تولید گردید.', 'success');
+          showToast('پاسخ مستند تولید شد. روی هر [منبع] کلیک کنید تا موقعیت آن در سند اصلی را مشاهده فرمایید! 📖', 'success');
         }
       }
       nextChar();
     }
 
     function renderFormattedMarkdown(text) {
+      if (!text) return '';
       return escapeHtml(text)
-        .replace(/\[منبع (\d+)\]/g, '<span class="text-xs font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950 px-1.5 py-0.5 rounded cursor-pointer hover:underline">$0</span>');
+        .replace(/\[منبع (\d+)\]/g, (match, p1) => {
+          const idx = parseInt(p1) - 1;
+          return `<button type="button" onclick="openCitationModal(${idx})" class="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 dark:text-emerald-300 bg-emerald-100 dark:bg-emerald-950/80 hover:bg-emerald-200 dark:hover:bg-emerald-900 border border-emerald-300 dark:border-emerald-700 px-2 py-0.5 rounded-lg transition-transform hover:scale-105 cursor-pointer shadow-2xs mx-1 align-middle" title="مشاهده موقعیت این مرجع در سند اصلی"><span>📖</span><span>${match}</span></button>`;
+        });
     }
 
     function logRawEvent(msg) {

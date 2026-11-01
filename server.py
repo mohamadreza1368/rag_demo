@@ -13,6 +13,7 @@ Or:
 
 import sys
 import os
+import re
 import io
 import time
 import math
@@ -41,40 +42,79 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 LOADED_MODELS: Dict[str, Any] = {}
 
 # ---------------------------------------------------------------------------
-# Vector Embedding Engines
+# Persian NLP & Semantic Dense Vectorizer
 # ---------------------------------------------------------------------------
+PERSIAN_STOPWORDS = {
+    'و', 'در', 'به', 'از', 'که', 'این', 'آن', 'را', 'با', 'برای', 'است', 'شد', 'می', 'شود',
+    'یک', 'هم', 'یا', 'تا', 'بر', 'بود', 'چه', 'چگونه', 'چیست', 'هستند', 'باشد', 'دارند',
+    'نیز', 'وی', 'اما', 'اگر', 'چون', 'پس', 'بین', 'هر', 'همه', 'کنند', 'گردد', 'می‌باشد',
+    'می‌شود', 'های', 'ها', 'اند', 'ای', 'ان', 'کدام', 'آیا', 'باید', 'نمی', 'روی'
+}
+
+def normalize_persian_text(s: str) -> str:
+    if not s:
+        return ""
+    s = s.replace('\u064a', '\u06cc').replace('\u0649', '\u06cc') # ي / ى -> ی
+    s = s.replace('\u0643', '\u06a9')                             # ك -> ک
+    s = s.replace('\u0629', '\u0647')                             # ة -> ه
+    s = s.replace('\u200c', ' ')                                  # ZWNJ -> space
+    s = re.sub(r'[\u064b-\u065f\u0670]', '', s)                   # remove harakat
+    s = re.sub(r'[«»\"\'\'،؛؟\(\)\[\]\.\,\!\:\-\/\n\r\t]', ' ', s)
+    return s.lower().strip()
+
+def stem_persian_word(w: str) -> str:
+    if len(w) <= 3:
+        return w
+    for suf in ['هایمان', 'هایتان', 'هایشان', 'هایش', 'هایم', 'هایت', 'های', 'ها', 'ترین', 'تر', 'ان', 'ات', 'مند', 'ناک']:
+        if w.endswith(suf) and len(w) - len(suf) >= 3:
+            return w[:-len(suf)]
+    if (w.startswith('می') or w.startswith('بی')) and len(w) >= 5:
+        return w[2:]
+    return w
+
 def local_python_embed(text: str, dim: int = 768) -> List[float]:
     """
-    Pure Python deterministic semantic dense vectorizer.
+    Persian-optimized deterministic semantic dense vectorizer.
     Runs 100% locally with zero external network or heavy dependencies.
-    Produces normalized L2 unit vectors suitable for cosine similarity.
+    Produces normalized L2 unit vectors with high signal-to-noise ratio.
     """
     if not text:
         return [0.0] * dim
 
     vec = [0.0] * dim
-    clean_text = text.lower().strip()
-    words = clean_text.split()
-    features = list(words)
+    norm_text = normalize_persian_text(text)
+    raw_words = norm_text.split()
+    words = [w for w in raw_words if len(w) > 1 and w not in PERSIAN_STOPWORDS]
+    stems = [stem_persian_word(w) for w in words]
+    if not words:
+        words = raw_words or [norm_text]
+        stems = words
+
+    features: List[Tuple[str, float]] = []
+    # Primary words (high weight)
+    for w in words:
+        features.append((w, 3.0))
+    # Stems
+    for s in stems:
+        if s not in words:
+            features.append((s, 2.5))
+    # Word Bigrams (phrase context)
+    for i in range(len(words) - 1):
+        features.append((f"{words[i]}_{words[i+1]}", 2.0))
+    # Character Trigrams (spelling & typo tolerance)
     for w in words:
         if len(w) >= 3:
             for i in range(len(w) - 2):
-                features.append(w[i:i+3])
-        if len(w) >= 4:
-            for i in range(len(w) - 3):
-                features.append(w[i:i+4])
+                features.append((w[i:i+3], 1.0))
 
-    if not features:
-        features = [clean_text]
-
-    for feat in features:
+    for feat, feat_weight in features:
         h_bytes = hashlib.sha256(feat.encode('utf-8')).digest()
         for offset in range(0, 28, 4):
             val = int.from_bytes(h_bytes[offset:offset+4], 'big')
             idx = val % dim
             sign = 1.0 if (val & 0x80000000) else -1.0
-            weight = 1.0 + (float(val % 100) / 100.0)
-            vec[idx] += sign * weight
+            val_weight = 1.0 + (float(val % 100) / 100.0)
+            vec[idx] += sign * val_weight * feat_weight
 
     norm = math.sqrt(sum(x * x for x in vec))
     if norm > 1e-9:
