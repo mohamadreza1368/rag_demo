@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      network: host
       args:
         DOCKER_REGISTRY: ${DOCKER_REGISTRY:-dockerhub.ime.co.ir/}
         DEBIAN_MIRROR: ${DEBIAN_MIRROR:-https://linux.repo.ime.co.ir/repository/debian}

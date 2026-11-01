@@ -34,6 +34,7 @@ WORKDIR /app
 
 # Copy dependency configuration
 COPY requirements.txt pip.conf /app/
+ENV PIP_CONFIG_FILE=/app/pip.conf
 
 # Install requirements if populated
 RUN pip install --no-cache-dir -r requirements.txt || true
