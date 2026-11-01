@@ -207,9 +207,9 @@
         </button>
 
         <!-- Walkthrough Guide Button -->
-        <button onclick="openGuideModal()" class="p-2 sm:px-3 sm:py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white/80 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 text-xs font-semibold flex items-center gap-1.5 transition">
-          <span></span>
-          <span class="hidden sm:inline">راهنمای یادگیری</span>
+        <button onclick="openGuideModal()" class="px-3 py-1.5 rounded-xl border border-slate-200 dark:border-slate-700/80 bg-white/80 dark:bg-slate-900/80 text-slate-700 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 hover:border-brand-500/40 text-xs font-semibold flex items-center gap-1.5 transition shadow-2xs" title="راهنمای جامع کارکرد خط لوله RAG">
+          <svg class="w-4 h-4 text-brand-600 dark:text-brand-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
+          <span class="hidden sm:inline">راهنمای RAG</span>
         </button>
 
         <!-- View Mode Switch -->
@@ -223,8 +223,8 @@
         </div>
 
         <!-- Dark/Light Mode -->
-        <button onclick="toggleDarkMode()" class="p-2 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition" title="تغییر تم">
-          <span id="themeToggleIcon">تم</span>
+        <button onclick="toggleDarkMode()" id="themeToggleBtn" class="p-2.5 rounded-xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 text-slate-600 dark:text-slate-300 hover:border-brand-500/50 hover:bg-slate-100 dark:hover:bg-slate-800 transition shadow-2xs" title="تغییر حالت روشن / تیره">
+          <span id="themeToggleIcon" class="flex items-center justify-center"></span>
         </button>
       </div>
     </div>
@@ -248,7 +248,7 @@
             <span class="block text-[10px] text-slate-400">Ingestion</span>
           </div>
         </button>
-        <span class="text-slate-300 dark:text-slate-700 text-xs">←</span>
+        <svg class="w-3.5 h-3.5 text-slate-300 dark:text-slate-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
 
         <!-- Step 2 -->
         <button onclick="goToStep(2)" class="step-nav-btn group flex items-center gap-2.5 px-3 py-1.5 rounded-xl transition-all duration-200 text-right whitespace-nowrap" data-step="2">
@@ -258,7 +258,7 @@
             <span class="block text-[10px] text-slate-400">Chunking</span>
           </div>
         </button>
-        <span class="text-slate-300 dark:text-slate-700 text-xs">←</span>
+        <svg class="w-3.5 h-3.5 text-slate-300 dark:text-slate-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
 
         <!-- Step 3 -->
         <button onclick="goToStep(3)" class="step-nav-btn group flex items-center gap-2.5 px-3 py-1.5 rounded-xl transition-all duration-200 text-right whitespace-nowrap" data-step="3">
@@ -268,7 +268,7 @@
             <span class="block text-[10px] text-slate-400">Embeddings</span>
           </div>
         </button>
-        <span class="text-slate-300 dark:text-slate-700 text-xs">←</span>
+        <svg class="w-3.5 h-3.5 text-slate-300 dark:text-slate-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
 
         <!-- Step 4 -->
         <button onclick="goToStep(4)" class="step-nav-btn group flex items-center gap-2.5 px-3 py-1.5 rounded-xl transition-all duration-200 text-right whitespace-nowrap" data-step="4">
@@ -278,7 +278,7 @@
             <span class="block text-[10px] text-slate-400">Vector Store</span>
           </div>
         </button>
-        <span class="text-slate-300 dark:text-slate-700 text-xs">←</span>
+        <svg class="w-3.5 h-3.5 text-slate-300 dark:text-slate-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
 
         <!-- Step 5 -->
         <button onclick="goToStep(5)" class="step-nav-btn group flex items-center gap-2.5 px-3 py-1.5 rounded-xl transition-all duration-200 text-right whitespace-nowrap" data-step="5">
@@ -288,7 +288,7 @@
             <span class="block text-[10px] text-slate-400">Cosine Retrieval</span>
           </div>
         </button>
-        <span class="text-slate-300 dark:text-slate-700 text-xs">←</span>
+        <svg class="w-3.5 h-3.5 text-slate-300 dark:text-slate-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
 
         <!-- Step 6 -->
         <button onclick="goToStep(6)" class="step-nav-btn group flex items-center gap-2.5 px-3 py-1.5 rounded-xl transition-all duration-200 text-right whitespace-nowrap" data-step="6">
@@ -298,7 +298,7 @@
             <span class="block text-[10px] text-slate-400">Augmentation</span>
           </div>
         </button>
-        <span class="text-slate-300 dark:text-slate-700 text-xs">←</span>
+        <svg class="w-3.5 h-3.5 text-slate-300 dark:text-slate-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
 
         <!-- Step 7 -->
         <button onclick="goToStep(7)" class="step-nav-btn group flex items-center gap-2.5 px-3 py-1.5 rounded-xl transition-all duration-200 text-right whitespace-nowrap" data-step="7">
@@ -737,9 +737,12 @@
         <!-- Query Input with Raycast-style UI -->
         <div class="mt-5 space-y-3">
           <div class="relative group">
-            <input type="text" id="liveUserQueryInput" placeholder="پرسش خود را اینجا بنویسید (مثلاً: شرایط انتقال مرخصی چیست؟)..." value="شرایط استفاده از مرخصی استحقاقی و انتقال آن چگونه است؟" onkeydown="if(event.key==='Enter') executeLiveRetrieval()" class="w-full px-5 py-3.5 pl-24 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white/70 dark:bg-slate-900/70 text-slate-800 dark:text-slate-100 text-xs sm:text-sm font-semibold focus:ring-2 focus:ring-brand-500 focus:outline-none transition-all shadow-sm" oninput="executeLiveRetrieval()">
-            <button onclick="executeLiveRetrieval()" class="absolute left-2 top-2 bottom-2 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-md shadow-brand-500/25">
-              <span>جستجو</span>
+            <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+            </div>
+            <input type="text" id="liveUserQueryInput" placeholder="پرسش خود را اینجا بنویسید (مثلاً: شرایط انتقال مرخصی چیست؟)..." value="شرایط استفاده از مرخصی استحقاقی و انتقال آن چگونه است؟" onkeydown="if(event.key==='Enter') executeLiveRetrieval()" class="w-full pr-12 pl-28 py-3.5 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 text-slate-800 dark:text-slate-100 text-xs sm:text-sm font-semibold focus:ring-2 focus:ring-brand-500 focus:border-brand-500 focus:outline-none transition-all shadow-sm" oninput="executeLiveRetrieval()">
+            <button onclick="executeLiveRetrieval()" class="absolute left-2 top-2 bottom-2 px-4 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-md shadow-brand-500/25 hover:shadow-brand-500/40">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
               <span>جستجو</span>
             </button>
           </div>
@@ -932,8 +935,9 @@
           </div>
 
           <div class="flex items-center gap-2">
-            <button onclick="startLiveLLMStream()" id="btnExecuteLLM" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-brand-600 via-indigo-600 to-accent-purple hover:opacity-95 text-white text-xs font-bold shadow-lg shadow-brand-500/30 transition-all flex items-center gap-2">
-              <span> اجرای درخواست زنده به مدل</span>
+            <button onclick="startLiveLLMStream()" id="btnExecuteLLM" class="px-5 py-2.5 rounded-2xl bg-gradient-to-r from-brand-600 via-indigo-600 to-accent-purple hover:opacity-95 text-white text-xs font-bold shadow-lg shadow-brand-500/30 transition-all flex items-center gap-2 group">
+              <svg class="w-4 h-4 text-amber-300 group-hover:rotate-12 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+              <span>اجرای درخواست زنده به مدل</span>
             </button>
           </div>
         </div>
@@ -1147,9 +1151,7 @@ Ready to send payload...
             <p class="text-[11px] text-slate-400">اتصال به OpenAI، DeepSeek، Groq، Ollama، OpenRouter و دیگران</p>
           </div>
         </div>
-        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg">
-          
-        </button>
+        <button onclick="closeConfigModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg w-8 h-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center transition" title="بستن پنجره"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
       </div>
 
       <!-- Quick Preset Providers -->
@@ -1321,9 +1323,7 @@ Ready to send payload...
             <p class="text-[11px] text-slate-400">آشنایی با ۷ رکن اساسی تولید مبتنی بر بازیابی اطلاعات</p>
           </div>
         </div>
-        <button onclick="closeGuideModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg">
-          
-        </button>
+        <button onclick="closeGuideModal()" class="text-slate-400 hover:text-slate-600 dark:hover:text-white p-1 rounded-lg w-8 h-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center transition" title="بستن پنجره"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
       </div>
 
       <div class="mt-5 space-y-4 text-xs leading-relaxed text-slate-600 dark:text-slate-300">
@@ -1407,9 +1407,7 @@ Ready to send payload...
             <h3 id="conceptHelpTitle" class="font-black text-slate-900 dark:text-white text-base sm:text-lg mt-0.5">عنوان مفهوم</h3>
           </div>
         </div>
-        <button onclick="closeConceptHelpModal()" class="w-8 h-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center transition">
-          
-        </button>
+        <button onclick="closeConceptHelpModal()" class="w-8 h-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center transition w-8 h-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center transition" title="بستن پنجره"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
       </div>
 
       <div class="mt-5 space-y-4 text-xs leading-relaxed">
@@ -1486,9 +1484,7 @@ Ready to send payload...
             <h3 class="font-bold text-slate-900 dark:text-white text-base mt-1">شناسنامه کامل رکورد پایگاه داده برداری</h3>
           </div>
         </div>
-        <button onclick="closeVectorRecordModal()" class="w-8 h-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center transition">
-          
-        </button>
+        <button onclick="closeVectorRecordModal()" class="w-8 h-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center transition w-8 h-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center transition" title="بستن پنجره"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
       </div>
 
       <div class="mt-5 space-y-4">
@@ -1591,9 +1587,7 @@ Ready to send payload...
             <h3 class="font-bold text-slate-900 dark:text-white text-base mt-1">تطابق دقیق استناد با متن سند اصلی</h3>
           </div>
         </div>
-        <button onclick="closeCitationModal()" class="w-8 h-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center transition">
-          
-        </button>
+        <button onclick="closeCitationModal()" class="w-8 h-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center transition w-8 h-8 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-white flex items-center justify-center transition" title="بستن پنجره"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
       </div>
 
       <div class="mt-5 space-y-4">
@@ -1843,7 +1837,25 @@ Ready to send payload...
       const formulaDescEl = document.getElementById('conceptHelpFormulaDesc');
       const tipEl = document.getElementById('conceptHelpTip');
 
-      if (iconBox) iconBox.innerText = topic.icon || '';
+      const topicSvgIcons = {
+        similarity_metrics: '<svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>',
+        ingestion: '<svg class="w-6 h-6 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>',
+        chunking: '<svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>',
+        overlap: '<svg class="w-6 h-6 text-amber-600 dark:text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"></path></svg>',
+        embeddings: '<svg class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>',
+        pca: '<svg class="w-6 h-6 text-sky-600 dark:text-sky-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"></path></svg>',
+        vector_db: '<svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"></path></svg>',
+        retrieval: '<svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>',
+        cosine_sim: '<svg class="w-6 h-6 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 7h6m0 10v-3m-3 3h.01M9 17h.01M9 14h.01M12 14h.01M15 11h.01M12 11h.01M9 11h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path></svg>',
+        top_k: '<svg class="w-6 h-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path></svg>',
+        threshold: '<svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"></path></svg>',
+        augmentation: '<svg class="w-6 h-6 text-rose-600 dark:text-rose-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>',
+        grounded_gen: '<svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path></svg>',
+        rag_triad: '<svg class="w-6 h-6 text-purple-600 dark:text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>'
+      };
+      if (iconBox) {
+        iconBox.innerHTML = topicSvgIcons[topicKey] || '<svg class="w-6 h-6 text-brand-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+      }
       if (titleEl) titleEl.innerText = topic.title;
       if (enTermEl) enTermEl.innerText = topic.enTerm || '';
       if (whyEl) whyEl.innerText = topic.why;
@@ -2082,10 +2094,15 @@ Ready to send payload...
     // --- On DOM Loaded ---
     window.addEventListener('DOMContentLoaded', () => {
       // Dark mode initialization
-      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+      const savedTheme = localStorage.getItem('rag_theme');
+      const isSystemDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const shouldBeDark = savedTheme ? (savedTheme === 'dark') : isSystemDark;
+      if (shouldBeDark) {
         document.documentElement.classList.add('dark');
-        document.getElementById('themeToggleIcon').innerText = 'تم';
+      } else {
+        document.documentElement.classList.remove('dark');
       }
+      updateThemeIcon(shouldBeDark);
 
       loadConfigIntoUI();
       loadDocumentPreset('company');
@@ -2097,16 +2114,25 @@ Ready to send payload...
     // --- Toast Notifications ---
     function showToast(message, type = 'info') {
       const container = document.getElementById('toastContainer');
+      if (!container) return;
       const toast = document.createElement('div');
       
-      const bgColors = {
-        success: 'bg-emerald-600 text-white',
-        error: 'bg-rose-600 text-white',
-        info: 'bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900'
+      const bgStyles = {
+        success: 'bg-emerald-600 text-white shadow-emerald-500/20 border-emerald-500/50',
+        error: 'bg-rose-600 text-white shadow-rose-500/20 border-rose-500/50',
+        warning: 'bg-amber-600 text-white shadow-amber-500/20 border-amber-500/50',
+        info: 'bg-slate-900 text-white dark:bg-slate-800 dark:text-slate-100 shadow-slate-900/30 border-slate-700'
+      };
+
+      const icons = {
+        success: '<svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>',
+        error: '<svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>',
+        warning: '<svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>',
+        info: '<svg class="w-4 h-4 text-sky-300 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>'
       };
       
-      toast.className = `px-4 py-2.5 rounded-xl shadow-xl text-xs font-semibold flex items-center gap-2 pointer-events-auto transition-all duration-300 transform translate-y-4 opacity-0 ${bgColors[type] || bgColors.info}`;
-      toast.innerHTML = `<span>${type === 'success' ? 'تایید' : type === 'error' ? '' : 'ℹ'}</span><span>${message}</span>`;
+      toast.className = `px-4 py-3 rounded-2xl shadow-xl backdrop-blur-md border text-xs font-semibold flex items-center gap-2.5 pointer-events-auto transition-all duration-300 transform translate-y-4 opacity-0 ${bgStyles[type] || bgStyles.info}`;
+      toast.innerHTML = `${icons[type] || icons.info}<span class="leading-relaxed">${message}</span>`;
       
       container.appendChild(toast);
       setTimeout(() => {
@@ -2120,9 +2146,20 @@ Ready to send payload...
     }
 
     // --- Dark Mode ---
+    function updateThemeIcon(isDark) {
+      const icon = document.getElementById('themeToggleIcon');
+      if (!icon) return;
+      if (isDark) {
+        icon.innerHTML = '<svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>';
+      } else {
+        icon.innerHTML = '<svg class="w-4 h-4 text-slate-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"></path></svg>';
+      }
+    }
+
     function toggleDarkMode() {
       const isDark = document.documentElement.classList.toggle('dark');
-      document.getElementById('themeToggleIcon').innerText = isDark ? 'تم' : 'تم';
+      try { localStorage.setItem('rag_theme', isDark ? 'dark' : 'light'); } catch(e) {}
+      updateThemeIcon(isDark);
       drawVectorCanvas();
     }
 
@@ -2277,7 +2314,7 @@ Ready to send payload...
       }
 
       container.classList.remove('hidden');
-      container.innerHTML = `<span class="text-slate-500 dark:text-slate-400 animate-pulse">⏳ در حال دریافت لیست مدل‌ها از سرور (${baseUrl})...</span>`;
+      container.innerHTML = `<span class="text-slate-500 dark:text-slate-400 animate-pulse"> در حال دریافت لیست مدل‌ها از سرور (${baseUrl})...</span>`;
 
       const modelsUrl = resolveModelsUrl(baseUrl);
       try {
@@ -2399,13 +2436,13 @@ Ready to send payload...
       
       const TIMEOUT_SEC = 50;
       let elapsedSec = 0;
-      feedback.innerHTML = `⏳ در حال ارسال درخواست تست به سرور مدل زبانی... (زمان سپری‌شده: ۰ ثانیه)`;
+      feedback.innerHTML = ` در حال ارسال درخواست تست به سرور مدل زبانی... (زمان سپری‌شده: ۰ ثانیه)`;
       btn.disabled = true;
-      icon.innerText = "⏳";
+      icon.innerText = "";
 
       const progressInterval = setInterval(() => {
         elapsedSec++;
-        feedback.innerHTML = `⏳ در حال انتظار برای پاسخ مدل زبانی... (زمان سپری‌شده: ${elapsedSec} از ${TIMEOUT_SEC} ثانیه)`;
+        feedback.innerHTML = ` در حال انتظار برای پاسخ مدل زبانی... (زمان سپری‌شده: ${elapsedSec} از ${TIMEOUT_SEC} ثانیه)`;
       }, 1000);
 
       const rawBaseUrl = document.getElementById('cfgBaseUrl').value.trim();
@@ -2510,9 +2547,9 @@ Ready to send payload...
 
       feedback.classList.remove('hidden');
       feedback.className = "p-3 rounded-xl text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700";
-      feedback.innerHTML = `⏳ در حال بررسی و اجرای مدل google/embeddinggemma-2 از کش سیستم...`;
+      feedback.innerHTML = ` در حال بررسی و اجرای مدل google/embeddinggemma-2 از کش سیستم...`;
       btn.disabled = true;
-      icon.innerText = "⏳";
+      icon.innerText = "";
 
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), 60000);
@@ -2596,11 +2633,11 @@ Ready to send payload...
       const icon = document.getElementById('btnInstallDepsIcon');
       const logBox = document.getElementById('installDepsProgress');
       if (btn) btn.disabled = true;
-      if (icon) icon.innerText = "⏳";
+      if (icon) icon.innerText = "";
 
       if (logBox) {
         logBox.classList.remove('hidden');
-        logBox.innerHTML = '<span class="text-indigo-600 dark:text-indigo-400 animate-pulse">⏳ در حال نصب پکیج‌های Transformers و PyTorch داخل کانتینر داکر... لطفاً شکیبا باشید (این عملیات ممکن است چند دقیقه طول بکشد)...</span>';
+        logBox.innerHTML = '<span class="text-indigo-600 dark:text-indigo-400 animate-pulse"> در حال نصب پکیج‌های Transformers و PyTorch داخل کانتینر داکر... لطفاً شکیبا باشید (این عملیات ممکن است چند دقیقه طول بکشد)...</span>';
       }
 
       try {
@@ -3568,9 +3605,9 @@ Ready to send payload...
             </span>
           </td>
           <td class="p-3.5 text-center">
-            <button type="button" onclick="event.stopPropagation(); openVectorRecordModal(${idx})" class="px-2.5 py-1 rounded-lg bg-purple-100/80 hover:bg-purple-200 dark:bg-purple-950 dark:hover:bg-purple-900 border border-purple-300/80 dark:border-purple-800 text-purple-700 dark:text-purple-300 font-bold text-[11px] transition inline-flex items-center gap-1 shadow-2xs">
-              <span></span>
-              <span>مشاهده</span>
+            <button type="button" onclick="event.stopPropagation(); openVectorRecordModal(${idx})" class="px-3 py-1.5 rounded-xl bg-purple-100/90 hover:bg-purple-200 dark:bg-purple-950 dark:hover:bg-purple-900 border border-purple-300 dark:border-purple-800 text-purple-700 dark:text-purple-300 font-bold text-[11px] transition inline-flex items-center gap-1.5 shadow-2xs hover:scale-105" title="مشاهده شناسنامه، مقادیر عددی بردار و نقشه حرارتی">
+              <svg class="w-3.5 h-3.5 text-purple-600 dark:text-purple-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+              <span>مشاهده رکورد</span>
             </button>
           </td>
         `;
@@ -3927,8 +3964,7 @@ ${currentQuery}
           <span>Chunk #${chunk.id}${chunk.page && currentPdfMeta ? ` (ص ${chunk.page})` : ''}</span>
         `;
         pill.onclick = () => {
-          selectedChunkIndex = chunks.findIndex(c => c.id === chunk.id);
-          goToStep(3);
+          openCitationModal(idx);
         };
         citationsContainer.appendChild(pill);
       });
@@ -4179,16 +4215,20 @@ ${currentQuery}
         const s = parseInt(btn.getAttribute('data-step'));
         const circle = btn.querySelector('.step-circle');
         if (s === step) {
-          circle.className = "step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-brand-600 text-white shadow-md shadow-brand-500/30 scale-105 transition-all";
-          btn.classList.add('bg-slate-100', 'dark:bg-slate-800');
-        } else if (s < step) {
-          circle.className = "step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-emerald-500 text-white";
-          circle.innerHTML = 'تایید';
-          btn.classList.remove('bg-slate-100', 'dark:bg-slate-800');
-        } else {
-          circle.className = "step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500";
+          circle.className = "step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-brand-600 text-white shadow-md shadow-brand-500/30 scale-105 ring-2 ring-brand-500/40 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 transition-all";
           circle.innerHTML = s;
-          btn.classList.remove('bg-slate-100', 'dark:bg-slate-800');
+          btn.classList.add('bg-brand-50/70', 'dark:bg-brand-950/40', 'border-brand-500/30');
+          btn.classList.remove('border-transparent');
+        } else if (s < step) {
+          circle.className = "step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-emerald-500 text-white shadow-2xs transition-all";
+          circle.innerHTML = '<svg class="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"></path></svg>';
+          btn.classList.remove('bg-brand-50/70', 'dark:bg-brand-950/40', 'border-brand-500/30');
+          btn.classList.add('border-transparent');
+        } else {
+          circle.className = "step-circle w-7 h-7 rounded-lg flex items-center justify-center text-xs font-bold bg-slate-100 dark:bg-slate-800 text-slate-500 transition-all";
+          circle.innerHTML = s;
+          btn.classList.remove('bg-brand-50/70', 'dark:bg-brand-950/40', 'border-brand-500/30');
+          btn.classList.add('border-transparent');
         }
       });
 
