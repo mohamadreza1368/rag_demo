@@ -36,12 +36,17 @@ WORKDIR /app
 COPY requirements.txt pip.conf /app/
 ENV PIP_CONFIG_FILE=/app/pip.conf
 
-# Install requirements with fallback stages
-RUN pip install --no-cache-dir transformers torch accelerate huggingface-hub || \
+# Install requirements with fallback stages (supports host network in BuildKit and fallback)
+RUN --network=host pip install --no-cache-dir transformers torch accelerate huggingface-hub || \
+    pip install --no-cache-dir transformers torch accelerate huggingface-hub || \
     pip install --no-cache-dir -r requirements.txt || true
 
 # Copy all application assets
 COPY . /app
+
+# Ensure entrypoint script has Unix line endings and execution permissions
+RUN sed -i 's/\r$//' /app/entrypoint.sh 2>/dev/null || true && \
+    chmod +x /app/entrypoint.sh 2>/dev/null || true
 
 EXPOSE 8080
 
@@ -49,4 +54,5 @@ EXPOSE 8080
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
   CMD python -c "import urllib.request, os; resp = urllib.request.urlopen(f'http://localhost:{os.environ.get(\"PORT\", 8080)}/health', timeout=3); resp.read()" || exit 1
 
+ENTRYPOINT ["/app/entrypoint.sh"]
 CMD ["python", "server.py"]

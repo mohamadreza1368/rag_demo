@@ -1877,10 +1877,34 @@ Ready to send payload...
             `🟢 ${data.message || 'آماده برای تبدیل اسناد و پرسش‌ها به بردار.'}`;
           showToast(`مدل google/embeddinggemma-2 (${dim} بعد) با موفقیت تست شد!`, 'success');
         } else {
+          let installButtonHtml = '';
+          if (resp.status === 501 || (data.error && data.error.includes('نصب نیست'))) {
+            installButtonHtml = `
+              <div class="mt-3 p-3 bg-indigo-50/90 dark:bg-indigo-950/60 border border-indigo-200 dark:border-indigo-800 rounded-xl font-sans">
+                <div class="font-bold text-indigo-900 dark:text-indigo-200 mb-1 flex items-center gap-1.5">
+                  <span>⚡ نصب بدون نیاز به Build مجدد ایمیج:</span>
+                </div>
+                <p class="text-[11px] text-slate-600 dark:text-slate-400 mb-2 leading-relaxed">
+                  به دلیل ایزوله بودن DNS در زمان بیلد داکر، پکیج‌ها در ایمیج پایه نصب نشده‌اند. اکنون می‌توانید مستقیماً داخل کانتینر در حال اجرا نصب فرمایید:
+                </p>
+                <div class="flex flex-wrap items-center gap-2">
+                  <button type="button" id="btnInstallDeps" onclick="installDependenciesNow()" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs shadow-md transition flex items-center gap-1.5">
+                    <span id="btnInstallDepsIcon">⚡</span>
+                    <span>نصب خودکار پکیج‌های ترنسفورمرز در کانتینر</span>
+                  </button>
+                  <span class="text-[11px] text-slate-500">یا با اجرای این دستور در ترمینال سرور:</span>
+                  <code class="px-2 py-1 bg-slate-900 text-emerald-400 rounded-lg text-[10px] select-all font-mono">docker compose exec rag_studio pip install transformers torch accelerate</code>
+                </div>
+                <div id="installDepsProgress" class="mt-2.5 hidden"></div>
+              </div>
+            `;
+          }
+
           feedback.className = "p-3 rounded-xl text-xs font-mono bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300";
           feedback.innerHTML = `❌ خطا در اجرای مدل از کش سیستم (Status ${resp.status}):<br><b>${data.error || 'خطای سرور'}</b>` +
             (data.hint ? `<br><span class="text-amber-700 dark:text-amber-300 mt-1 block">💡 راهنما: ${data.hint}</span>` : '') +
-            (data.source ? `<br><span class="text-[10px] text-slate-500 mt-0.5 block">منبع: ${data.source}</span>` : '');
+            (data.source ? `<br><span class="text-[10px] text-slate-500 mt-0.5 block">منبع کش: ${data.source}</span>` : '') +
+            installButtonHtml;
           showToast('خطا در اجرای مدل از کش سیستم.', 'error');
         }
       } catch (err) {
@@ -1895,6 +1919,51 @@ Ready to send payload...
       } finally {
         btn.disabled = false;
         icon.innerText = "🧪";
+      }
+    }
+
+    async function installDependenciesNow() {
+      const btn = document.getElementById('btnInstallDeps');
+      const icon = document.getElementById('btnInstallDepsIcon');
+      const logBox = document.getElementById('installDepsProgress');
+      if (btn) btn.disabled = true;
+      if (icon) icon.innerText = "⏳";
+
+      if (logBox) {
+        logBox.classList.remove('hidden');
+        logBox.innerHTML = '<span class="text-indigo-600 dark:text-indigo-400 animate-pulse">⏳ در حال نصب پکیج‌های Transformers و PyTorch داخل کانتینر داکر... لطفاً شکیبا باشید (این عملیات ممکن است چند دقیقه طول بکشد)...</span>';
+      }
+
+      try {
+        const resp = await fetch('/api/install-deps', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const data = await resp.json().catch(() => ({}));
+
+        if (resp.ok && data.status === 'ok') {
+          showToast('پکیج‌ها با موفقیت در کانتینر نصب شدند!', 'success');
+          if (logBox) {
+            logBox.innerHTML = `<span class="text-emerald-600 dark:text-emerald-400 font-bold">✅ ${data.message}</span><pre class="mt-1 p-2 rounded bg-slate-900 text-slate-200 text-[10px] overflow-auto max-h-40 leading-relaxed font-mono">${data.output || ''}</pre>`;
+          }
+          setTimeout(() => {
+            testEmbedConnection();
+          }, 1500);
+        } else {
+          showToast('خطا در نصب پکیج‌ها.', 'error');
+          if (logBox) {
+            logBox.innerHTML = `<span class="text-rose-600 dark:text-rose-400 font-bold">❌ ${data.message || data.error || 'خطا در نصب'}</span><pre class="mt-1 p-2 rounded bg-slate-900 text-slate-200 text-[10px] overflow-auto max-h-40 leading-relaxed font-mono">${data.output || data.error || ''}</pre><div class="mt-2 text-slate-600 dark:text-slate-400">💡 می‌توانید دستور زیر را مستقیماً در ترمینال سرور اجرا کنید:<br><code class="bg-slate-200 dark:bg-slate-800 px-1 py-0.5 rounded select-all font-mono">docker compose exec rag_studio pip install transformers torch accelerate</code></div>`;
+          }
+          if (btn) btn.disabled = false;
+          if (icon) icon.innerText = "⚡";
+        }
+      } catch (err) {
+        showToast('خطا در ارتباط با سرور: ' + err.message, 'error');
+        if (logBox) {
+          logBox.innerHTML = `<span class="text-rose-600">❌ خطا: ${err.message}</span>`;
+        }
+        if (btn) btn.disabled = false;
+        if (icon) icon.innerText = "⚡";
       }
     }
 

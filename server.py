@@ -73,31 +73,59 @@ def local_python_embed(text: str, dim: int = 768) -> list:
 
 def find_cached_model_path(model_id="google/embeddinggemma-2"):
     candidates = []
-    hf_home = os.environ.get("HF_HOME") or os.environ.get("HUGGINGFACE_HUB_CACHE")
-    if hf_home:
-        candidates.append(os.path.join(hf_home, "hub") if not hf_home.endswith("hub") else hf_home)
-        candidates.append(hf_home)
+    for env_var in ["HF_HOME", "HUGGINGFACE_HUB_CACHE", "HF_HUB_CACHE", "HF_CACHE_DIR"]:
+        val = os.environ.get(env_var)
+        if val:
+            candidates.append(os.path.join(val, "hub"))
+            candidates.append(val)
     candidates.extend([
         "/root/.cache/huggingface/hub",
         "/root/.cache/huggingface",
         os.path.expanduser("~/.cache/huggingface/hub"),
         os.path.expanduser("~/.cache/huggingface"),
     ])
-    clean_name = "models--" + model_id.replace("/", "--")
+
+    model_variants = [
+        model_id,
+        "models--" + model_id.replace("/", "--"),
+        "models--" + model_id.replace("/", "--").lower(),
+        "models--google--embeddinggemma-2",
+        "models--google--embeddinggemma",
+        "embeddinggemma-2",
+        "embeddinggemma"
+    ]
+
     for base in candidates:
         if not os.path.exists(base):
             continue
-        model_dir = os.path.join(base, clean_name)
-        if os.path.exists(model_dir):
-            snapshots_dir = os.path.join(model_dir, "snapshots")
-            if os.path.exists(snapshots_dir):
-                try:
-                    snaps = [os.path.join(snapshots_dir, s) for s in os.listdir(snapshots_dir) if os.path.isdir(os.path.join(snapshots_dir, s))]
-                    if snaps:
-                        return snaps[0]
-                except Exception:
-                    pass
-            return model_dir
+        # Direct check for variant directories
+        for var in model_variants:
+            model_dir = os.path.join(base, var)
+            if os.path.exists(model_dir):
+                snapshots_dir = os.path.join(model_dir, "snapshots")
+                if os.path.exists(snapshots_dir):
+                    try:
+                        snaps = [os.path.join(snapshots_dir, s) for s in os.listdir(snapshots_dir) if os.path.isdir(os.path.join(snapshots_dir, s))]
+                        if snaps:
+                            return snaps[0]
+                    except Exception:
+                        pass
+                return model_dir
+
+        # Generic search for embeddinggemma in subdirectories
+        try:
+            for item in os.listdir(base):
+                if "embeddinggemma" in item.lower() or "gemma" in item.lower():
+                    sub = os.path.join(base, item)
+                    snaps_dir = os.path.join(sub, "snapshots")
+                    if os.path.exists(snaps_dir):
+                        snaps = [os.path.join(snaps_dir, s) for s in os.listdir(snaps_dir) if os.path.isdir(os.path.join(snaps_dir, s))]
+                        if snaps:
+                            return snaps[0]
+                    return sub
+        except Exception:
+            pass
+
     return None
 
 class ThreadedTCPServer(socketserver.ThreadingTCPServer):
@@ -174,8 +202,88 @@ class RAGStudioHandler(http.server.SimpleHTTPRequestHandler):
             self.handle_embed()
         elif self.path.startswith('/api/parse-doc'):
             self.handle_parse_doc()
+        elif self.path.startswith('/api/install-deps'):
+            self.handle_install_deps()
         else:
             self.send_error(404, "Endpoint not found")
+
+    def handle_install_deps(self):
+        try:
+            import subprocess
+            import sys
+
+            # Check if already installed
+            try:
+                import transformers
+                import torch
+                already_installed = True
+            except ImportError:
+                already_installed = False
+
+            if already_installed:
+                resp = {
+                    'status': 'ok',
+                    'installed': True,
+                    'already_installed': True,
+                    'output': f'پکیج‌ها از قبل نصب هستند:\n- PyTorch: {torch.__version__}\n- Transformers: {transformers.__version__}',
+                    'message': 'پکیج‌های مورد نیاز هم‌اکنون روی سیستم نصب و آماده استفاده هستند.'
+                }
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(resp, ensure_ascii=False).encode('utf-8'))
+                return
+
+            pkgs = ["transformers>=4.42.0", "torch>=2.1.0", "accelerate>=0.26.0", "huggingface-hub>=0.23.0"]
+            pip_cmd = [sys.executable, "-m", "pip", "install", "--no-cache-dir"] + pkgs
+
+            pypi_index = os.environ.get("PIP_INDEX_URL") or os.environ.get("PYPI_INDEX")
+            pypi_host = os.environ.get("PIP_TRUSTED_HOST") or os.environ.get("PYPI_HOST")
+            if pypi_index:
+                pip_cmd.extend(["-i", pypi_index])
+            if pypi_host:
+                pip_cmd.extend(["--trusted-host", pypi_host])
+
+            proc = subprocess.run(
+                pip_cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True,
+                timeout=900
+            )
+            stdout_text = proc.stdout or ""
+
+            # Check verification
+            verify_proc = subprocess.run(
+                [sys.executable, "-c", "import transformers, torch; print('DEP_OK')"],
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,
+                text=True
+            )
+            is_ok = ("DEP_OK" in (verify_proc.stdout or ""))
+
+            resp = {
+                'status': 'ok' if is_ok else 'error',
+                'installed': is_ok,
+                'output': stdout_text[-2500:],
+                'message': 'پکیج‌های Transformers و PyTorch با موفقیت در کانتینر نصب شدند!' if is_ok else 'نصب پکیج‌ها به اتمام نرسید.'
+            }
+            self.send_response(200 if is_ok else 500)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps(resp, ensure_ascii=False).encode('utf-8'))
+
+        except Exception as e:
+            self.send_response(500)
+            self.send_header('Content-Type', 'application/json; charset=utf-8')
+            self.send_header('Access-Control-Allow-Origin', '*')
+            self.end_headers()
+            self.wfile.write(json.dumps({
+                'status': 'error',
+                'error': f'خطا در فرآیند نصب پکیج‌ها: {str(e)}'
+            }, ensure_ascii=False).encode('utf-8'))
 
     def handle_parse_doc(self):
         content_length = int(self.headers.get('Content-Length', 0))
