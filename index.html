@@ -9,280 +9,6 @@
   <!-- PDF.js for 100% Client-Side Offline PDF Extraction -->
   <script src="pdf.min.js"></script>
   <script>
-
-    // ==========================================
-    // EDUCATIONAL RAG TOPICS KNOWLEDGE BASE
-    // ==========================================
-    const EDUCATIONAL_TOPICS = {
-      similarity_metrics: {
-        title: "مقایسه الگوریتم‌های شباهت و فاصله برداری",
-        enTerm: "Vector Similarity & Distance Metrics",
-        icon: "📐",
-        why: "تنها یک روش برای سنجش شباهت وجود ندارد! بسته به اینکه آیا بردارها نرمال شده‌اند، اسناد دارای طول‌های نابرابر هستند، یا نیاز به تطابق دقیق کلمات تخصصی (Keyword Match) داریم، انتخاب سنجه مناسب بر دقت بازیابی اطلاعات تاثیر چشمگیری می‌گذارد.",
-        how: "۱. شباهت کسینوسی (Cosine): زاویه دو بردار را می‌سنجد و طول سند تاثیری در آن ندارد (بازه ۰ تا ۱).\n۲. ضرب داخلی (Dot Product): ترکیب زاویه و اندازه بردار؛ در صورت نرمال‌سازی بردارها سریع‌ترین گزینه در سخت‌افزار است.\n۳. فاصله اقلیدسی (L2 Distance): کوتاهترین فاصله خط‌کشی در فضا؛ فرمول معکوس 1/(1+d) جهت تبدیل به شباهت.\n۴. فاصله منهتن (L1 Distance): مجموع فاصله‌های شبکه‌ای؛ در ابعاد بالا نسبت به نویز ابعاد تکی مقاوم‌تر است.\n۵. جستجوی ترکیبی (Hybrid Search): ترکیب ۶۰٪ شباهت معنایی و ۴۰٪ تطابق واژگانی (BM25) برای پوشش خطاهای ناموجود در امبدینگ.",
-        formula: "Cosine = \\frac{A \\cdot B}{\\|A\\| \\|B\\|}, \\;\\; Dot = \\sum A_i B_i, \\;\\; L2 = \\sqrt{\\sum (A_i - B_i)^2}, \\;\\; Hybrid = 0.6 \\cdot \\text{Dense} + 0.4 \\cdot \\text{BM25}",
-        formulaDesc: "فرمول‌های پنج الگوریتم متداول سنجش شباهت و فاصله در موتورهای بازیابی برداری.",
-        tip: "در پروژه‌های واقعی و سازمانی، استاندارد مدرن استفاده از «Hybrid Search» است تا اصطلاحات فنی، کدهای کالا یا شماره مواد قانونی توسط BM25 پیدا شوند و مفاهیم عمومی با امبدینگ معنایی پوشش داده شوند."
-      },
-      ingestion: {
-        title: "ورود، پاکسازی و استخراج اسناد",
-        enTerm: "Document Ingestion & Preprocessing",
-        icon: "📥",
-        why: "اسناد اولیه سازمانی معمولاً در قالب‌های ناهمگون نظیر PDF، DOCX، HTML یا پایگاه‌های داده وجود دارند. کیفیت کل زنجیره RAG (قانون Garbage In, Garbage Out) به شدت وابسته به این است که چقدر متن خام، تمیز، عاری از کاراکترهای مخرب و دارای ابرداده‌های ساخت‌یافته استخراج گردد.",
-        how: "در این فاز، فایل بارگذاری‌شده به متن خالص تبدیل شده، حروف یکدست می‌شوند (مانند یکنواخت‌سازی ی و ک فارسی) و ابرداده‌هایی نظیر نام فایل، شماره صفحه، تاریخ سند و نویسنده به هر بخش متصل می‌شود تا در فاز بازیابی بتوان فیلترهای دقیق متادیتا اعمال کرد.",
-        formula: "CleanText = NormalizeUnicode(StripHeadersFooters(RawExtractedDoc))",
-        formulaDesc: "نرمال‌سازی یونی‌کد، حذف سرصفحه‌ها و پانویس‌های تکراری و استخراج ابرداده‌های ساخت‌یافته سند.",
-        tip: "در فایل‌های PDF فارسی یا دوزبانه، ترتیب کلمات در استخراج خام ممکن است معکوس شود. استفاده از کتابخانه‌هایی نظیر pdfplumber یا PyMuPDF همراه با Bidi-reordering برای حفظ ترتیب صحیح کلمات الزامی است."
-      },
-      chunking: {
-        title: "قطعه‌بندی هوشمند متن و پنجره بافت",
-        enTerm: "Smart Text Chunking",
-        icon: "✂️",
-        why: "مدل‌های زبانی دارای محدودیت پنجره بافت (Context Window) هستند و هر چه متن ارسالی طولانی‌تر باشد، هزینه توکن بالاتر و پدیده «گم‌شدن اطلاعات در میانه» (Lost in the Middle) رخ می‌دهد. همچنین قطعات کوچک‌تر، بردار معنایی متمرکزتر و دقیق‌تری تولید می‌کنند.",
-        how: "متن به بخش‌هایی با اندازه معین (مثلاً ۱۸۰ تا ۵۰۰ کاراکتر یا توکن) خرد می‌شود. الگوریتم بازگشتی (Recursive Character Splitter) ابتدا تلاش می‌کند در مرز پاراگراف‌ها (\n\n)، سپس مرز جملات (.) و در نهایت مرز کلمات برش ایجاد کند تا ساختار دستوری جمله شکسته نشود.",
-        formula: "Chunks = RecursiveSplit(text, chunkSize=C, overlap=O, separators=['\\n\\n', '\\n', '. ', ' '])",
-        formulaDesc: "برش بازگشتی با اولویت‌بندی جداکننده‌ها به طوری که اندازه هر قطعه حداکثر C کاراکتر باشد.",
-        tip: "اندازه چانک کوچک (۱۰۰-۲۰۰) برای بازیابی فکت‌های دقیق و جزئی عالی است؛ در حالی که اندازه بزرگ‌تر (۵۰۰-۱۰۰۰) برای خلاصه‌سازی و تحلیل روابط پیچیده بین مفاهیم بهتر عمل می‌کند."
-      },
-      overlap: {
-        title: "هم‌پوشانی چانک‌ها برای حفظ پیوستگی معنایی",
-        enTerm: "Chunk Overlap & Sliding Window",
-        icon: "🔗",
-        why: "اگر یک جمله یا شرط مهم دقیقاً در محل مرز برش بین دو چانک بیفتد، نیمی از معنا در قطعه اول و نیم دیگر در قطعه دوم قرار گرفته و معنای کامل آن توسط سیستم برداری قابل بازیابی نخواهد بود.",
-        how: "با تعریف هم‌پوشانی (مثلاً ۱۰ تا ۲۰ درصد اندازه چانک)، انتهای هر چانک در ابتدای چانک بعدی تکرار می‌شود (پنجره لغزان یا Sliding Window). بدین ترتیب زنجیره جملات در مرزها قطع نمی‌شود.",
-        formula: "Chunk[i+1].Start = Chunk[i].End - OverlapLength",
-        formulaDesc: "نقطه آغاز چانک بعدی به اندازه OverlapLength پیش از پایان چانک قبلی قرار می‌گیرد.",
-        tip: "افزایش بیش از حد Overlap باعث ایجاد افزونگی (Redundancy) و اشغال بیهوده توکن‌های بافت مدل می‌شود. مقدار بهینه معمولاً ۱۰٪ تا ۲۰٪ اندازه Chunk Size است."
-      },
-      embeddings: {
-        title: "بردارهای متراکم معنایی",
-        enTerm: "Dense Vector Embeddings",
-        icon: "🧬",
-        why: "رایانه‌ها متن را به صورت کاراکتری درک می‌کنند و متوجه مترادف‌ها، مفاهیم ضمنی و تشابه معنایی نمی‌شوند. امبدینگ‌ها متن را به یک بردار عددی چندبعدی تبدیل می‌کنند به طوری که کلمات و جملات با معنای نزدیک، در این فضا در همسایگی هم قرار گیرند.",
-        how: "یک شبکه عصبی ترنسفورمر (مانند google/embeddinggemma-2 یا BGE-m3) متن را خوانده و یک بردار با طول مشخص (مثلاً ۷۶۸ بعد) تولید می‌کند. این بردار نرمال‌سازی می‌شود تا طول آن برابر ۱ گردد (L2 Norm = 1.0).",
-        formula: "v = EmbedModel(text) \\in \\mathbb{R}^{d}, \\quad \\hat{v} = \\frac{v}{\\|v\\|_2}",
-        formulaDesc: "نگاشت متن به فضای برداری d-بعدی و نرمال‌سازی اقلیدسی جهت سازگاری با ضرب داخلی.",
-        tip: "برای متون فارسی یا چندزبانه حتماً از مدل‌های چندزبانه قدرتمند نظیر Multilingual-E5، BGE-M3 یا EmbeddingGemma استفاده کنید تا دقت بازیابی در زبان فارسی افت نکند."
-      },
-      pca: {
-        title: "کاهش بعد با تحلیل مؤلفه‌های اصلی (PCA)",
-        enTerm: "Principal Component Analysis (PCA)",
-        icon: "📊",
-        why: "بردارهای واقعی امبدینگ دارای ۳۸۴ تا ۱۵۳۶ بعد هستند که توسط ذهن انسان و نمایشگرهای دوبعدی قابل ترسیم نیستند. الگوریتم PCA بیشترین واریانس داده‌ها را به دو یا سه بعد اصلی نگاشت می‌دهد تا چیدمان هندسی خوشه‌ها قابل رویت باشد.",
-        how: "با محاسبه ماتریس کوواریانس بردارها و یافتن مقادیر و بردارهای ویژه (Eigenvectors)، دو راستایی که بیشترین پراکندگی اطلاعات را دارند انتخاب شده و بردارها روی این دو بعد تصویر (Project) می‌شوند.",
-        formula: "z_i = [v_i \\cdot u_1, \\, v_i \\cdot u_2], \\quad u_1, u_2 = \\text{Top-2 Eigenvectors of } \\Sigma",
-        formulaDesc: "تصویر بردار d-بعدی بر روی دو بردار ویژه اول ماتریس کوواریانس.",
-        tip: "تصویر دوبعدی صرفاً تقریب بصری است؛ مقایسه دقیق شباهت در دیتابیس همیشه روی کل ابعاد (مثلاً ۷۶۸ بعد کامل) صورت می‌پذیرد نه روی ۲ بعد PCA."
-      },
-      vector_db: {
-        title: "پایگاه داده برداری و ایندکس سلسله‌مراتبی HNSW",
-        enTerm: "Vector Database & HNSW Indexing",
-        icon: "🗄️",
-        why: "در دیتابیس‌های رابطه‌ای (مانند SQL) جستجوی شباهت معنایی بین بردارها نیازمند محاسبه فاصله با تک‌تک رکوردهای دیتابیس (اسکن کامل یا O(N)) است که با میلیونی شدن اسناد ثانیه‌ها طول می‌کشد. دیتابیس‌های برداری ایندکس‌های تقریبی فوق‌سریع دارند.",
-        how: "الگوریتم HNSW (Hierarchical Navigable Small World) یک گراف چندلایه شبیه به ساختار بزرگ‌راه‌ها و خیابان‌های شهری می‌سازد. در لایه‌های بالا جهش‌های بزرگ به سمت همسایگی بردار انجام شده و در لایه زیرین همسایه‌های دقیق واکشی می‌شوند با زمان O(log N).",
-        formula: "\\text{Query Complexity: } O(\\log N) \\quad \\text{vs Flat Scan: } O(N \\cdot d)",
-        formulaDesc: "پیچیدگی زمانی لگاریتمی در جستجوی همسایگی تقریبی (Approximate Nearest Neighbors).",
-        tip: "در پروژه‌های واقعی سازمانی از پایگاه‌های داده مطرح مانند Qdrant، Milvus یا pgvector استفاده کنید که پشتیبانی عالی از فیلترهای همزمان Metadata دارند."
-      },
-      retrieval: {
-        title: "بردارسازی سوال و جستجوی معنایی",
-        enTerm: "Vector Similarity Retrieval",
-        icon: "🔍",
-        why: "کاربران به زبان طبیعی و کلماتی متفاوت از متن سند سوال می‌پرسند (مثلاً «چند روز استراحت کاری دارم؟» در برابر «مرخصی استحقاقی»). جستجوی متنی سنتی این تطابق را نمی‌فهمد، اما جستجوی برداری مفهوم پشت کلمات را پیدا می‌کند.",
-        how: "سوال کاربر با همان مدل امبدینگ به یک بردار متراکم تبدیل می‌شود. سپس فاصله این بردار با تمامی رکوردهای پایگاه داده سنجیده شده و مواردی که بیشترین شباهت جهت‌گیری دارند استخراج می‌شوند.",
-        formula: "\\text{Top-K} = \\operatorname{arg\\,max}_{c \\in \\mathcal{C}}^{(K)} \\, \\operatorname{CosineSimilarity}(q, c)",
-        formulaDesc: "انتخاب K چانک از مجموعه چانک‌ها که بالاترین همبستگی کسینوسی با بردار سوال دارند.",
-        tip: "ترکیب جستجوی کلیدواژه‌ای (BM25) با جستجوی برداری که به Hybrid Search معروف است، بالاترین دقت را در پروژه‌های واقعی تولید می‌کند."
-      },
-      cosine_sim: {
-        title: "فرمول و مفهوم شباهت کسینوسی",
-        enTerm: "Cosine Similarity Metric",
-        icon: "📐",
-        why: "طول متن (تعداد کلمات) نباید بر شباهت تاثیر منفی بگذارد. برخلاف فاصله اقلیدسی که به اندازه بردار حساس است، شباهت کسینوسی صرفاً زاویه جهت‌گیری دو بردار در فضا را می‌سنجد.",
-        how: "با محاسبه ضرب داخلی دو بردار تقسیم بر حاصل‌ضرب طول آن‌ها، عددی بین -۱ (تضاد کامل)، ۰ (متعامد و بی‌ارتباط) و +۱ (انطباق کامل معنایی) به دست می‌آید.",
-        formula: "\\cos(\\theta) = \\frac{\\mathbf{A} \\cdot \\mathbf{B}}{\\|\\mathbf{A}\\| \\|\\mathbf{B}\\|} = \\frac{\\sum_{i=1}^d A_i B_i}{\\sqrt{\\sum_{i=1}^d A_i^2} \\sqrt{\\sum_{i=1}^d B_i^2}}",
-        formulaDesc: "محاسبه کسینوس زاویه بین دو بردار A و B در فضای d-بعدی.",
-        tip: "اگر بردارها پیش از ایندکس‌گذاری نرمال شوند (||A||=1)، محاسبه شباهت کسینوسی صرفاً به یک ضرب داخلی ساده (Dot Product) تبدیل شده و سرعت پردازش ده‌ها برابر می‌شود."
-      },
-      top_k: {
-        title: "تعداد نتایج منتخب (Top-K)",
-        enTerm: "Top-K Selection",
-        icon: "🎯",
-        why: "نمی‌توانیم تمام اسناد را به مدل بدهیم؛ باید دقیقاً تعداد مشخصی از شبیه‌ترین قطعات جدا شوند. انتخاب K مناسب تعادل میان «پوشش کامل اطلاعات» و «جلوگیری از ورود نویز و سردرگمی مدل» را تضمین می‌کند.",
-        how: "پس از رتبه‌بندی کل چانک‌ها بر اساس امتیاز شباهت، تنها K چانک نخست که بالاتر از حد آستانه هستند جدا شده و مابقی فیلتر می‌شوند.",
-        formula: "K \\in [2, 5] \\quad (\\text{معمولاً ۲ الی ۵ چانک برای پاسخ‌دهی بهینه})",
-        formulaDesc: "تنظیم K به صورت تابعی از اندازه پنجره کانتکست و حجم اطلاعات مورد نیاز سوال.",
-        tip: "مقدار K بالا (مثلاً ۱۰) اگرچه داده بیشتری می‌آورد، اما خطر ورود اطلاعات نامرتبط (Distractors) و کاهش دقت استدلال LLM را به همراه دارد."
-      },
-      threshold: {
-        title: "حد آستانه شباهت (Similarity Threshold)",
-        enTerm: "Minimum Similarity Threshold",
-        icon: "🛡️",
-        why: "گاهی کاربر سوالی کاملاً بی‌ربط می‌پرسد (مثلاً پرسیدن دستور پخت پیتزا از سیستم آیین‌نامه اداری!). اگر حد آستانه نباشد، سیستم باز هم نزدیک‌ترین چانک‌های نامربوط را واکشی می‌کند و مدل ممکن است توهم بزند.",
-        how: "یک فیلتر سخت‌گیرانه روی امتیاز شباهت قرار می‌گیرد (مثلاً 0.30 یا 30%). چانک‌هایی که امتیازشان پایین‌تر از این حد باشد، حتی اگر در بین رتبه‌های برتر باشند، کنار گذاشته می‌شوند.",
-        formula: "\\text{ValidChunks} = \\{ c \\in \\text{Top-K} \\mid \\operatorname{Sim}(q, c) \\ge \\tau \\}",
-        formulaDesc: "پالایش چانک‌های دارای امتیاز شباهت بزرگتر یا مساوی حد آستانه tau.",
-        tip: "اگر هیچ چانکی از حد آستانه عبور نکرد، سیستم باید به جای ارسال داده بی‌ربط به مدل، فوراً پیام «اطلاعاتی در این زمینه در اسناد موجود نیست» را برگرداند."
-      },
-      augmentation: {
-        title: "تقویت پرامپت و مهندسی کانتکست",
-        enTerm: "Context Augmentation & Prompt Engineering",
-        icon: "🧬",
-        why: "مدل زبانی به خودی خود نمی‌داند کدام بخش کانتکست است و کدام بخش سوال. یک ساختاردهی مهندسی‌شده و استاندارد، مرز بین دستورات سیستم، فکت‌های مرجع و سوال کاربر را برای هوش مصنوعی شفاف می‌سازد.",
-        how: "پرامپت نهایی از ترکیب ۳ عنصر تشکیل می‌شود: ۱- دستورالعمل سیستم (Strict Rules)، ۲- تکه‌های استخراج‌شده با برچسب‌گذاری منبع [منبع ۱]، [منبع ۲]، ۳- سوال صریح کاربر.",
-        formula: "Prompt = [\\text{SystemInstructions}] + \\sum_{i=1}^k [\\text{Source } i: c_i] + [\\text{UserQuery}]",
-        formulaDesc: "ترکیب ساخت‌یافته دستورالعمل سیستمی، کانتکست‌های مرجع و پرسش کاربر.",
-        tip: "در سیستم پرامپت حتماً قید کنید: «تنها در صورتی که پاسخ در منابع داده‌شده وجود دارد پاسخ دهید، در غیر این صورت صراحتاً اعلام کنید در مستندات یافت نشد.» این جمله بیش از ۸۰٪ توهم مدل را کاهش می‌دهد."
-      },
-      grounded_gen: {
-        title: "تولید مستند به منابع و رفع توهم",
-        enTerm: "Grounded Generation & Citation",
-        icon: "📝",
-        why: "هدف نهایی RAG، ارائه پاسخی است که قابل استناد، ممیزی و حسابرسی باشد. کاربران و سازمان‌ها باید مطمئن باشند پاسخ هوش مصنوعی از پیش‌فرض‌های نامعلوم نیامده بلکه مستقیماً از پاراگراف مشخصی در سند استخراج شده است.",
-        how: "مدل موظف است در پاسخ خود، شماره منبع را با علائمی نظیر [منبع ۱، صفحه ۲] ذکر کند. در سمت فرانت‌اند، این علائم به تگ‌ها و هایلایت‌های تعاملی تبدیل می‌شوند.",
-        formula: "\\text{Answer} = \\operatorname{LLM}(Prompt) \\quad \\text{Subject to: } \\forall \\text{claim } \\exists \\text{Citation}(c_i)",
-        formulaDesc: "تولید زبانی مقید به این که هر ادعا دارای استناد به یکی از تکه‌های کانتکست باشد.",
-        tip: "ارائه پاسخ به صورت استریم (Streaming SSE) تجربه کاربری بسیار روان‌تری نسبت به انتظار چند ثانیه‌ای ایجاد می‌کند."
-      },
-      rag_triad: {
-        title: "ارزیابی سه‌گانه سیستم‌های RAG",
-        enTerm: "The RAG Triad Evaluation Framework",
-        icon: "📊",
-        why: "بدون متریک‌های شفاف نمی‌توان فهمید آیا سیستم RAG عملکرد مطلوبی دارد یا کجای پایپ‌لاین ایراد دارد. شاخص‌های سه‌گانه RAG Triad استاندارد صنعتی برای ارزیابی این معماری هستند.",
-        how: "این چارچوب سه محور مستقل را می‌سنجد: ۱- وفاداری (Faithfulness): آیا پاسخ صرفاً از کانتکست آمده و توهم ندارد؟ ۲- ربط کانتکست (Context Relevance): آیا چانک‌های واکشی‌شده واقعاً به سوال مربوطند؟ ۳- ربط پاسخ (Answer Relevance): آیا پاسخ واقعاً سوال کاربر را حل کرده است؟",
-        formula: "\\text{RAG Triad} = \\langle \\text{Faithfulness}(A, C), \\; \\text{ContextRelevance}(C, Q), \\; \\text{AnswerRelevance}(A, Q) \\rangle",
-        formulaDesc: "سه‌گانه ارزیابی: وفاداری پاسخ به کانتکست، ربط کانتکست به سوال، و ربط پاسخ به سوال.",
-        tip: "فریم‌ورک‌هایی نظیر TruLens و Ragas برای محاسبه خودکار این ۳ شاخص در محیط Production استفاده می‌شوند."
-      }
-    };
-
-    // ==========================================
-    // EDUCATIONAL CONCEPT MODAL CONTROLLER
-    // ==========================================
-    function showConceptHelp(topicKey) {
-      const topic = EDUCATIONAL_TOPICS[topicKey];
-      if (!topic) return;
-
-      const modal = document.getElementById('helpConceptModal');
-      if (!modal) return;
-
-      document.getElementById('conceptHelpIconBox').innerText = topic.icon || '💡';
-      document.getElementById('conceptHelpTitle').innerText = topic.title;
-      document.getElementById('conceptHelpEnTerm').innerText = topic.enTerm || '';
-      document.getElementById('conceptHelpWhy').innerText = topic.why;
-      document.getElementById('conceptHelpHow').innerText = topic.how;
-
-      const formulaContainer = document.getElementById('conceptHelpFormulaContainer');
-      if (topic.formula) {
-        formulaContainer.classList.remove('hidden');
-        document.getElementById('conceptHelpFormula').innerText = topic.formula;
-        document.getElementById('conceptHelpFormulaDesc').innerText = topic.formulaDesc || '';
-      } else {
-        formulaContainer.classList.add('hidden');
-      }
-
-      document.getElementById('conceptHelpTip').innerText = topic.tip || '';
-      modal.classList.remove('hidden');
-    }
-
-    function closeConceptHelpModal() {
-      const modal = document.getElementById('helpConceptModal');
-      if (modal) modal.classList.add('hidden');
-    }
-
-    // ==========================================
-    // VECTOR DATABASE RECORD INSPECTOR MODAL
-    // ==========================================
-    let currentInspectedRecordIdx = 0;
-
-    function openVectorRecordModal(idx) {
-      if (!chunks[idx]) return;
-      currentInspectedRecordIdx = idx;
-      const chunk = chunks[idx];
-      const modal = document.getElementById('vectorRecordModal');
-      if (!modal) return;
-
-      document.getElementById('recordModalId').innerText = `#chk-${chunk.id.toString().padStart(3, '0')}`;
-      document.getElementById('recordModalFullText').innerText = chunk.text;
-      document.getElementById('recordModalSource').innerText = chunk.source || (currentPdfMeta ? currentPdfMeta.fileName : currentPresetKey);
-      document.getElementById('recordModalChars').innerText = `${chunk.length || chunk.text.length} کاراکتر`;
-
-      const vec = chunk.vector || [];
-      const dim = vec.length || 32;
-      document.getElementById('recordModalDim').innerText = `${dim}-بعدی`;
-
-      // Calculate L2 Norm = sqrt(sum(v_i^2))
-      let norm = 0;
-      if (vec.length > 0) {
-        for (let i = 0; i < vec.length; i++) norm += vec[i] * vec[i];
-        norm = Math.sqrt(norm);
-      }
-      document.getElementById('recordModalL2Norm').innerText = `||v|| ≈ ${norm.toFixed(3)}`;
-
-      // Render dense vector heatmap
-      const heatmap = document.getElementById('recordModalHeatmap');
-      if (heatmap) {
-        heatmap.innerHTML = '';
-        vec.forEach((val, i) => {
-          const cell = document.createElement('div');
-          const clamped = Math.max(-1, Math.min(1, val));
-          let bg = '';
-          if (clamped > 0) {
-            const opacity = Math.min(1, Math.abs(clamped));
-            bg = `rgba(16, 185, 129, ${0.25 + opacity * 0.75})`;
-          } else {
-            const opacity = Math.min(1, Math.abs(clamped));
-            bg = `rgba(239, 68, 68, ${0.25 + opacity * 0.75})`;
-          }
-          cell.style.backgroundColor = bg;
-          cell.className = 'w-full h-3.5 rounded-xs transition hover:scale-125 hover:z-10 cursor-help';
-          cell.title = `Dim #${i + 1}: ${Number(val).toFixed(4)}`;
-          heatmap.appendChild(cell);
-        });
-      }
-
-      // Render raw vector numbers
-      const arrayBox = document.getElementById('recordModalVectorArray');
-      if (arrayBox) {
-        const formatted = '[
-  ' + vec.map(v => Number(v).toFixed(4)).join(', ') + '
-]';
-        arrayBox.innerText = formatted;
-      }
-
-      modal.classList.remove('hidden');
-    }
-
-    function closeVectorRecordModal() {
-      const modal = document.getElementById('vectorRecordModal');
-      if (modal) modal.classList.add('hidden');
-    }
-
-    function copyRecordText() {
-      const chunk = chunks[currentInspectedRecordIdx];
-      if (!chunk) return;
-      navigator.clipboard.writeText(chunk.text).then(() => {
-        showToast('متن کامل چانک با موفقیت کپی شد! 📋', 'success');
-      });
-    }
-
-    function copyRecordFullVector() {
-      const chunk = chunks[currentInspectedRecordIdx];
-      if (!chunk || !chunk.vector) return;
-      const json = JSON.stringify(chunk.vector, null, 2);
-      navigator.clipboard.writeText(json).then(() => {
-        showToast(`کل آرایه بردار (${chunk.vector.length} بعد) در کلیپ‌بورد کپی شد! 🔢`, 'success');
-      });
-    }
-
-    function jumpToChunkIn2DSpace() {
-      closeVectorRecordModal();
-      inspectSelectedChunk(currentInspectedRecordIdx);
-      goToStep(3);
-      showToast(`ناوبری به فضای دو بعدی PCA برای چانک #${currentInspectedRecordIdx + 1}`, 'info');
-    }
-
-
     if (window.pdfjsLib) {
       pdfjsLib.GlobalWorkerOptions.workerSrc = 'pdf.worker.min.js';
     }
@@ -1836,6 +1562,298 @@ Ready to send payload...
 
   <!-- OPERATIONAL JAVASCRIPT ENGINE -->
   <script>
+
+    // ==========================================
+    // EDUCATIONAL RAG TOPICS KNOWLEDGE BASE
+    // ==========================================
+    const EDUCATIONAL_TOPICS = {
+      similarity_metrics: {
+        title: "مقایسه الگوریتم‌های شباهت و فاصله برداری",
+        enTerm: "Vector Similarity & Distance Metrics",
+        icon: "📐",
+        why: "تنها یک روش برای سنجش شباهت وجود ندارد! بسته به اینکه آیا بردارها نرمال شده‌اند، اسناد دارای طول‌های نابرابر هستند، یا نیاز به تطابق دقیق کلمات تخصصی (Keyword Match) داریم، انتخاب سنجه مناسب بر دقت بازیابی اطلاعات تاثیر چشمگیری می‌گذارد.",
+        how: "۱. شباهت کسینوسی (Cosine): زاویه دو بردار را می‌سنجد و طول سند تاثیری در آن ندارد (بازه ۰ تا ۱).\n۲. ضرب داخلی (Dot Product): ترکیب زاویه و اندازه بردار؛ در صورت نرمال‌سازی بردارها سریع‌ترین گزینه در سخت‌افزار است.\n۳. فاصله اقلیدسی (L2 Distance): کوتاهترین فاصله خط‌کشی در فضا؛ فرمول معکوس 1/(1+d) جهت تبدیل به شباهت.\n۴. فاصله منهتن (L1 Distance): مجموع فاصله‌های شبکه‌ای؛ در ابعاد بالا نسبت به نویز ابعاد تکی مقاوم‌تر است.\n۵. جستجوی ترکیبی (Hybrid Search): ترکیب ۶۰٪ شباهت معنایی و ۴۰٪ تطابق واژگانی (BM25) برای پوشش خطاهای ناموجود در امبدینگ.",
+        formula: "Cosine = (A · B) / (||A|| ||B||),   Dot = Σ(A_i * B_i),   L2 = sqrt(Σ(A_i - B_i)²),   Hybrid = 0.6 * Dense + 0.4 * BM25",
+        formulaDesc: "فرمول‌های پنج الگوریتم متداول سنجش شباهت و فاصله در موتورهای بازیابی برداری.",
+        tip: "در پروژه‌های واقعی و سازمانی، استاندارد مدرن استفاده از «Hybrid Search» است تا اصطلاحات فنی، کدهای کالا یا شماره مواد قانونی توسط BM25 پیدا شوند و مفاهیم عمومی با امبدینگ معنایی پوشش داده شوند."
+      },
+      ingestion: {
+        title: "ورود، پاکسازی و استخراج اسناد",
+        enTerm: "Document Ingestion & Preprocessing",
+        icon: "📥",
+        why: "اسناد اولیه سازمانی معمولاً در قالب‌های ناهمگون نظیر PDF، DOCX، HTML یا پایگاه‌های داده وجود دارند. کیفیت کل زنجیره RAG (قانون Garbage In, Garbage Out) به شدت وابسته به این است که چقدر متن خام، تمیز، عاری از کاراکترهای مخرب و دارای ابرداده‌های ساخت‌یافته استخراج گردد.",
+        how: "در این فاز، فایل بارگذاری‌شده به متن خالص تبدیل شده، حروف یکدست می‌شوند (مانند یکنواخت‌سازی ی و ک فارسی) و ابرداده‌هایی نظیر نام فایل، شماره صفحه، تاریخ سند و نویسنده به هر بخش متصل می‌شود تا در فاز بازیابی بتوان فیلترهای دقیق متادیتا اعمال کرد.",
+        formula: "CleanText = NormalizeUnicode(StripHeadersFooters(RawExtractedDoc))",
+        formulaDesc: "نرمال‌سازی یونی‌کد، حذف سرصفحه‌ها و پانویس‌های تکراری و استخراج ابرداده‌های ساخت‌یافته سند.",
+        tip: "در فایل‌های PDF فارسی یا دوزبانه، ترتیب کلمات در استخراج خام ممکن است معکوس شود. استفاده از کتابخانه‌هایی نظیر pdfplumber یا PyMuPDF همراه با Bidi-reordering برای حفظ ترتیب صحیح کلمات الزامی است."
+      },
+      chunking: {
+        title: "قطعه‌بندی هوشمند متن و پنجره بافت",
+        enTerm: "Smart Text Chunking",
+        icon: "✂️",
+        why: "مدل‌های زبانی دارای محدودیت پنجره بافت (Context Window) هستند و هر چه متن ارسالی طولانی‌تر باشد، هزینه توکن بالاتر و پدیده «گم‌شدن اطلاعات در میانه» (Lost in the Middle) رخ می‌دهد. همچنین قطعات کوچک‌تر، بردار معنایی متمرکزتر و دقیق‌تری تولید می‌کنند.",
+        how: "متن به بخش‌هایی با اندازه معین (مثلاً ۱۸۰ تا ۵۰۰ کاراکتر یا توکن) خرد می‌شود. الگوریتم بازگشتی (Recursive Character Splitter) ابتدا تلاش می‌کند در مرز پاراگراف‌ها (\\n\\n)، سپس مرز جملات (.) و در نهایت مرز کلمات برش ایجاد کند تا ساختار دستوری جمله شکسته نشود.",
+        formula: "Chunks = RecursiveSplit(text, chunkSize=C, overlap=O, separators=['\\n\\n', '\\n', '. ', ' '])",
+        formulaDesc: "برش بازگشتی با اولویت‌بندی جداکننده‌ها به طوری که اندازه هر قطعه حداکثر C کاراکتر باشد.",
+        tip: "اندازه چانک کوچک (۱۰۰-۲۰۰) برای بازیابی فکت‌های دقیق و جزئی عالی است؛ در حالی که اندازه بزرگ‌تر (۵۰۰-۱۰۰۰) برای خلاصه‌سازی و تحلیل روابط پیچیده بین مفاهیم بهتر عمل می‌کند."
+      },
+      overlap: {
+        title: "هم‌پوشانی چانک‌ها برای حفظ پیوستگی معنایی",
+        enTerm: "Chunk Overlap & Sliding Window",
+        icon: "🔗",
+        why: "اگر یک جمله یا شرط مهم دقیقاً در محل مرز برش بین دو چانک بیفتد، نیمی از معنا در قطعه اول و نیم دیگر در قطعه دوم قرار گرفته و معنای کامل آن توسط سیستم برداری قابل بازیابی نخواهد بود.",
+        how: "با تعریف هم‌پوشانی (مثلاً ۱۰ تا ۲۰ درصد اندازه چانک)، انتهای هر چانک در ابتدای چانک بعدی تکرار می‌شود (پنجره لغزان یا Sliding Window). بدین ترتیب زنجیره جملات در مرزها قطع نمی‌شود.",
+        formula: "Chunk[i+1].Start = Chunk[i].End - OverlapLength",
+        formulaDesc: "نقطه آغاز چانک بعدی به اندازه OverlapLength پیش از پایان چانک قبلی قرار می‌گیرد.",
+        tip: "افزایش بیش از حد Overlap باعث ایجاد افزونگی (Redundancy) و اشغال بیهوده توکن‌های بافت مدل می‌شود. مقدار بهینه معمولاً ۱۰٪ تا ۲۰٪ اندازه Chunk Size است."
+      },
+      embeddings: {
+        title: "بردارهای متراکم معنایی",
+        enTerm: "Dense Vector Embeddings",
+        icon: "🧬",
+        why: "رایانه‌ها متن را به صورت کاراکتری درک می‌کنند و متوجه مترادف‌ها، مفاهیم ضمنی و تشابه معنایی نمی‌شوند. امبدینگ‌ها متن را به یک بردار عددی چندبعدی تبدیل می‌کنند به طوری که کلمات و جملات با معنای نزدیک، در این فضا در همسایگی هم قرار گیرند.",
+        how: "یک شبکه عصبی ترنسفورمر (مانند google/embeddinggemma-2 یا BGE-m3) متن را خوانده و یک بردار با طول مشخص (مثلاً ۷۶۸ بعد) تولید می‌کند. این بردار نرمال‌سازی می‌شود تا طول آن برابر ۱ گردد (L2 Norm = 1.0).",
+        formula: "v = EmbedModel(text) in R^d,   v_normalized = v / ||v||_2",
+        formulaDesc: "نگاشت متن به فضای برداری d-بعدی و نرمال‌سازی اقلیدسی جهت سازگاری با ضرب داخلی.",
+        tip: "برای متون فارسی یا چندزبانه حتماً از مدل‌های چندزبانه قدرتمند نظیر Multilingual-E5، BGE-M3 یا EmbeddingGemma استفاده کنید تا دقت بازیابی در زبان فارسی افت نکند."
+      },
+      pca: {
+        title: "کاهش بعد با تحلیل مؤلفه‌های اصلی (PCA)",
+        enTerm: "Principal Component Analysis (PCA)",
+        icon: "📊",
+        why: "بردارهای واقعی امبدینگ دارای ۳۸۴ تا ۱۵۳۶ بعد هستند که توسط ذهن انسان و نمایشگرهای دوبعدی قابل ترسیم نیستند. الگوریتم PCA بیشترین واریانس داده‌ها را به دو یا سه بعد اصلی نگاشت می‌دهد تا چیدمان هندسی خوشه‌ها قابل رویت باشد.",
+        how: "با محاسبه ماتریس کوواریانس بردارها و یافتن مقادیر و بردارهای ویژه (Eigenvectors)، دو راستایی که بیشترین پراکندگی اطلاعات را دارند انتخاب شده و بردارها روی این دو بعد تصویر (Project) می‌شوند.",
+        formula: "z_i = [v_i · u_1, v_i · u_2],   where u_1, u_2 are top eigenvectors of Covariance matrix",
+        formulaDesc: "تصویر بردار d-بعدی بر روی دو بردار ویژه اول ماتریس کوواریانس.",
+        tip: "تصویر دوبعدی صرفاً تقریب بصری است؛ مقایسه دقیق شباهت در دیتابیس همیشه روی کل ابعاد (مثلاً ۷۶۸ بعد کامل) صورت می‌پذیرد نه روی ۲ بعد PCA."
+      },
+      vector_db: {
+        title: "پایگاه داده برداری و ایندکس سلسله‌مراتبی HNSW",
+        enTerm: "Vector Database & HNSW Indexing",
+        icon: "🗄️",
+        why: "در دیتابیس‌های رابطه‌ای (مانند SQL) جستجوی شباهت معنایی بین بردارها نیازمند محاسبه فاصله با تک‌تک رکوردهای دیتابیس (اسکن کامل یا O(N)) است که با میلیونی شدن اسناد ثانیه‌ها طول می‌کشد. دیتابیس‌های برداری ایندکس‌های تقریبی فوق‌سریع دارند.",
+        how: "الگوریتم HNSW (Hierarchical Navigable Small World) یک گراف چندلایه شبیه به ساختار بزرگ‌راه‌ها و خیابان‌های شهری می‌سازد. در لایه‌های بالا جهش‌های بزرگ به سمت همسایگی بردار انجام شده و در لایه زیرین همسایه‌های دقیق واکشی می‌شوند با زمان O(log N).",
+        formula: "Query Complexity: O(log N)   vs Flat Scan: O(N * d)",
+        formulaDesc: "پیچیدگی زمانی لگاریتمی در جستجوی همسایگی تقریبی (Approximate Nearest Neighbors).",
+        tip: "در پروژه‌های واقعی سازمانی از پایگاه‌های داده مطرح مانند Qdrant، Milvus یا pgvector استفاده کنید که پشتیبانی عالی از فیلترهای همزمان Metadata دارند."
+      },
+      retrieval: {
+        title: "بردارسازی سوال و جستجوی معنایی",
+        enTerm: "Vector Similarity Retrieval",
+        icon: "🔍",
+        why: "کاربران به زبان طبیعی و کلماتی متفاوت از متن سند سوال می‌پرسند (مثلاً «چند روز استراحت کاری دارم؟» در برابر «مرخصی استحقاقی»). جستجوی متنی سنتی این تطابق را نمی‌فهمد، اما جستجوی برداری مفهوم پشت کلمات را پیدا می‌کند.",
+        how: "سوال کاربر با همان مدل امبدینگ به یک بردار متراکم تبدیل می‌شود. سپس فاصله این بردار با تمامی رکوردهای پایگاه داده سنجیده شده و مواردی که بیشترین شباهت جهت‌گیری دارند استخراج می‌شوند.",
+        formula: "Top-K = argmax_{c in C}^(K) Similarity(q, c)",
+        formulaDesc: "انتخاب K چانک از مجموعه چانک‌ها که بالاترین همبستگی کسینوسی با بردار سوال دارند.",
+        tip: "ترکیب جستجوی کلیدواژه‌ای (BM25) با جستجوی برداری که به Hybrid Search معروف است، بالاترین دقت را در پروژه‌های واقعی تولید می‌کند."
+      },
+      cosine_sim: {
+        title: "فرمول و مفهوم شباهت کسینوسی",
+        enTerm: "Cosine Similarity Metric",
+        icon: "📐",
+        why: "طول متن (تعداد کلمات) نباید بر شباهت تاثیر منفی بگذارد. برخلاف فاصله اقلیدسی که به اندازه بردار حساس است، شباهت کسینوسی صرفاً زاویه جهت‌گیری دو بردار در فضا را می‌سنجد.",
+        how: "با محاسبه ضرب داخلی دو بردار تقسیم بر حاصل‌ضرب طول آن‌ها، عددی بین -۱ (تضاد کامل)، ۰ (متعامد و بی‌ارتباط) و +۱ (انطباق کامل معنایی) به دست می‌آید.",
+        formula: "cos(θ) = (A · B) / (||A|| * ||B||) = Σ(A_i * B_i) / (sqrt(Σ A_i²) * sqrt(Σ B_i²))",
+        formulaDesc: "محاسبه کسینوس زاویه بین دو بردار A و B در فضای d-بعدی.",
+        tip: "اگر بردارها پیش از ایندکس‌گذاری نرمال شوند (||A||=1)، محاسبه شباهت کسینوسی صرفاً به یک ضرب داخلی ساده (Dot Product) تبدیل شده و سرعت پردازش ده‌ها برابر می‌شود."
+      },
+      top_k: {
+        title: "تعداد نتایج منتخب (Top-K)",
+        enTerm: "Top-K Selection",
+        icon: "🎯",
+        why: "نمی‌توانیم تمام اسناد را به مدل بدهیم؛ باید دقیقاً تعداد مشخصی از شبیه‌ترین قطعات جدا شوند. انتخاب K مناسب تعادل میان «پوشش کامل اطلاعات» و «جلوگیری از ورود نویز و سردرگمی مدل» را تضمین می‌کند.",
+        how: "پس از رتبه‌بندی کل چانک‌ها بر اساس امتیاز شباهت، تنها K چانک نخست که بالاتر از حد آستانه هستند جدا شده و مابقی فیلتر می‌شوند.",
+        formula: "K in [2, 5] (معمولاً ۲ الی ۵ چانک برای پاسخ‌دهی بهینه)",
+        formulaDesc: "تنظیم K به صورت تابعی از اندازه پنجره کانتکست و حجم اطلاعات مورد نیاز سوال.",
+        tip: "مقدار K بالا (مثلاً ۱۰) اگرچه داده بیشتری می‌آورد، اما خطر ورود اطلاعات نامرتبط (Distractors) و کاهش دقت استدلال LLM را به همراه دارد."
+      },
+      threshold: {
+        title: "حد آستانه شباهت (Similarity Threshold)",
+        enTerm: "Minimum Similarity Threshold",
+        icon: "🛡️",
+        why: "گاهی کاربر سوالی کاملاً بی‌ربط می‌پرسد (مثلاً پرسیدن دستور پخت پیتزا از سیستم آیین‌نامه اداری!). اگر حد آستانه نباشد، سیستم باز هم نزدیک‌ترین چانک‌های نامربوط را واکشی می‌کند و مدل ممکن است توهم بزند.",
+        how: "یک فیلتر سخت‌گیرانه روی امتیاز شباهت قرار می‌گیرد (مثلاً 0.30 یا 30%). چانک‌هایی که امتیازشان پایین‌تر از این حد باشد، حتی اگر در بین رتبه‌های برتر باشند، کنار گذاشته می‌شوند.",
+        formula: "ValidChunks = { c in Top-K | Sim(q, c) >= Threshold }",
+        formulaDesc: "پالایش چانک‌های دارای امتیاز شباهت بزرگتر یا مساوی حد آستانه tau.",
+        tip: "اگر هیچ چانکی از حد آستانه عبور نکرد، سیستم باید به جای ارسال داده بی‌ربط به مدل، فوراً پیام «اطلاعاتی در این زمینه در اسناد موجود نیست» را برگرداند."
+      },
+      augmentation: {
+        title: "تقویت پرامپت و مهندسی کانتکست",
+        enTerm: "Context Augmentation & Prompt Engineering",
+        icon: "🧬",
+        why: "مدل زبانی به خودی خود نمی‌داند کدام بخش کانتکست است و کدام بخش سوال. یک ساختاردهی مهندسی‌شده و استاندارد، مرز بین دستورات سیستم، فکت‌های مرجع و سوال کاربر را برای هوش مصنوعی شفاف می‌سازد.",
+        how: "پرامپت نهایی از ترکیب ۳ عنصر تشکیل می‌شود: ۱- دستورالعمل سیستم (Strict Rules)، ۲- تکه‌های استخراج‌شده با برچسب‌گذاری منبع [منبع ۱]، [منبع ۲]، ۳- سوال صریح کاربر.",
+        formula: "Prompt = [SystemInstructions] + Σ [Source_i: Chunk_i] + [UserQuery]",
+        formulaDesc: "ترکیب ساخت‌یافته دستورالعمل سیستمی، کانتکست‌های مرجع و پرسش کاربر.",
+        tip: "در سیستم پرامپت حتماً قید کنید: «تنها در صورتی که پاسخ در منابع داده‌شده وجود دارد پاسخ دهید، در غیر این صورت صراحتاً اعلام کنید در مستندات یافت نشد.» این جمله بیش از ۸۰٪ توهم مدل را کاهش می‌دهد."
+      },
+      grounded_gen: {
+        title: "تولید مستند به منابع و رفع توهم",
+        enTerm: "Grounded Generation & Citation",
+        icon: "📝",
+        why: "هدف نهایی RAG، ارائه پاسخی است که قابل استناد، ممیزی و حسابرسی باشد. کاربران و سازمان‌ها باید مطمئن باشند پاسخ هوش مصنوعی از پیش‌فرض‌های نامعلوم نیامده بلکه مستقیماً از پاراگراف مشخصی در سند استخراج شده است.",
+        how: "مدل موظف است در پاسخ خود، شماره منبع را با علائمی نظیر [منبع ۱، صفحه ۲] ذکر کند. در سمت فرانت‌اند، این علائم به تگ‌ها و هایلایت‌های تعاملی تبدیل می‌شوند.",
+        formula: "Answer = LLM(Prompt)  Subject to: for all claims exists Citation(chunk_i)",
+        formulaDesc: "تولید زبانی مقید به این که هر ادعا دارای استناد به یکی از تکه‌های کانتکست باشد.",
+        tip: "ارائه پاسخ به صورت استریم (Streaming SSE) تجربه کاربری بسیار روان‌تری نسبت به انتظار چند ثانیه‌ای ایجاد می‌کند."
+      },
+      rag_triad: {
+        title: "ارزیابی سه‌گانه سیستم‌های RAG",
+        enTerm: "The RAG Triad Evaluation Framework",
+        icon: "📊",
+        why: "بدون متریک‌های شفاف نمی‌توان فهمید آیا سیستم RAG عملکرد مطلوبی دارد یا کجای پایپ‌لاین ایراد دارد. شاخص‌های سه‌گانه RAG Triad استاندارد صنعتی برای ارزیابی این معماری هستند.",
+        how: "این چارچوب سه محور مستقل را می‌سنجد: ۱- وفاداری (Faithfulness): آیا پاسخ صرفاً از کانتکست آمده و توهم ندارد؟ ۲- ربط کانتکست (Context Relevance): آیا چانک‌های واکشی‌شده واقعاً به سوال مربوطند؟ ۳- ربط پاسخ (Answer Relevance): آیا پاسخ واقعاً سوال کاربر را حل کرده است؟",
+        formula: "RAG Triad = < Faithfulness(Answer, Context), ContextRelevance(Context, Query), AnswerRelevance(Answer, Query) >",
+        formulaDesc: "سه‌گانه ارزیابی: وفاداری پاسخ به کانتکست، ربط کانتکست به سوال، و ربط پاسخ به سوال.",
+        tip: "فریم‌ورک‌هایی نظیر TruLens و Ragas برای محاسبه خودکار این ۳ شاخص در محیط Production استفاده می‌شوند."
+      }
+    };
+
+    // ==========================================
+    // EDUCATIONAL CONCEPT MODAL CONTROLLER
+    // ==========================================
+    function showConceptHelp(topicKey) {
+      const topic = EDUCATIONAL_TOPICS[topicKey];
+      if (!topic) {
+        console.warn('Unknown concept topic:', topicKey);
+        return;
+      }
+
+      const modal = document.getElementById('helpConceptModal');
+      if (!modal) return;
+
+      const iconBox = document.getElementById('conceptHelpIconBox');
+      const titleEl = document.getElementById('conceptHelpTitle');
+      const enTermEl = document.getElementById('conceptHelpEnTerm');
+      const whyEl = document.getElementById('conceptHelpWhy');
+      const howEl = document.getElementById('conceptHelpHow');
+      const formulaContainer = document.getElementById('conceptHelpFormulaContainer');
+      const formulaEl = document.getElementById('conceptHelpFormula');
+      const formulaDescEl = document.getElementById('conceptHelpFormulaDesc');
+      const tipEl = document.getElementById('conceptHelpTip');
+
+      if (iconBox) iconBox.innerText = topic.icon || '💡';
+      if (titleEl) titleEl.innerText = topic.title;
+      if (enTermEl) enTermEl.innerText = topic.enTerm || '';
+      if (whyEl) whyEl.innerText = topic.why;
+      if (howEl) howEl.innerText = topic.how;
+
+      if (formulaContainer) {
+        if (topic.formula) {
+          formulaContainer.classList.remove('hidden');
+          if (formulaEl) formulaEl.innerText = topic.formula;
+          if (formulaDescEl) formulaDescEl.innerText = topic.formulaDesc || '';
+        } else {
+          formulaContainer.classList.add('hidden');
+        }
+      }
+
+      if (tipEl) tipEl.innerText = topic.tip || '';
+      modal.classList.remove('hidden');
+    }
+
+    function closeConceptHelpModal() {
+      const modal = document.getElementById('helpConceptModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    // ==========================================
+    // VECTOR DATABASE RECORD INSPECTOR MODAL
+    // ==========================================
+    let currentInspectedRecordIdx = 0;
+
+    function openVectorRecordModal(idx) {
+      if (!chunks[idx]) return;
+      currentInspectedRecordIdx = idx;
+      const chunk = chunks[idx];
+      const modal = document.getElementById('vectorRecordModal');
+      if (!modal) return;
+
+      const idEl = document.getElementById('recordModalId');
+      const textEl = document.getElementById('recordModalFullText');
+      const sourceEl = document.getElementById('recordModalSource');
+      const charsEl = document.getElementById('recordModalChars');
+      const dimEl = document.getElementById('recordModalDim');
+      const l2El = document.getElementById('recordModalL2Norm');
+
+      if (idEl) idEl.innerText = `#chk-${chunk.id.toString().padStart(3, '0')}`;
+      if (textEl) textEl.innerText = chunk.text;
+      if (sourceEl) sourceEl.innerText = chunk.source || (currentPdfMeta ? currentPdfMeta.fileName : currentPresetKey);
+      if (charsEl) charsEl.innerText = `${chunk.length || chunk.text.length} کاراکتر`;
+
+      const vec = chunk.vector || [];
+      const dim = vec.length || 32;
+      if (dimEl) dimEl.innerText = `${dim}-بعدی`;
+
+      // Calculate L2 Norm = sqrt(sum(v_i^2))
+      let norm = 0;
+      if (vec.length > 0) {
+        for (let i = 0; i < vec.length; i++) norm += vec[i] * vec[i];
+        norm = Math.sqrt(norm);
+      }
+      if (l2El) l2El.innerText = `||v|| ≈ ${norm.toFixed(3)}`;
+
+      // Render dense vector heatmap
+      const heatmap = document.getElementById('recordModalHeatmap');
+      if (heatmap) {
+        heatmap.innerHTML = '';
+        vec.forEach((val, i) => {
+          const cell = document.createElement('div');
+          const clamped = Math.max(-1, Math.min(1, val));
+          let bg = '';
+          if (clamped > 0) {
+            const opacity = Math.min(1, Math.abs(clamped));
+            bg = `rgba(16, 185, 129, ${0.25 + opacity * 0.75})`;
+          } else {
+            const opacity = Math.min(1, Math.abs(clamped));
+            bg = `rgba(239, 68, 68, ${0.25 + opacity * 0.75})`;
+          }
+          cell.style.backgroundColor = bg;
+          cell.className = 'w-full h-3.5 rounded-xs transition hover:scale-125 hover:z-10 cursor-help';
+          cell.title = `Dim #${i + 1}: ${Number(val).toFixed(4)}`;
+          heatmap.appendChild(cell);
+        });
+      }
+
+      // Render raw vector numbers
+      const arrayBox = document.getElementById('recordModalVectorArray');
+      if (arrayBox) {
+        arrayBox.innerText = '[\n  ' + vec.map(v => Number(v).toFixed(4)).join(', ') + '\n]';
+      }
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeVectorRecordModal() {
+      const modal = document.getElementById('vectorRecordModal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function copyRecordText() {
+      const chunk = chunks[currentInspectedRecordIdx];
+      if (!chunk) return;
+      navigator.clipboard.writeText(chunk.text).then(() => {
+        showToast('متن کامل چانک با موفقیت کپی شد! 📋', 'success');
+      });
+    }
+
+    function copyRecordFullVector() {
+      const chunk = chunks[currentInspectedRecordIdx];
+      if (!chunk || !chunk.vector) return;
+      const json = JSON.stringify(chunk.vector, null, 2);
+      navigator.clipboard.writeText(json).then(() => {
+        showToast(`کل آرایه بردار (${chunk.vector.length} بعد) در کلیپ‌بورد کپی شد! 🔢`, 'success');
+      });
+    }
+
+    function jumpToChunkIn2DSpace() {
+      closeVectorRecordModal();
+      inspectSelectedChunk(currentInspectedRecordIdx);
+      goToStep(3);
+      showToast(`ناوبری به فضای دو بعدی PCA برای چانک #${currentInspectedRecordIdx + 1}`, 'info');
+    }
+
+
     // --- Predefined Operational Documents ---
     const KNOWLEDGE_PRESETS = {
       company: {
