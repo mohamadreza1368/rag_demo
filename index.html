@@ -1207,45 +1207,32 @@ Ready to send payload...
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">روش وکتورایز (Provider):</label>
-              <select id="cfgEmbeddingProvider" onchange="onEmbeddingProviderChanged()" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-medium text-slate-800 dark:text-slate-100">
-                <option value="custom_api" selected>API سفارشی / سازگار با OpenAI (/v1/embeddings)</option>
-                <option value="local_python">پایتون محلی (SentenceTransformers / مدل محلی)</option>
-                <option value="huggingface">Hugging Face (Inference API - ابری)</option>
-                <option value="builtin">شبیه‌ساز آموزشی (Offline Simulator - بدون نیاز به مدل)</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">نام یا شناسه مدل امبدینگ:</label>
-              <input type="text" id="cfgEmbeddingModel" value="text-embedding-3-small" placeholder="text-embedding-3-small یا bge-m3" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
-            </div>
-          </div>
+          <!-- Exclusively Dedicated to google/embeddinggemma-2 from system cache -->
+          <input type="hidden" id="cfgEmbeddingProvider" value="cache">
+          <input type="hidden" id="cfgEmbeddingModel" value="google/embeddinggemma-2">
+          <input type="hidden" id="cfgHfToken" value="">
 
-          <!-- Dynamic Hint for Selected Provider -->
-          <div id="cfgEmbeddingProviderHint" class="text-[11px] text-slate-500 dark:text-slate-400 bg-slate-50 dark:bg-slate-900/60 p-2 rounded-lg border border-slate-200/60 dark:border-slate-800 font-sans">
-            درخواست امبدینگ مستقیماً به اندپوینت <code>/v1/embeddings</code> آدرس سرور سفارشی شما ارسال می‌گردد.
-          </div>
-
-          <!-- Hugging Face Token (for gated models like google/embeddinggemma-2) -->
-          <div id="cfgHfTokenGroup" class="hidden">
-            <div class="flex justify-between items-center mb-1">
-              <label class="text-xs font-bold text-slate-700 dark:text-slate-300">توکن Hugging Face (اختیاری برای مدل‌های محافظت‌شده):</label>
-              <a href="https://huggingface.co/settings/tokens" target="_blank" class="text-[10px] text-brand-600 dark:text-brand-400 hover:underline">دریافت توکن رایگان ↗</a>
-            </div>
-            <div class="relative">
-              <input type="password" id="cfgHfToken" placeholder="hf_..." class="w-full px-3 py-2 pl-10 rounded-xl border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-xs font-mono text-slate-800 dark:text-slate-100" style="direction: ltr;">
-              <button type="button" onclick="toggleHfTokenVisibility()" class="absolute left-3 top-2 text-slate-400 hover:text-slate-600 text-xs">👁️</button>
-            </div>
-          </div>
-
-          <!-- Dedicated Embedding Test Section -->
-          <div class="pt-2 border-t border-indigo-200/60 dark:border-indigo-900/50 flex flex-col gap-2">
+          <div class="p-4 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200/80 dark:border-indigo-800/60 shadow-xs space-y-3">
             <div class="flex items-center justify-between">
-              <span class="text-xs font-bold text-indigo-900 dark:text-indigo-200">تست تبدیل متن به بردار (Vectorize Test):</span>
-              <button type="button" id="btnTestEmbed" onclick="testEmbedConnection()" class="px-3.5 py-1.5 rounded-lg border border-indigo-500 text-indigo-600 dark:text-indigo-300 hover:bg-indigo-100/70 dark:hover:bg-indigo-900/50 text-xs font-bold transition flex items-center gap-1.5 shadow-xs">
+              <div>
+                <span class="text-xs font-bold text-slate-700 dark:text-slate-300 block">مدل اختصاصی امبدینگ:</span>
+                <span class="text-sm font-mono font-black text-indigo-600 dark:text-indigo-400">google/embeddinggemma-2</span>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 text-[10px] font-bold border border-emerald-300 dark:border-emerald-800 flex items-center gap-1.5 shadow-xs">
+                <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                بارگذاری مستقیم از کش سیستم (Local HF Cache)
+              </span>
+            </div>
+
+            <p class="text-[11px] text-slate-600 dark:text-slate-300 leading-relaxed">
+              سیستم به صورت انحصاری از مدل <b>google/embeddinggemma-2</b> ذخیره‌شده در کش سیستم شما (مسیر <code>~/.cache/huggingface</code>) برای تمامی پردازش‌های برداری، ذخیره چانک‌ها و بازیابی معنایی استفاده می‌کند.
+            </p>
+
+            <div class="pt-2 border-t border-indigo-200/60 dark:border-indigo-900/50 flex items-center justify-between">
+              <span class="text-xs font-bold text-indigo-900 dark:text-indigo-200">تست اجرای مدل از کش سیستم:</span>
+              <button type="button" id="btnTestEmbed" onclick="testEmbedConnection()" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm shadow-indigo-500/20">
                 <span id="btnTestEmbedIcon">🧪</span>
-                <span id="btnTestEmbedText">تست وکتورایزر محلی پایتون</span>
+                <span id="btnTestEmbedText">تست اجرای google/embeddinggemma-2 از کش</span>
               </button>
             </div>
             <div id="cfgEmbedTestFeedback" class="hidden p-2.5 rounded-lg text-xs font-mono"></div>
@@ -1427,8 +1414,8 @@ Ready to send payload...
       baseUrl: localStorage.getItem('rag_base_url') || 'https://api.openai.com/v1',
       apiKey: localStorage.getItem('rag_api_key') || '',
       modelName: localStorage.getItem('rag_model_name') || 'gpt-4o-mini',
-      embeddingModel: localStorage.getItem('rag_embed_model') || 'text-embedding-3-small',
-      embeddingProvider: localStorage.getItem('rag_embed_provider') || 'custom_api',
+      embeddingModel: 'google/embeddinggemma-2',
+      embeddingProvider: 'cache',
       hfToken: localStorage.getItem('rag_hf_token') || '',
       useProxy: localStorage.getItem('rag_use_proxy') !== 'false'
     };
@@ -1555,85 +1542,34 @@ Ready to send payload...
     }
 
     function onEmbeddingProviderChanged() {
-      const prov = document.getElementById('cfgEmbeddingProvider').value;
-      const hfGroup = document.getElementById('cfgHfTokenGroup');
-      const testBtnText = document.getElementById('btnTestEmbedText');
-      const modelInput = document.getElementById('cfgEmbeddingModel');
-      const hint = document.getElementById('cfgEmbeddingProviderHint');
-
-      if (prov === 'custom_api') {
-        hfGroup.classList.add('hidden');
-        if (testBtnText) testBtnText.innerText = 'تست اندپوینت /v1/embeddings سرور سفارشی';
-        if (modelInput.value === 'local_python_768d' || modelInput.value === 'google/embeddinggemma-2' || modelInput.value === 'simulation_768d') {
-          modelInput.value = 'text-embedding-3-small';
-        }
-        modelInput.placeholder = 'text-embedding-3-small یا bge-m3 یا gemma...';
-        if (hint) hint.innerHTML = 'درخواست امبدینگ مستقیماً به اندپوینت <code>/v1/embeddings</code> آدرس سرور سفارشی شما ارسال می‌گردد و اعتبارسنجی واقعی انجام می‌شود.';
-      } else if (prov === 'huggingface') {
-        hfGroup.classList.remove('hidden');
-        if (testBtnText) testBtnText.innerText = 'تست API هاگینگ‌فیس';
-        if (modelInput.value === 'local_python_768d' || modelInput.value === 'text-embedding-3-small' || modelInput.value === 'simulation_768d') {
-          modelInput.value = 'google/embeddinggemma-2';
-        }
-        modelInput.placeholder = 'google/embeddinggemma-2 یا BAAI/bge-m3';
-        if (hint) hint.innerHTML = 'اتصال مستقیم به Hugging Face Inference API؛ برای مدل‌های گیت‌شده نیاز به Access Token معتبر (hf_...) است.';
-      } else if (prov === 'local_python') {
-        hfGroup.classList.add('hidden');
-        if (testBtnText) testBtnText.innerText = 'تست اجرای مدل در پایتون (SentenceTransformers)';
-        if (!modelInput.value || modelInput.value === 'text-embedding-3-small' || modelInput.value === 'simulation_768d') {
-          modelInput.value = 'sentence-transformers/all-MiniLM-L6-v2';
-        }
-        modelInput.placeholder = 'sentence-transformers/all-MiniLM-L6-v2';
-        if (hint) hint.innerHTML = 'مدل را مستقیماً با پکیج <code>sentence-transformers</code> در پایتون اجرا می‌کند (نیازمند نصب پکیج با pip).';
-      } else {
-        hfGroup.classList.add('hidden');
-        if (testBtnText) testBtnText.innerText = 'تست شبیه‌ساز داخلی (Offline)';
-        modelInput.value = 'simulation_768d';
-        modelInput.placeholder = 'simulation_768d';
-        if (hint) hint.innerHTML = 'شبیه‌ساز آفلاین محاسباتی (768D Hash)؛ صرفاً برای سناریوی تست رابط کاربری بدون نیاز به مدل خارجی.';
-      }
+      // Exclusively locked to google/embeddinggemma-2 from system cache
     }
 
     function applyProviderPreset(provider) {
       if (provider === 'openai') {
         document.getElementById('cfgBaseUrl').value = 'https://api.openai.com/v1';
         document.getElementById('cfgModelName').value = 'gpt-4o-mini';
-        document.getElementById('cfgEmbeddingModel').value = 'local_python_768d';
-        document.getElementById('cfgEmbeddingProvider').value = 'local_python';
       } else if (provider === 'openrouter') {
         document.getElementById('cfgBaseUrl').value = 'https://openrouter.ai/api/v1';
         document.getElementById('cfgModelName').value = 'meta-llama/llama-3.3-70b-instruct';
-        document.getElementById('cfgEmbeddingModel').value = 'local_python_768d';
-        document.getElementById('cfgEmbeddingProvider').value = 'local_python';
       } else if (provider === 'groq') {
         document.getElementById('cfgBaseUrl').value = 'https://api.groq.com/openai/v1';
         document.getElementById('cfgModelName').value = 'llama-3.3-70b-versatile';
-        document.getElementById('cfgEmbeddingModel').value = 'local_python_768d';
-        document.getElementById('cfgEmbeddingProvider').value = 'local_python';
       } else if (provider === 'deepseek') {
         document.getElementById('cfgBaseUrl').value = 'https://api.deepseek.com/v1';
         document.getElementById('cfgModelName').value = 'deepseek-chat';
-        document.getElementById('cfgEmbeddingModel').value = 'local_python_768d';
-        document.getElementById('cfgEmbeddingProvider').value = 'local_python';
       } else if (provider === 'ollama') {
         document.getElementById('cfgBaseUrl').value = 'http://localhost:11434/v1';
         document.getElementById('cfgModelName').value = 'llama3';
-        document.getElementById('cfgEmbeddingModel').value = 'local_python_768d';
-        document.getElementById('cfgEmbeddingProvider').value = 'local_python';
       } else if (provider === 'lmstudio') {
         document.getElementById('cfgBaseUrl').value = 'http://localhost:1234/v1';
         document.getElementById('cfgModelName').value = 'local-model';
-        document.getElementById('cfgEmbeddingModel').value = 'local_python_768d';
-        document.getElementById('cfgEmbeddingProvider').value = 'local_python';
       } else if (provider === 'custom') {
         document.getElementById('cfgBaseUrl').value = 'http://localhost:8000/v1';
         document.getElementById('cfgModelName').value = '';
-        document.getElementById('cfgEmbeddingModel').value = 'local_python_768d';
-        document.getElementById('cfgEmbeddingProvider').value = 'local_python';
         document.getElementById('cfgUseProxy').checked = true;
       }
-      onEmbeddingProviderChanged();
-      showToast(`پریست ${provider.toUpperCase()} اعمال شد.`, 'info');
+      showToast(`پریست ${provider.toUpperCase()} برای مدل زبانی اعمال شد (مدل امبدینگ اختصاصی gemma-2 حفظ گردید).`, 'info');
     }
 
     function resolveChatCompletionsUrl(rawUrl) {
@@ -1762,10 +1698,7 @@ Ready to send payload...
       if (activeModelBadge) activeModelBadge.innerText = llmConfig.modelName;
       if (metricModel) metricModel.innerText = llmConfig.modelName;
 
-      const embedLabel = llmConfig.embeddingProvider === 'custom_api' ? `API سرور (${llmConfig.embeddingModel || 'OpenAI-Embed'})` :
-                         llmConfig.embeddingProvider === 'local_python' ? `پایتون محلی (${llmConfig.embeddingModel || '768D'})` :
-                         llmConfig.embeddingProvider === 'huggingface' ? `Hugging Face (${llmConfig.embeddingModel})` : 'شبیه‌ساز آفلاین';
-      if (step3Badge) step3Badge.innerHTML = `<span>🧬 وکتورایزر: ${embedLabel}</span><span class="text-[10px] text-slate-400">⚙️</span>`;
+      if (step3Badge) step3Badge.innerHTML = `<span>🧬 وکتورایزر: google/embeddinggemma-2 (کش سیستم)</span><span class="text-[10px] text-slate-400">⚙️</span>`;
 
       let providerDisplay = 'سفارشی';
       if (llmConfig.baseUrl.includes('openai.com')) providerDisplay = 'OpenAI';
@@ -1900,7 +1833,7 @@ Ready to send payload...
       }
     }
 
-    // --- TEST 2: EMBEDDING SERVICE / VECTORIZER TEST ---
+    // --- TEST 2: DEDICATED GEMMA-2 EMBEDDING FROM SYSTEM CACHE ---
     async function testEmbedConnection() {
       const feedback = document.getElementById('cfgEmbedTestFeedback');
       const btn = document.getElementById('btnTestEmbed');
@@ -1908,18 +1841,12 @@ Ready to send payload...
 
       feedback.classList.remove('hidden');
       feedback.className = "p-3 rounded-xl text-xs font-mono bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700";
-      feedback.innerHTML = `⏳ در حال ارسال درخواست و اعتبارسنجی سرویس امبدینگ...`;
+      feedback.innerHTML = `⏳ در حال بررسی و اجرای مدل google/embeddinggemma-2 از کش سیستم...`;
       btn.disabled = true;
       icon.innerText = "⏳";
 
-      const provider = document.getElementById('cfgEmbeddingProvider').value;
-      const model = document.getElementById('cfgEmbeddingModel').value.trim() || 'text-embedding-3-small';
-      const token = document.getElementById('cfgHfToken').value.trim();
-      const baseUrl = document.getElementById('cfgBaseUrl').value.trim();
-      const apiKey = document.getElementById('cfgApiKey').value.trim();
-
       const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), 25000);
+      const timer = setTimeout(() => controller.abort(), 60000);
       const startTime = performance.now();
 
       try {
@@ -1929,11 +1856,7 @@ Ready to send payload...
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             texts: ["سامانه بازیابی هوشمند اطلاعات و قطعه‌بندی اسناد"],
-            model: model,
-            provider: provider,
-            baseUrl: baseUrl,
-            apiKey: apiKey,
-            token: token,
+            model: "google/embeddinggemma-2",
             test: true
           })
         });
@@ -1943,30 +1866,30 @@ Ready to send payload...
 
         if (resp.ok && data.status === 'ok') {
           const dim = data.dimensions || (data.embeddings?.[0]?.length) || (data.sample?.length) || 768;
-          const engine = data.engine || 'سرویس امبدینگ';
+          const engine = data.engine || 'google/embeddinggemma-2 (System Cache)';
           const sample = (data.sample || data.embeddings?.[0]?.slice(0, 4) || []).map(n => Number(n).toFixed(3)).join(', ');
 
           feedback.className = "p-3 rounded-xl text-xs font-mono bg-emerald-50 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 border border-emerald-300";
-          feedback.innerHTML = `✅ اتصال به سرویس امبدینگ تایید شد! (${elapsed}ms)<br>` +
-            `روش اجرایی: <b>${engine}</b><br>` +
-            `مدل: <b>${data.model || model}</b> | ابعاد بردار: <b>${dim}D</b><br>` +
-            `نمونه بردار تولیدی: [${sample}, ...]<br>` +
-            `🟢 ${data.message || 'تبدیل متن به بردار با موفقیت انجام شد.'}`;
-          showToast(`امبدینگ مدل ${model} (${dim} بعد) با موفقیت تست شد!`, 'success');
+          feedback.innerHTML = `✅ مدل google/embeddinggemma-2 از کش سیستم با موفقیت اجرا شد! (${elapsed}ms)<br>` +
+            `موتور اجرایی: <b>${engine}</b><br>` +
+            `منبع کش: <b>${data.source || 'Hugging Face Cache'}</b><br>` +
+            `ابعاد بردار: <b>${dim}D</b> | نمونه مقادیر: [${sample}, ...]<br>` +
+            `🟢 ${data.message || 'آماده برای تبدیل اسناد و پرسش‌ها به بردار.'}`;
+          showToast(`مدل google/embeddinggemma-2 (${dim} بعد) با موفقیت تست شد!`, 'success');
         } else {
           feedback.className = "p-3 rounded-xl text-xs font-mono bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300";
-          feedback.innerHTML = `❌ خطا در امبدینگ (Status ${resp.status}):<br><b>${data.error || 'خطای وب‌سرور'}</b>` +
+          feedback.innerHTML = `❌ خطا در اجرای مدل از کش سیستم (Status ${resp.status}):<br><b>${data.error || 'خطای سرور'}</b>` +
             (data.hint ? `<br><span class="text-amber-700 dark:text-amber-300 mt-1 block">💡 راهنما: ${data.hint}</span>` : '') +
-            (data.endpoint ? `<br><span class="text-[10px] text-slate-500 mt-0.5 block">اندپوینت: ${data.endpoint}</span>` : '');
-          showToast('خطا در تست امبدینگ.', 'error');
+            (data.source ? `<br><span class="text-[10px] text-slate-500 mt-0.5 block">منبع: ${data.source}</span>` : '');
+          showToast('خطا در اجرای مدل از کش سیستم.', 'error');
         }
       } catch (err) {
         clearTimeout(timer);
         feedback.className = "p-3 rounded-xl text-xs font-mono bg-rose-50 dark:bg-rose-950/60 text-rose-700 dark:text-rose-300 border border-rose-300";
         if (err.name === 'AbortError') {
-          feedback.innerHTML = `❌ زمان پاسخ امبدینگ به پایان رسید (Timeout 25s). سرور پاسخ نداد.`;
+          feedback.innerHTML = `❌ زمان بارگذاری مدل به پایان رسید (Timeout 60s).`;
         } else {
-          feedback.innerHTML = `❌ خطا در برقراری ارتباط با سرور: ${err.message}`;
+          feedback.innerHTML = `❌ خطا در برقراری ارتباط با وب‌سرور: ${err.message}`;
         }
         showToast('خطا در اجرای تست امبدینگ.', 'error');
       } finally {
@@ -2362,30 +2285,15 @@ Ready to send payload...
       });
     }
 
-    // --- STEP 3: EMBEDDINGS (Custom API, SentenceTransformers, HuggingFace, or Simulator) ---
+    // --- STEP 3: EMBEDDINGS (Exclusively google/embeddinggemma-2 from System Cache) ---
     async function executeGenerateEmbeddings(showFeedback) {
-      const modelName = llmConfig.embeddingModel || 'text-embedding-3-small';
-      const provider = llmConfig.embeddingProvider || 'custom_api';
+      const modelName = 'google/embeddinggemma-2';
       const badge = document.getElementById('embeddingDimBadge');
       const btn = document.getElementById('btnRecomputeEmbeddings');
 
-      if (provider === 'builtin') {
-        chunks.forEach((chunk, idx) => {
-          chunk.vector = computeDeterministicDenseVector(chunk.text);
-          chunk.pca2d = projectVectorTo2D(chunk.vector, idx);
-        });
-        if (badge) badge.innerText = `Built-in Simulator (32-dim) ➔ 2D Plane`;
-        drawVectorCanvas();
-        inspectSelectedChunk(selectedChunkIndex);
-        renderVectorDatabaseTable();
-        if (showFeedback) showToast(`تعداد ${chunks.length} بردار با شبیه‌ساز آفلاین تولید شد.`, 'success');
-        return;
-      }
-
       if (chunks.length === 0) return;
 
-      const providerLabel = provider === 'custom_api' ? 'سرور اختصاصی' : provider === 'local_python' ? 'پایتون محلی' : 'Hugging Face';
-      if (badge) badge.innerText = `در حال دریافت بردارها از ${providerLabel} (${modelName})...`;
+      if (badge) badge.innerText = `در حال دریافت بردارها با ${modelName} (کش سیستم)...`;
       if (btn) btn.classList.add('opacity-50');
 
       try {
@@ -2395,11 +2303,7 @@ Ready to send payload...
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             texts: texts,
-            model: modelName,
-            provider: provider,
-            baseUrl: llmConfig.baseUrl,
-            apiKey: llmConfig.apiKey,
-            token: llmConfig.hfToken
+            model: modelName
           })
         });
 
@@ -2426,11 +2330,11 @@ Ready to send payload...
             chunk.vector = vectors[idx];
             chunk.pca2d = projectVectorTo2D(chunk.vector, idx);
           });
-          if (badge) badge.innerText = `${modelName} (${dim}-dim) ➔ 2D Plane`;
+          if (badge) badge.innerText = `gemma-2 (${dim}-dim | کش سیستم) ➔ 2D Plane`;
           drawVectorCanvas();
           inspectSelectedChunk(selectedChunkIndex);
           renderVectorDatabaseTable();
-          if (showFeedback) showToast(`بردارها با مدل ${modelName} (${dim} بعد) با موفقیت دریافت و ذخیره شدند!`, 'success');
+          if (showFeedback) showToast(`بردارها با مدل google/embeddinggemma-2 (${dim} بعد) از کش سیستم با موفقیت تولید شدند!`, 'success');
           return;
         } else {
           throw new Error(data.details || 'تعداد بردارهای دریافتی با چانک‌های سند مطابقت ندارد.');
@@ -2440,14 +2344,14 @@ Ready to send payload...
         console.error('Embedding error:', err.message);
         if (showFeedback) {
           showToast(`خطا در ایجاد بردارها: ${err.message}`, 'error');
-          if (badge) badge.innerText = `خطا در دریافت بردار از ${modelName} ⚠️`;
+          if (badge) badge.innerText = `خطا در اجرای gemma-2 از کش ⚠️`;
         } else {
-          // Graceful initial offline fallback so app remains interactive
+          // Graceful initial offline fallback so app remains interactive before user loads model
           chunks.forEach((chunk, idx) => {
             chunk.vector = computeDeterministicDenseVector(chunk.text);
             chunk.pca2d = projectVectorTo2D(chunk.vector, idx);
           });
-          if (badge) badge.innerText = `حالت شبیه‌ساز موقت (خطا در اتصال به ${modelName})`;
+          if (badge) badge.innerText = `آماده‌باش (نیازمند بارگذاری gemma-2 از کش)`;
           drawVectorCanvas();
           inspectSelectedChunk(selectedChunkIndex);
           renderVectorDatabaseTable();

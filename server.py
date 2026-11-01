@@ -71,6 +71,35 @@ def local_python_embed(text: str, dim: int = 768) -> list:
     vec[0] = 1.0
     return vec
 
+def find_cached_model_path(model_id="google/embeddinggemma-2"):
+    candidates = []
+    hf_home = os.environ.get("HF_HOME") or os.environ.get("HUGGINGFACE_HUB_CACHE")
+    if hf_home:
+        candidates.append(os.path.join(hf_home, "hub") if not hf_home.endswith("hub") else hf_home)
+        candidates.append(hf_home)
+    candidates.extend([
+        "/root/.cache/huggingface/hub",
+        "/root/.cache/huggingface",
+        os.path.expanduser("~/.cache/huggingface/hub"),
+        os.path.expanduser("~/.cache/huggingface"),
+    ])
+    clean_name = "models--" + model_id.replace("/", "--")
+    for base in candidates:
+        if not os.path.exists(base):
+            continue
+        model_dir = os.path.join(base, clean_name)
+        if os.path.exists(model_dir):
+            snapshots_dir = os.path.join(model_dir, "snapshots")
+            if os.path.exists(snapshots_dir):
+                try:
+                    snaps = [os.path.join(snapshots_dir, s) for s in os.listdir(snapshots_dir) if os.path.isdir(os.path.join(snapshots_dir, s))]
+                    if snaps:
+                        return snaps[0]
+                except Exception:
+                    pass
+            return model_dir
+    return None
+
 class ThreadedTCPServer(socketserver.ThreadingTCPServer):
     allow_reuse_address = True
     daemon_threads = True
@@ -163,259 +192,45 @@ class RAGStudioHandler(http.server.SimpleHTTPRequestHandler):
         texts = req_data.get('texts', [])
         if isinstance(texts, str):
             texts = [texts]
+        if not texts:
+            texts = ["تست تبدیل متن به بردار با مدل کش‌شده سیستم"]
 
-        model_name = (req_data.get('model') or '').strip()
-        provider = req_data.get('provider', 'custom_api')
-        base_url = (req_data.get('baseUrl') or '').strip()
-        api_key = (req_data.get('apiKey') or '').strip()
-        hf_token = req_data.get('token') or os.environ.get('HF_TOKEN') or os.environ.get('HUGGING_FACE_HUB_TOKEN')
+        # Exclusively dedicated to google/embeddinggemma-2 from system cache
+        model_name = "google/embeddinggemma-2"
         is_test = req_data.get('test', False)
-
         start_time = time.time()
 
-        # 1. Custom OpenAI-compatible API Provider (/v1/embeddings)
-        if provider in ('custom_api', 'openai', 'custom'):
-            if not base_url:
-                self.send_response(400)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(json.dumps({
-                    'error': 'آدرس سرور (Base URL) برای API سفارشی مشخص نشده است.',
-                    'hint': 'لطفا در بخش تنظیمات، آدرس Base URL سرور مدل را وارد فرمایید.'
-                }).encode('utf-8'))
-                return
+        cached_path = find_cached_model_path(model_name)
+        model_target = cached_path if cached_path else model_name
 
-            # Docker internal host resolution
-            target_base = base_url
-            if os.environ.get('DOCKER') and ('localhost' in target_base or '127.0.0.1' in target_base):
-                target_base = target_base.replace('://localhost:', '://host.docker.internal:').replace('://127.0.0.1:', '://host.docker.internal:')
+        # 1. Primary engine: SentenceTransformer loaded from system cache
+        try:
+            from sentence_transformers import SentenceTransformer
+            if 'gemma2' not in LOADED_MODELS:
+                try:
+                    LOADED_MODELS['gemma2'] = SentenceTransformer(model_target, local_files_only=True)
+                except Exception:
+                    LOADED_MODELS['gemma2'] = SentenceTransformer(model_target)
 
-            # Construct embeddings endpoint URL
-            clean_base = target_base.rstrip('/')
-            if clean_base.endswith('/embeddings'):
-                embed_url = clean_base
-            elif clean_base.endswith('/v1'):
-                embed_url = f"{clean_base}/embeddings"
-            else:
-                embed_url = f"{clean_base}/v1/embeddings"
-
-            headers = {
-                'Content-Type': 'application/json',
-                'User-Agent': 'RAG-Studio-Embed/1.0'
-            }
-            if api_key:
-                headers['Authorization'] = f"Bearer {api_key}"
-
-            payload = {
-                "input": texts if texts else ["تست اتصال به سرور امبدینگ"],
-                "model": model_name or "text-embedding-3-small"
-            }
-
-            try:
-                post_data = json.dumps(payload).encode('utf-8')
-                req = urllib.request.Request(embed_url, data=post_data, headers=headers, method='POST')
-                with urllib.request.urlopen(req, timeout=40, context=ssl_context) as resp:
-                    resp_bytes = resp.read()
-                    data = json.loads(resp_bytes.decode('utf-8'))
-
-                    vectors = []
-                    if 'data' in data and isinstance(data['data'], list):
-                        sorted_items = sorted(data['data'], key=lambda x: x.get('index', 0))
-                        vectors = [item['embedding'] for item in sorted_items if 'embedding' in item]
-                    elif 'embeddings' in data and isinstance(data['embeddings'], list):
-                        vectors = data['embeddings']
-                    elif 'embedding' in data and isinstance(data['embedding'], list):
-                        vectors = [data['embedding']]
-
-                    if not vectors:
-                        raise ValueError(f"سرور پاسخی معتبر نداد: {resp_bytes[:200].decode('utf-8', errors='ignore')}")
-
-                    elapsed_ms = round((time.time() - start_time) * 1000, 1)
-                    dim = len(vectors[0])
-                    resp_obj = {
-                        'status': 'ok',
-                        'embeddings': vectors,
-                        'model': model_name or 'custom_embedding_model',
-                        'dimensions': dim,
-                        'provider': 'custom_api',
-                        'endpoint': embed_url,
-                        'engine': f'OpenAI-Compatible Remote Server ({dim}D)',
-                        'latency_ms': elapsed_ms
-                    }
-                    if is_test and vectors:
-                        resp_obj['sample'] = vectors[0][:5]
-                        resp_obj['message'] = f'ارتباط با API امبدینگ در آدرس {embed_url} با مدل «{model_name}» برقرار شد.'
-
-                    self.send_response(200)
-                    self.send_header('Content-Type', 'application/json')
-                    self.send_header('Access-Control-Allow-Origin', '*')
-                    self.end_headers()
-                    self.wfile.write(json.dumps(resp_obj).encode('utf-8'))
-                    return
-
-            except urllib.error.HTTPError as e:
-                err_body = e.read().decode('utf-8', errors='ignore')
-                self.send_response(e.code)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(json.dumps({
-                    'error': f'خطای سرور امبدینگ ({e.code}): {err_body or e.reason}',
-                    'status': e.code,
-                    'endpoint': embed_url,
-                    'model': model_name,
-                    'hint': f'آیا مدل «{model_name}» روی سرور وجود دارد و اندپوینت /v1/embeddings پشتیبانی می‌شود؟'
-                }).encode('utf-8'))
-                return
-            except Exception as e:
-                self.send_response(502)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(json.dumps({
-                    'error': f'عدم دسترسی به سرور امبدینگ ({embed_url}): {str(e)}',
-                    'hint': 'لطفا بررسی کنید آدرس سرور روشن بوده و پورت آن از داخل کانتینر/شبکه قابل دسترس باشد.'
-                }).encode('utf-8'))
-                return
-
-        # 2. Hugging Face Inference API
-        elif provider == 'huggingface':
-            hf_url = f"https://api-inference.huggingface.co/pipeline/feature-extraction/{model_name}"
-            headers = {
-                'Content-Type': 'application/json',
-                'User-Agent': 'RAG-Studio-Embed/1.0'
-            }
-            if hf_token:
-                headers['Authorization'] = f"Bearer {hf_token}"
-
-            try:
-                hf_payload = json.dumps({"inputs": texts or ["test ping"], "options": {"wait_for_model": True}}).encode('utf-8')
-                req = urllib.request.Request(hf_url, data=hf_payload, headers=headers, method='POST')
-                with urllib.request.urlopen(req, timeout=20, context=ssl_context) as resp:
-                    data = resp.read()
-                    self.send_response(200)
-                    self.send_header('Content-Type', 'application/json')
-                    self.send_header('Access-Control-Allow-Origin', '*')
-                    self.end_headers()
-                    self.wfile.write(data)
-                    return
-            except urllib.error.HTTPError as e:
-                err_body = e.read().decode('utf-8', errors='ignore')
-                self.send_response(e.code)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(json.dumps({
-                    'error': f'خطای سرویس Hugging Face ({e.code}): {err_body or e.reason}',
-                    'model': model_name,
-                    'hint': 'مدل‌های گیت‌شده هاگینگ‌فیس (مانند google/embeddinggemma-2) نیازمند تایید لایسنس و توکن معتبر hf_... هستند.'
-                }).encode('utf-8'))
-                return
-            except Exception as e:
-                self.send_response(502)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(json.dumps({
-                    'error': f'عدم دسترسی به هاگینگ‌فیس: {str(e)}',
-                    'hint': 'اتصال اینترنت یا دسترسی به api-inference.huggingface.co را بررسی فرمایید.'
-                }).encode('utf-8'))
-                return
-
-        # 3. Local Python (SentenceTransformers or Pure Python)
-        elif provider in ('local_python', 'local'):
-            # If user explicitly requested hash or default simulation
-            if not model_name or model_name in ('local_hash_768d', 'pure_python_hash', 'builtin'):
-                vectors = [local_python_embed(t, dim=768) for t in (texts or ["تست"])]
-                elapsed_ms = round((time.time() - start_time) * 1000, 1)
-                resp_obj = {
-                    'status': 'ok',
-                    'embeddings': vectors,
-                    'model': 'local_hash_768d',
-                    'dimensions': 768,
-                    'provider': 'local_python',
-                    'engine': 'Python Pure Dense Hash (768D Offline)',
-                    'latency_ms': elapsed_ms
-                }
-                if is_test:
-                    resp_obj['sample'] = vectors[0][:5]
-                    resp_obj['message'] = 'وکتورایزر آفلاین پایتون با موفقیت تست شد.'
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(json.dumps(resp_obj).encode('utf-8'))
-                return
-
-            # If user entered a real model name (e.g. sentence-transformers/... or BAAI/bge-m3)
-            try:
-                from sentence_transformers import SentenceTransformer
-            except ImportError:
-                self.send_response(501)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(json.dumps({
-                    'error': f'کتابخانه sentence-transformers برای اجرای مدل ترنسفورمر «{model_name}» در پایتون نصب نیست.',
-                    'hint': 'برای اجرای مدل‌های واقعی ترنسفورمر در پایتون، دستور pip install sentence-transformers را اجرا فرمایید، یا در صورتی که سرور API سازگار با OpenAI دارید گزینه «API سفارشی / سازگار با OpenAI» را انتخاب کنید.',
-                    'model': model_name
-                }).encode('utf-8'))
-                return
-
-            try:
-                if model_name not in LOADED_MODELS:
-                    LOADED_MODELS[model_name] = SentenceTransformer(model_name)
-                loaded_model = LOADED_MODELS[model_name]
-                raw_vecs = loaded_model.encode(texts or ["تست"], show_progress_bar=False)
-                vectors = [v.tolist() for v in raw_vecs]
-                elapsed_ms = round((time.time() - start_time) * 1000, 1)
-                dim = len(vectors[0]) if vectors else 768
-                resp_obj = {
-                    'status': 'ok',
-                    'embeddings': vectors,
-                    'model': model_name,
-                    'dimensions': dim,
-                    'provider': 'local_python',
-                    'engine': f'SentenceTransformer ({model_name})',
-                    'latency_ms': elapsed_ms
-                }
-                if is_test:
-                    resp_obj['sample'] = vectors[0][:5]
-                    resp_obj['message'] = f'مدل {model_name} با موفقیت در پایتون بارگذاری و تست شد.'
-                self.send_response(200)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(json.dumps(resp_obj).encode('utf-8'))
-                return
-            except Exception as e:
-                self.send_response(500)
-                self.send_header('Content-Type', 'application/json')
-                self.send_header('Access-Control-Allow-Origin', '*')
-                self.end_headers()
-                self.wfile.write(json.dumps({
-                    'error': f'خطا در اجرای مدل ترنسفورمر {model_name}: {str(e)}',
-                    'model': model_name
-                }).encode('utf-8'))
-                return
-
-        # 4. Built-in Offline Simulation
-        elif provider in ('simulation', 'builtin'):
-            vectors = [local_python_embed(t, dim=768) for t in (texts or ["تست"])]
+            st_model = LOADED_MODELS['gemma2']
+            raw_vecs = st_model.encode(texts, show_progress_bar=False)
+            vectors = [v.tolist() for v in raw_vecs]
+            dim = len(vectors[0]) if vectors else 768
             elapsed_ms = round((time.time() - start_time) * 1000, 1)
+
             resp_obj = {
                 'status': 'ok',
                 'embeddings': vectors,
-                'model': 'simulation_768d',
-                'dimensions': 768,
-                'provider': 'simulation',
-                'engine': 'شبیه‌ساز آموزشی بردارها (Offline Hash)',
+                'model': model_name,
+                'dimensions': dim,
+                'source': f'System Cache ({cached_path or "Hugging Face Cache"})',
+                'engine': f'SentenceTransformer: google/embeddinggemma-2 ({dim}D)',
                 'latency_ms': elapsed_ms
             }
             if is_test:
                 resp_obj['sample'] = vectors[0][:5]
-                resp_obj['message'] = 'شبیه‌ساز داخلی بردارها آماده است (حالت آموزشی بدون نیاز به سرور خارجی).'
+                resp_obj['message'] = f'مدل {model_name} با موفقیت از کش سیستم بارگذاری و اجرا شد.'
+
             self.send_response(200)
             self.send_header('Content-Type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
@@ -423,12 +238,72 @@ class RAGStudioHandler(http.server.SimpleHTTPRequestHandler):
             self.wfile.write(json.dumps(resp_obj).encode('utf-8'))
             return
 
-        else:
-            self.send_response(400)
+        except ImportError:
+            # 2. Secondary engine: Hugging Face Transformers + PyTorch loaded from system cache
+            try:
+                import torch
+                from transformers import AutoTokenizer, AutoModel
+                if 'gemma2_hf' not in LOADED_MODELS:
+                    tok = AutoTokenizer.from_pretrained(model_target, local_files_only=True)
+                    mod = AutoModel.from_pretrained(model_target, local_files_only=True)
+                    LOADED_MODELS['gemma2_hf'] = (tok, mod)
+
+                tok, mod = LOADED_MODELS['gemma2_hf']
+                inputs = tok(texts, padding=True, truncation=True, return_tensors='pt')
+                with torch.no_grad():
+                    outputs = mod(**inputs)
+                    mask = inputs['attention_mask'].unsqueeze(-1)
+                    embeddings = torch.sum(outputs[0] * mask, 1) / torch.clamp(mask.sum(1), min=1e-9)
+                    embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=1)
+                    vectors = embeddings.tolist()
+
+                dim = len(vectors[0]) if vectors else 768
+                elapsed_ms = round((time.time() - start_time) * 1000, 1)
+                resp_obj = {
+                    'status': 'ok',
+                    'embeddings': vectors,
+                    'model': model_name,
+                    'dimensions': dim,
+                    'source': f'System Cache ({cached_path or "Hugging Face Cache"})',
+                    'engine': f'Transformers PyTorch: google/embeddinggemma-2 ({dim}D)',
+                    'latency_ms': elapsed_ms
+                }
+                if is_test:
+                    resp_obj['sample'] = vectors[0][:5]
+                    resp_obj['message'] = f'مدل {model_name} با موفقیت توسط موتور PyTorch از کش سیستم اجرا شد.'
+
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps(resp_obj).encode('utf-8'))
+                return
+
+            except ImportError:
+                self.send_response(501)
+                self.send_header('Content-Type', 'application/json')
+                self.send_header('Access-Control-Allow-Origin', '*')
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    'error': f'پکیج sentence-transformers یا transformers برای اجرای مدل «{model_name}» از کش سیستم نصب نیست.',
+                    'hint': 'لطفا دستور "pip install sentence-transformers torch" را اجرا فرمایید یا اطمینان حاصل کنید در کانتینر داکر نصب شده باشد.',
+                    'model': model_name,
+                    'source': cached_path or 'HF Cache'
+                }).encode('utf-8'))
+                return
+
+        except Exception as e:
+            self.send_response(500)
             self.send_header('Content-Type', 'application/json')
             self.send_header('Access-Control-Allow-Origin', '*')
             self.end_headers()
-            self.wfile.write(json.dumps({'error': f'ارائه‌دهنده امبدینگ ناشناخته: {provider}'}).encode('utf-8'))
+            self.wfile.write(json.dumps({
+                'error': f'خطا در بارگذاری یا اجرای مدل {model_name} از کش سیستم: {str(e)}',
+                'hint': 'بررسی فرمایید فایل‌های کش شده مدل در مسیر ~/.cache/huggingface به صورت کامل دانلود و مانت شده باشند.',
+                'model': model_name,
+                'path': cached_path
+            }).encode('utf-8'))
+            return
 
     def handle_proxy(self, method=None):
         content_length = int(self.headers.get('Content-Length', 0))

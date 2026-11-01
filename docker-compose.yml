@@ -17,6 +17,7 @@ services:
       - "${HOST_PORT:-8089}:8080"
     volumes:
       - .:/app
+      - ${HF_CACHE_DIR:-~/.cache/huggingface}:/root/.cache/huggingface
     healthcheck:
       test: ["CMD-SHELL", "python -c 'import urllib.request, os; resp = urllib.request.urlopen(\"http://localhost:\" + str(os.environ.get(\"PORT\", 8080)) + \"/health\", timeout=3); resp.read()' || exit 1"]
       interval: 20s
